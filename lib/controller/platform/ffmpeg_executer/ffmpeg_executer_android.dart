@@ -54,7 +54,7 @@ class _FFMPEGExecuterAndroid extends FFMPEGExecuter {
   }
 
   @override
-  Future<Map<dynamic, dynamic>?> getMediaInformation(String path) async {
+  Future<Map<String, dynamic>?> getMediaInformation(String path) async {
     return await _enqueue(
       () async {
         final commandArguments = [

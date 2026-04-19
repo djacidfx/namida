@@ -13,7 +13,7 @@ abstract class FFMPEGExecuter {
   Future<void> dispose();
   Future<bool> ffmpegExecute(List<String> args);
   Future<String?> ffprobeExecute(List<String> args);
-  Future<Map<dynamic, dynamic>?> getMediaInformation(String path);
+  Future<Map<String, dynamic>?> getMediaInformation(String path);
   Future<bool> supportsWebDAV();
   Future<bool> supportsSMB();
 
@@ -25,15 +25,15 @@ abstract class FFMPEGExecuter {
     return output.contains('smb');
   }
 
-  static Map? parseFFprobeOutput(String? output) {
+  static Map<String, dynamic>? parseFFprobeOutput(String? output) {
     if (output == null) return null;
     try {
-      return jsonDecode(output) as Map?;
+      return jsonDecode(output) as Map<String, dynamic>?;
     } catch (_) {
       try {
         // COVERART is a giant base64 blob and breaks json pasing
         output = output.replaceFirst(RegExp(r'"COVERART".*', multiLine: false, caseSensitive: false), '');
-        return jsonDecode(output) as Map?;
+        return jsonDecode(output) as Map<String, dynamic>?;
       } catch (_) {}
     }
     return null;
@@ -57,7 +57,7 @@ abstract class FFMPEGExecuter {
       map["PATH"] = path;
       final miBackup = MediaInfo.fromMap(map);
       final format = miBackup.format;
-      Map? tags = map['tags'];
+      Map<String, dynamic>? tags = map['tags'] ?? map['format']?['tags'];
       if (tags == null) {
         try {
           final mainTags = (map['streams'] as List?)?.firstWhereEff((e) {

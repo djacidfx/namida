@@ -32,7 +32,7 @@ class MediaInfo {
     return null;
   }
 
-  factory MediaInfo.fromMap(Map<dynamic, dynamic> map) {
+  factory MediaInfo.fromMap(Map<String, dynamic> map) {
     final format = map.getOrUpperCase("format");
     return MediaInfo(
       path: map.getOrLowerCase("PATH"),
@@ -72,7 +72,7 @@ class MIFormat {
     this.tags,
   });
 
-  factory MIFormat.fromMap(Map<dynamic, dynamic> map) {
+  factory MIFormat.fromMap(Map<String, dynamic> map) {
     final tags = map.getOrUpperCase("tags");
     final size = map.getOrUpperCase("size");
     return MIFormat(
@@ -162,7 +162,7 @@ class MIFormatTags {
     this.sortInfo,
   });
 
-  factory MIFormatTags.fromMap(Map<dynamic, dynamic> map) => MIFormatTags(
+  factory MIFormatTags.fromMap(Map<String, dynamic> map) => MIFormatTags(
     date: map.getOrUpperCase("date"),
     language: map.getOrLowerCase("LANGUAGE"),
     artist: map.getOrUpperCase("artist"),
@@ -184,7 +184,7 @@ class MIFormatTags {
     track: map.getOrUpperCase("track"),
     trackTotal: map.getOrLowerCase("TRACKTOTAL"),
     discTotal: map.getOrLowerCase("DISCTOTAL"),
-    lyrics: map.getOrUpperCase("lyrics"),
+    lyrics: map.getOrUpperCase("lyrics") ?? map.getOrUpperCase("lyrics-XXX") ?? map.filterStartsWith('lyrics') ?? map.filterStartsWith('LYRICS'),
     lyricist: map.getOrLowerCase("LYRICIST"),
     compatibleBrands: map.getOrUpperCase("compatible_brands"),
     mood: map.getOrUpperCase("mood"),
@@ -302,7 +302,7 @@ class MIStream {
     return null;
   }
 
-  factory MIStream.fromMap(Map<dynamic, dynamic> map) {
+  factory MIStream.fromMap(Map<String, dynamic> map) {
     final tags = map.getOrUpperCase("tags");
     return MIStream(
       rFrameRate: map.getOrUpperCase("r_frame_rate"),
@@ -399,7 +399,7 @@ class MIStreamTags {
     this.track,
   });
 
-  factory MIStreamTags.fromMap(Map<dynamic, dynamic> map) => MIStreamTags(
+  factory MIStreamTags.fromMap(Map<String, dynamic> map) => MIStreamTags(
     handlerName: map.getOrUpperCase("handler_name"),
     language: map.getOrUpperCase("language"),
     title: map["Title"] ?? map.getOrUpperCase("title"),
@@ -438,9 +438,18 @@ extension SreamTypeDetector on MIStream {
   StreamType? get streamType => _streamTypes[codecType];
 }
 
-extension _MapValueGetter on Map {
+extension _MapValueGetter on Map<String, dynamic> {
   dynamic getOrUpperCase(String lowercase) => this[lowercase] ?? this[lowercase.toUpperCase()];
   dynamic getOrLowerCase(String uppercase) => this[uppercase] ?? this[uppercase.toLowerCase()];
+
+  dynamic filterStartsWith(String lowercase) {
+    for (final k in keys) {
+      if (k.startsWith(lowercase)) {
+        return this[k]!;
+      }
+    }
+    return null;
+  }
 }
 
 final _streamTypes = <String, StreamType>{

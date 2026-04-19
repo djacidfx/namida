@@ -28,7 +28,7 @@ class _FFMPEGExecuterDesktop extends FFMPEGExecuter {
   }
 
   @override
-  Future<Map<dynamic, dynamic>?> getMediaInformation(String path) async {
+  Future<Map<String, dynamic>?> getMediaInformation(String path) async {
     final output = await ffprobeExecute(
       [
         "-hide_banner",
