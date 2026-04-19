@@ -75,19 +75,26 @@ jobs:
           body_path: ./beta_changelog.md
           token: ${{ inputs.is_beta && secrets.SNAPSHOTS_REPO_SECRET || secrets.GITHUB_TOKEN }}
 
+  setup_matrix:
+    runs-on: ubuntu-22.04
+    outputs:
+      matrix: ${{ steps.set.outputs.matrix }}
+    steps:
+      - id: set
+        run: |
+          if [ "${{ inputs.is_beta }}" = "true" ]; then
+            echo 'matrix={"include":[{"is_clone":false,"apk_suffix":""},{"is_clone":true,"apk_suffix":"-clone"}]}' >> $GITHUB_OUTPUT
+          else
+            echo 'matrix={"include":[{"is_clone":false,"apk_suffix":""}]}' >> $GITHUB_OUTPUT
+          fi
+
   build_android:
-    needs: create_release
+    needs: [create_release, setup_matrix]
     runs-on: ubuntu-22.04
     continue-on-error: ${{ matrix.is_clone }}
-    if: ${{ !matrix.is_clone || inputs.is_beta }}
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - is_clone: false
-            apk_suffix: ""
-          - is_clone: true
-            apk_suffix: "-clone"
+      matrix: ${{ fromJson(needs.setup_matrix.outputs.matrix) }}
 
     steps:
       - uses: actions/checkout@v4
