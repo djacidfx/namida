@@ -1423,6 +1423,60 @@ class Indexer<T extends Track> {
     unawaited(_trackStatsDBManager.put(track.path, newStats.toJsonWithoutTrack()));
   }
 
+  Future<void> moveStatsPath(Map<Track, Track> oldNewTrack) async {
+    for (final oldNew in oldNewTrack.entries) {
+      final oldValue = trackStatsMap[oldNew.key];
+      if (oldValue != null) {
+        trackStatsMap.value[oldNew.value] = oldValue;
+        trackStatsMap.refresh();
+      }
+      final oldValueDB = await _trackStatsDBManager.get(oldNew.key.path);
+      await _trackStatsDBManager.put(oldNew.value.path, oldValueDB);
+      // await _trackStatsDBManager.delete(oldNew.key.path); // not so important ig, preserve just in case
+    }
+  }
+
+  Future<void> moveStatsDirectory(
+    String normalizedOldDir,
+    String normalizedNewDir, {
+    Iterable<String>? forThesePathsOnly,
+    bool ensureNewFileExists = false,
+  }) async {
+    final pathsOnlySet = forThesePathsOnly?.toSet();
+    final existenceCache = <String, bool>{};
+    final toUpdate = <Track, Track>{};
+
+    for (final track in trackStatsMap.value.keys.toList()) {
+      final normalizedPath = replaceFunctionNormalizePath(track.path);
+      final shouldUpdate = replaceFunctionForUpdatedPaths(
+        track,
+        normalizedOldDir,
+        normalizedNewDir,
+        pathsOnlySet,
+        ensureNewFileExists,
+        existenceCache,
+      );
+      if (shouldUpdate) {
+        final newPath = replaceFunctionGetNewPath(normalizedPath, normalizedOldDir, normalizedNewDir);
+        toUpdate[track] = Track.fromTypeParameter(track.runtimeType, newPath);
+      }
+    }
+
+    if (toUpdate.isEmpty) return;
+
+    for (final entry in toUpdate.entries) {
+      final stats = trackStatsMap.value.remove(entry.key);
+      if (stats != null) trackStatsMap.value[entry.value] = stats;
+    }
+    trackStatsMap.refresh();
+
+    for (final oldNew in toUpdate.entries) {
+      final oldValueDB = await _trackStatsDBManager.get(oldNew.key.path);
+      await _trackStatsDBManager.put(oldNew.value.path, oldValueDB);
+      // await _trackStatsDBManager.delete(oldNew.key.path); // not so important ig, preserve just in case
+    }
+  }
+
   Future<void> _readTrackData([Completer<void>? completer]) async {
     tracksInfoList.clear(); // clearing for cases which refreshing library is required (like after changing separators)
 

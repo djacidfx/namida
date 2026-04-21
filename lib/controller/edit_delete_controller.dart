@@ -165,38 +165,20 @@ class EditDeleteController {
       oldNewTrack[oldTr as T] = newTr as T;
     }
 
-    // -- Player Queue
-    Player.inst.replaceAllTracksInQueueBulk(oldNewTrack); // no need to await
-
-    // -- History
-    final daysToSave = <int>[];
-    for (final entry in HistoryController.inst.historyMap.value.entries) {
-      final day = entry.key;
-      final trs = entry.value;
-      for (final oldNewTrack in oldNewTrack.entries) {
-        trs.replaceWhere(
-          (e) => e.track == oldNewTrack.key,
-          (old) => TrackWithDate(
-            dateAdded: old.dateAdded,
-            track: oldNewTrack.value,
-            source: old.source,
-          ),
-          onMatch: () => daysToSave.add(day),
-        );
-      }
-    }
-    HistoryController.inst.historyMap.refresh();
     await Future.wait([
-      HistoryController.inst.saveHistoryToStorage(daysToSave).then((value) => HistoryController.inst.updateMostPlayedPlaylist()),
-      QueueController.inst.replaceTrackInAllQueues(oldNewTrack), // -- Queues
-      PlaylistController.inst.replaceTrackInAllPlaylistsBulk(oldNewTrack), // -- Playlists
+      HistoryController.inst.replaceTheseTracksInHistoryBulk(oldNewTrack),
+      PlaylistController.inst.replaceTrackInAllPlaylistsBulk(oldNewTrack),
+      Indexer.inst.moveStatsPath(oldNewTrack),
+      QueueController.inst.replaceTrackInAllQueues(oldNewTrack),
+      Player.inst.replaceAllTracksInQueueBulk(oldNewTrack),
     ]);
-    // -- Selected Tracks
+
     if (SelectedTracksController.inst.selectedTracks.value.isNotEmpty) {
       for (final oldNewTrack in oldNewTrack.entries) {
         SelectedTracksController.inst.replaceThisTrack(oldNewTrack.key, oldNewTrack.value);
       }
     }
+
     if (removeOldTracksFromLibrary) {
       await Indexer.inst.removeTracksFromLibrary(oldNewTrack.keys, isFromDelete: false);
     }
@@ -206,13 +188,16 @@ class EditDeleteController {
     final newtrlist = await Indexer.inst.convertPathsToTracksAndAddToLists([newPath]);
     if (newtrlist.isEmpty) return;
     final newTrack = newtrlist.first;
+    final oldNewMap = {oldTrack: newTrack};
+
     await Future.wait([
-      QueueController.inst.replaceTrackInAllQueues({oldTrack: newTrack}), // Queues
-      Player.inst.replaceAllTracksInQueueBulk({oldTrack: newTrack}), // Player Queue
-      PlaylistController.inst.replaceTrackInAllPlaylists(oldTrack, newTrack), // Playlists & Favourites
-      HistoryController.inst.replaceAllTracksInsideHistory(oldTrack, newTrack), // History
+      HistoryController.inst.replaceAllTracksInsideHistory(oldTrack, newTrack),
+      PlaylistController.inst.replaceTrackInAllPlaylists(oldTrack, newTrack),
+      Indexer.inst.moveStatsPath(oldNewMap),
+      QueueController.inst.replaceTrackInAllQueues(oldNewMap),
+      Player.inst.replaceAllTracksInQueueBulk(oldNewMap),
     ]);
-    // --- Selected Tracks ---
+
     if (SelectedTracksController.inst.selectedTracks.value.isNotEmpty) {
       SelectedTracksController.inst.replaceThisTrack(oldTrack, newTrack);
     }
@@ -233,11 +218,13 @@ class EditDeleteController {
     if (!normalizedNewDir.endsWith('/')) normalizedNewDir += '/';
 
     await Future.wait([
+      HistoryController.inst.replaceTracksDirectoryInHistory(normalizedOldDir, normalizedNewDir, forThesePathsOnly: forThesePathsOnly, ensureNewFileExists: ensureNewFileExists),
       PlaylistController.inst.replaceTracksDirectory(normalizedOldDir, normalizedNewDir, forThesePathsOnly: forThesePathsOnly, ensureNewFileExists: ensureNewFileExists),
+      Indexer.inst.moveStatsDirectory(normalizedOldDir, normalizedNewDir, forThesePathsOnly: forThesePathsOnly, ensureNewFileExists: ensureNewFileExists),
       QueueController.inst.replaceTracksDirectoryInQueues(normalizedOldDir, normalizedNewDir, forThesePathsOnly: forThesePathsOnly, ensureNewFileExists: ensureNewFileExists),
       Player.inst.replaceTracksDirectoryInQueue(normalizedOldDir, normalizedNewDir, forThesePathsOnly: forThesePathsOnly, ensureNewFileExists: ensureNewFileExists),
-      HistoryController.inst.replaceTracksDirectoryInHistory(normalizedOldDir, normalizedNewDir, forThesePathsOnly: forThesePathsOnly, ensureNewFileExists: ensureNewFileExists),
     ]);
+
     if (SelectedTracksController.inst.selectedTracks.value.isNotEmpty) {
       SelectedTracksController.inst.replaceTrackDirectory(normalizedOldDir, normalizedNewDir, forThesePathsOnly: forThesePathsOnly, ensureNewFileExists: ensureNewFileExists);
     }

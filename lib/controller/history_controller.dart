@@ -79,6 +79,28 @@ class HistoryController with HistoryManager<TrackWithDate, Track> {
     );
   }
 
+  Future<void> replaceTheseTracksInHistoryBulk(Map<Track, Track> oldNewTrack) async {
+    final daysToSave = <int>{};
+    for (final entry in this.historyMap.value.entries) {
+      final day = entry.key;
+      final trs = entry.value;
+      for (final oldNewTrack in oldNewTrack.entries) {
+        trs.replaceWhere(
+          (e) => e.track == oldNewTrack.key,
+          (old) => TrackWithDate(
+            dateAdded: old.dateAdded,
+            track: oldNewTrack.value,
+            source: old.source,
+          ),
+          onMatch: () => daysToSave.add(day),
+        );
+      }
+    }
+    historyMap.refresh();
+    updateMostPlayedPlaylist();
+    await saveHistoryToStorage(daysToSave.toList());
+  }
+
   @override
   String get HISTORY_DIRECTORY => AppDirs.HISTORY_PLAYLIST;
 
