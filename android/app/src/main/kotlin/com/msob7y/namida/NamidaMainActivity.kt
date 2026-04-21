@@ -248,6 +248,7 @@ class NamidaMainActivity : FlutterActivity() {
           val multiple = call.argument<Boolean?>("multiple") ?: false
           val allowedExtensions = call.argument("allowedExtensions") as List<String>?
           val type = call.argument("type") as String?
+          val initialDirectory = call.argument("initialDirectory") as String?
           val error =
             FileSysPicker.pickFile(
               result,
@@ -255,7 +256,8 @@ class NamidaMainActivity : FlutterActivity() {
               NamidaRequestCodes.REQUEST_CODE_FILES_PICKER,
               multiple,
               allowedExtensions,
-              type
+              type,
+              initialDirectory
             )
           if (error != null) showToast(error, 3)
         }
@@ -263,12 +265,14 @@ class NamidaMainActivity : FlutterActivity() {
         "pickDirectory" -> {
           checkStorageReadPermission()
           val note = call.argument("note") as String?
+          val initialDirectory = call.argument("initialDirectory") as String?
           if (note != null && note != "") showToast(note, 3)
           val error =
             FileSysPicker.pickDirectory(
               result,
               activity,
               NamidaRequestCodes.REQUEST_CODE_FILES_PICKER,
+              initialDirectory,
             )
           if (error != null) showToast(error, 3)
         }

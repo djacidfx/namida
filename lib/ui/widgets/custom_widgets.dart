@@ -249,6 +249,7 @@ class CustomListTile extends StatelessWidget {
   final int? rotateIcon;
   final bool enabled;
   final bool largeTitle;
+  final int? maxTitleLines;
   final int maxSubtitleLines;
   final TextStyle? titleStyle;
   final double borderR;
@@ -270,6 +271,7 @@ class CustomListTile extends StatelessWidget {
     this.rotateIcon,
     this.enabled = true,
     this.largeTitle = false,
+    this.maxTitleLines,
     this.maxSubtitleLines = 8,
     this.titleStyle,
     this.borderR = 18.0,
@@ -351,7 +353,7 @@ class CustomListTile extends StatelessWidget {
                           Text(
                             title,
                             style: titleStyle ?? (largeTitle ? theme.textTheme.displayLarge : theme.textTheme.displayMedium),
-                            maxLines: subtitle != null ? 4 : 5,
+                            maxLines: maxTitleLines ?? (subtitle != null ? 4 : 5),
                             overflow: TextOverflow.ellipsis,
                           ),
                           if (subtitle?.isNotEmpty == true) ...[
@@ -7333,6 +7335,17 @@ class ObxPrefer<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return enabled ? ObxO(rx: rx, builder: builder) : builder(context, null);
+  }
+}
+
+class ObxOrNull<T> extends StatelessWidget {
+  final RxBaseCore<T>? rx;
+  final Widget Function(BuildContext context, T? value) builder;
+  const ObxOrNull({required this.rx, required this.builder, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return rx != null ? ObxO(rx: rx!, builder: builder) : builder(context, null);
   }
 }
 

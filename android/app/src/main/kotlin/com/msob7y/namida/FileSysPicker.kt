@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Parcelable
+import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.webkit.MimeTypeMap
 import io.flutter.plugin.common.MethodChannel
@@ -29,9 +30,19 @@ object FileSysPicker {
     pendingPickerResult = result
   }
 
-  fun pickDirectory(result: MethodChannel.Result?, activity: Activity, requestCode: Int): String? {
+  fun pathToDocumentUri(path: String): Uri? {
+    // -- android usually ignores it anyway 
+    return Uri.parse(path)
+  }
+
+  fun pickDirectory(result: MethodChannel.Result?, activity: Activity, requestCode: Int, initialDirectory: String? = null): String? {
     updatePendingResult(result)
-    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+        if (initialDirectory != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val uri = pathToDocumentUri(initialDirectory)
+            if (uri != null) putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri)
+        }
+    }
     return openPicker(intent, requestCode, activity)
   }
 
@@ -41,7 +52,8 @@ object FileSysPicker {
       requestCode: Int,
       multiple: Boolean,
       extensions: List<String>?,
-      type: String?
+      type: String?, 
+      initialDirectory: String? = null
   ): String? {
     updatePendingResult(result)
 
@@ -53,9 +65,7 @@ object FileSysPicker {
       intent = Intent(Intent.ACTION_GET_CONTENT)
       intent.addCategory(Intent.CATEGORY_OPENABLE)
     }
-    val uri: Uri = Uri.parse(Environment.getExternalStorageDirectory().getPath() + File.separator)
 
-    intent.setDataAndType(uri, type)
     intent.setType(type)
     intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, multiple)
     intent.putExtra("multi-pick", multiple)
@@ -73,6 +83,11 @@ object FileSysPicker {
 
     if (allowedMemetypes.isNotEmpty()) {
       intent.putExtra(Intent.EXTRA_MIME_TYPES, allowedMemetypes)
+    }
+
+    if (initialDirectory != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      val uri = pathToDocumentUri(initialDirectory)
+      if (uri != null) intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri)
     }
 
     return openPicker(intent, requestCode, activity)

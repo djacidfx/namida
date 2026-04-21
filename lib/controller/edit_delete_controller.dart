@@ -29,7 +29,7 @@ class EditDeleteController {
     final files = tracksToDelete.map((e) => e.track).mapPhysicalOrError((tr) => tr.path);
     if (files.isEmpty) return;
     await Isolate.run(() => _deleteAllIsolate(files));
-    await Indexer.inst.onDeleteTracksFromStoragePermanently(tracksToDelete);
+    await Indexer.inst.removeTracksFromLibrary(tracksToDelete, isFromDelete: true);
   }
 
   Future<void> deleteCachedVideos(List<Selectable> tracks) async {
@@ -154,13 +154,14 @@ class EditDeleteController {
     }
   }
 
-  Future<void> updateTrackPathInEveryPartOfNamidaBulk<T extends Track>(Map<String, String> oldNewPath) async {
-    final newtrlist = await Indexer.inst.convertPathsToTracksAndAddToLists(oldNewPath.values);
+  Future<void> updateTrackPathInEveryPartOfNamidaBulk<T extends Track>(Map<String, String> oldNewPathPre, {bool removeOldTracksFromLibrary = false}) async {
+    final newtrlist = await Indexer.inst.convertPathsToTracksAndAddToLists(oldNewPathPre.values);
     if (newtrlist.isEmpty) return;
     final oldNewTrack = <T, T>{};
-    for (final on in oldNewPath.entries) {
+    for (final on in oldNewPathPre.entries) {
       final oldTr = Track.orVideo(on.key);
       final newTr = Track.orVideo(on.value);
+      if (on.key == on.value) continue; // same path why update
       oldNewTrack[oldTr as T] = newTr as T;
     }
 
@@ -169,12 +170,10 @@ class EditDeleteController {
 
     // -- History
     final daysToSave = <int>[];
-    final allHistory = HistoryController.inst.historyMap.value.entries.toList();
-
-    for (final oldNewTrack in oldNewTrack.entries) {
-      allHistory.loop((entry) {
-        final day = entry.key;
-        final trs = entry.value;
+    for (final entry in HistoryController.inst.historyMap.value.entries) {
+      final day = entry.key;
+      final trs = entry.value;
+      for (final oldNewTrack in oldNewTrack.entries) {
         trs.replaceWhere(
           (e) => e.track == oldNewTrack.key,
           (old) => TrackWithDate(
@@ -184,7 +183,7 @@ class EditDeleteController {
           ),
           onMatch: () => daysToSave.add(day),
         );
-      });
+      }
     }
     HistoryController.inst.historyMap.refresh();
     await Future.wait([
@@ -197,6 +196,9 @@ class EditDeleteController {
       for (final oldNewTrack in oldNewTrack.entries) {
         SelectedTracksController.inst.replaceThisTrack(oldNewTrack.key, oldNewTrack.value);
       }
+    }
+    if (removeOldTracksFromLibrary) {
+      await Indexer.inst.removeTracksFromLibrary(oldNewTrack.keys, isFromDelete: false);
     }
   }
 

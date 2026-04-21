@@ -30,9 +30,10 @@ abstract class NamidaStorage {
     bool multiple = false,
     List<NamidaFileExtensionsWrapper>? allowedExtensions,
     NamidaStorageFileMemeType? memetype = NamidaStorageFileMemeType.any,
+    String? initialDirectory,
   });
 
-  Future<String?> pickDirectory({String? note});
+  Future<String?> pickDirectory({String? note, String? initialDirectory});
 }
 
 enum NamidaStorageFileMemeType {

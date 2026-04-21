@@ -458,20 +458,30 @@ class Indexer<T extends Track> {
   /// Removes Specific tracks from their corresponding media, useful when updating track metadata or reindexing a track.
   void _removeThisTrackFromAlbumGenreArtistEtc(Track tr) {
     final trExt = tr.toTrackExt();
+    void removeAndDeleteEmpty<K>(Map<K, List<Track>> map, K key) {
+      final list = map[key];
+      if (list != null) {
+        list.remove(tr);
+        if (list.isEmpty) {
+          map.remove(key);
+        }
+      }
+    }
+
     trExt.albumsIdentifiersModified.loop((identifier) {
-      mainMapAlbums.value[identifier]?.remove(tr);
+      removeAndDeleteEmpty(mainMapAlbums.value, identifier);
+    });
+    trExt.artistsList.loop((artist) {
+      removeAndDeleteEmpty(mainMapArtists.value, artist);
+    });
+    removeAndDeleteEmpty(mainMapAlbumArtists.value, trExt.albumArtist);
+    removeAndDeleteEmpty(mainMapComposer.value, trExt.composer);
+    trExt.genresList.loop((genre) {
+      removeAndDeleteEmpty(mainMapGenres.value, genre);
     });
 
-    trExt.artistsList.loop((artist) {
-      mainMapArtists.value[artist]?.remove(tr);
-    });
-    mainMapAlbumArtists.value[trExt.albumArtist]?.remove(tr);
-    mainMapComposer.value[trExt.composer]?.remove(tr);
-    trExt.genresList.loop((genre) {
-      mainMapGenres.value[genre]?.remove(tr);
-    });
-    tr is Video ? mainMapFoldersVideos[tr.folder]?.remove(tr) : mainMapFoldersTracks[tr.folder]?.remove(tr);
-    mainMapFoldersTracksAndVideos[tr.folder]?.remove(tr);
+    tr is Video ? removeAndDeleteEmpty(mainMapFoldersVideos.value, tr.folder) : removeAndDeleteEmpty(mainMapFoldersTracks.value, tr.folder);
+    removeAndDeleteEmpty(mainMapFoldersTracksAndVideos.value, tr.folder);
 
     _currentFileNamesMap.remove(tr.filename);
   }
@@ -881,25 +891,28 @@ class Indexer<T extends Track> {
   }
 
   /// Removes track entries from related lists, this doesNOT delete tracks from system or remove stats entries
-  Future<void> onDeleteTracksFromStoragePermanently(List<Selectable> tracksToDelete) async {
-    if (tracksToDelete.isEmpty) return;
-    final recentlyDeltedFile = File("${AppDirs.RECENTLY_DELETED}${DateFormat('yyyy_MM_dd HH_mm_ss').format(DateTime.now())} - (${tracksToDelete.length}).txt");
-    final recentlyDeltedFileWrite = recentlyDeltedFile.openWrite(mode: FileMode.writeOnlyAppend);
-    tracksToDelete.loop(
-      (trS) {
-        final tr = trS.track;
-        recentlyDeltedFileWrite.writeln(tr.path);
-        _removeThisTrackFromAlbumGenreArtistEtc(tr);
-        allTracksMappedByYTID.remove(tr.youtubeID);
-        tracksInfoList.value.remove(tr);
-        SearchSortController.inst.trackSearchList.value.remove(tr);
-        SearchSortController.inst.trackSearchTemp.value.remove(tr);
-        allTracksMappedByPath.remove(tr.path);
-        unawaited(_tracksDBManager.delete(tr.path));
-        TrackTileManager.rebuildTrackInfo(tr);
-        if (tr.isPhysical) this.scanMediaStore(tr.path);
-      },
-    );
+  Future<void> removeTracksFromLibrary(Iterable<Selectable> tracksToRemove, {required bool isFromDelete}) async {
+    if (tracksToRemove.isEmpty) return;
+    IOSink? recentlyDeletedFileWrite;
+    if (isFromDelete) {
+      final recentlyDeletedFile = File("${AppDirs.RECENTLY_DELETED}${DateFormat('yyyy_MM_dd HH_mm_ss').format(DateTime.now())} - (${tracksToRemove.length}).txt");
+      recentlyDeletedFileWrite = recentlyDeletedFile.openWrite(mode: FileMode.writeOnlyAppend);
+    }
+    final tracksToRemoveCopy = tracksToRemove.toList(growable: false);
+    for (final trS in tracksToRemoveCopy) {
+      final tr = trS.track;
+      recentlyDeletedFileWrite?.writeln(tr.path);
+      _removeThisTrackFromAlbumGenreArtistEtc(tr);
+      allTracksMappedByYTID.remove(tr.youtubeID);
+      tracksInfoList.value.remove(tr);
+      SearchSortController.inst.trackSearchList.value.remove(tr);
+      SearchSortController.inst.trackSearchTemp.value.remove(tr);
+      allTracksMappedByPath.remove(tr.path);
+      unawaited(_tracksDBManager.delete(tr.path));
+      TrackTileManager.rebuildTrackInfo(tr);
+      if (tr.isPhysical) this.scanMediaStore(tr.path);
+    }
+
     this.tracksInfoList.refresh();
     this.mainMapsGroup.refreshAll();
     SearchSortController.inst.trackSearchList.refresh();
@@ -907,7 +920,7 @@ class Indexer<T extends Track> {
     FoldersController.tracksAndVideos.currentFolder.refresh();
     FoldersController.tracks.currentFolder.refresh();
     FoldersController.videos.currentFolder.refresh();
-    recentlyDeltedFileWrite.flush().then((_) => recentlyDeltedFileWrite.close());
+    recentlyDeletedFileWrite?.flush().then((_) => recentlyDeletedFileWrite?.close());
 
     SearchSortController.inst.refreshPortsIfNecessary();
   }

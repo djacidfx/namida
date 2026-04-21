@@ -42,6 +42,7 @@ class _NamidaStorageAndroid extends NamidaStorage {
     bool multiple = false,
     List<NamidaFileExtensionsWrapper>? allowedExtensions,
     NamidaStorageFileMemeType? memetype = NamidaStorageFileMemeType.any,
+    String? initialDirectory,
   }) async {
     try {
       List<String>? extensionsList;
@@ -55,6 +56,7 @@ class _NamidaStorageAndroid extends NamidaStorage {
         'type': memetype?.type,
         'multiple': multiple,
         'allowedExtensions': extensionsList,
+        'initialDirectory': initialDirectory,
       });
 
       final filesPaths = res?.cast<String>() ?? <String>[];
@@ -80,9 +82,12 @@ class _NamidaStorageAndroid extends NamidaStorage {
   }
 
   @override
-  Future<String?> pickDirectory({String? note}) async {
+  Future<String?> pickDirectory({String? note, String? initialDirectory}) async {
     try {
-      final res = await _channel.invokeListMethod<String?>('pickDirectory', {'note': note});
+      final res = await _channel.invokeListMethod<String?>('pickDirectory', {
+        'note': note,
+        'initialDirectory': initialDirectory,
+      });
       return res?.firstOrNull;
     } catch (e) {
       snackyy(title: lang.error, message: e.toString(), isError: true);

@@ -175,9 +175,10 @@ class _NamidaStorageLinux extends NamidaStorage {
   }
 
   @override
-  Future<String?> pickDirectory({String? note}) async {
+  Future<String?> pickDirectory({String? note, String? initialDirectory}) async {
     final res = await FilePickerLinux().getDirectoryPath(
       dialogTitle: note,
+      initialDirectory: initialDirectory,
     );
     return res;
   }
@@ -188,6 +189,7 @@ class _NamidaStorageLinux extends NamidaStorage {
     bool multiple = false,
     List<NamidaFileExtensionsWrapper>? allowedExtensions,
     NamidaStorageFileMemeType? memetype = NamidaStorageFileMemeType.any,
+    String? initialDirectory,
   }) async {
     List<String>? extensionsList;
     if (allowedExtensions != null) {
@@ -208,6 +210,7 @@ class _NamidaStorageLinux extends NamidaStorage {
       allowMultiple: multiple,
       type: fileType,
       allowedExtensions: extensionsList,
+      initialDirectory: initialDirectory,
     );
     return res?.paths.whereType<String>().toList() ?? <String>[];
   }

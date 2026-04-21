@@ -8,6 +8,7 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:super_sliver_list/super_sliver_list.dart';
 
 import 'package:namida/base/pull_to_refresh.dart';
+import 'package:namida/class/file_parts.dart';
 import 'package:namida/controller/directory_index.dart';
 import 'package:namida/controller/navigator_controller.dart';
 import 'package:namida/controller/platform/namida_storage/namida_storage.dart';
@@ -887,11 +888,15 @@ class _NamidaFileBrowserState<T extends FileSystemEntity> extends State<_NamidaF
         multiple: widget.allowMultiple,
         memetype: widget.memeType,
         allowedExtensions: allowedExtensions,
+        initialDirectory: widget.initialDirectory,
       );
       final files = res.map((e) => File(e)).toList();
       if (files.isNotEmpty) _onSelectionComplete(files as List<T>);
     } else if (T == Directory) {
-      final res = await NamidaStorage.inst.pickDirectory(note: note);
+      final res = await NamidaStorage.inst.pickDirectory(
+        note: note,
+        initialDirectory: widget.initialDirectory,
+      );
       if (res != null) _onSelectionComplete([Directory(res) as T]);
     }
   }
@@ -925,6 +930,7 @@ class _NamidaFileBrowserState<T extends FileSystemEntity> extends State<_NamidaF
             if (e.key == map.length - 1) return; // same path
 
             String newDirPath = currentRoot;
+            if (newDirPath.endsWith(_pathSeparator)) newDirPath = currentRoot.substring(0, currentRoot.length - 1);
             for (final entry in map.entries.skip(1)) {
               if (entry.key > e.key) break;
               newDirPath += _pathSeparator + entry.value;
@@ -1046,6 +1052,7 @@ class _NamidaFileBrowserState<T extends FileSystemEntity> extends State<_NamidaF
                   ),
                   if (T == Directory)
                     IconButton(
+                      tooltip: lang.folder,
                       padding: EdgeInsets.zero,
                       visualDensity: VisualDensity.compact,
                       style: const ButtonStyle(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
@@ -1056,11 +1063,11 @@ class _NamidaFileBrowserState<T extends FileSystemEntity> extends State<_NamidaF
                             dirController.dispose();
                           },
                           dialogBuilder: (theme) => CustomBlurryDialog(
-                            title: lang.newDirectory,
+                            title: lang.folder,
                             actions: [
                               const CancelButton(),
                               NamidaButton(
-                                text: lang.choose,
+                                text: lang.confirm,
                                 onTap: () {
                                   final text = dirController.text;
                                   if (text.length > 2) {
@@ -1076,12 +1083,12 @@ class _NamidaFileBrowserState<T extends FileSystemEntity> extends State<_NamidaF
                                 CustomTagTextField(
                                   controller: dirController,
                                   hintText: '',
-                                  labelText: lang.newDirectory,
+                                  labelText: lang.folder,
                                   validatorMode: AutovalidateMode.always,
                                   validator: (value) {
                                     value ??= '';
                                     if (value.isEmpty) {
-                                      return lang.pleaseEnterAName;
+                                      return lang.emptyValue;
                                     }
                                     try {
                                       if (!DirectoryIndexLocal(value).existsSync()) {
@@ -1101,44 +1108,11 @@ class _NamidaFileBrowserState<T extends FileSystemEntity> extends State<_NamidaF
                         );
                       },
                       icon: Icon(
-                        Broken.add_circle,
+                        Broken.wallet_1,
                         size: 20.0,
-                        color: _showHiddenFiles.value ? null : context.defaultIconColor(),
+                        color: context.defaultIconColor(),
                       ),
                     ),
-                  IconButton(
-                    tooltip: 'Show empty folders',
-                    padding: EdgeInsets.zero,
-                    visualDensity: VisualDensity.compact,
-                    style: const ButtonStyle(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                    onPressed: () {
-                      setState(() => _showEmptyFolders = !_showEmptyFolders);
-                    },
-                    icon: StackedIcon(
-                      baseIcon: Broken.folder,
-                      secondaryIcon: _showEmptyFolders ? Broken.eye : Broken.eye_slash,
-                      iconSize: 20.0,
-                      secondaryIconSize: 12.0,
-                      disableColor: _showEmptyFolders,
-                    ),
-                  ),
-                  IconButton(
-                    tooltip: 'Show hidden files/folders',
-                    padding: EdgeInsets.zero,
-                    visualDensity: VisualDensity.compact,
-                    style: const ButtonStyle(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                    onPressed: () {
-                      _showHiddenFiles.value = !_showHiddenFiles.value;
-                      _fetchFiles(Directory(_currentFolderPath));
-                    },
-                    icon: Obx(
-                      (context) => Icon(
-                        _showHiddenFiles.valueR ? Broken.eye : Broken.eye_slash,
-                        size: 20.0,
-                        color: _showHiddenFiles.valueR ? null : context.defaultIconColor(),
-                      ),
-                    ),
-                  ),
                   LongPressDetector(
                     onLongPress: () => _onBackupPickerLaunch(), // launching without extensions filter
                     child: IconButton(
@@ -1202,19 +1176,122 @@ class _NamidaFileBrowserState<T extends FileSystemEntity> extends State<_NamidaF
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
                 child: Row(
+                  mainAxisAlignment: .end,
                   children: [
                     if (_currentFolders.isNotEmpty || _currentFiles.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
-                        child: Text(
-                          [
-                            if (_currentFolders.isNotEmpty) _currentFolders.length.displayFolderKeyword,
-                            if (_currentFiles.isNotEmpty) _currentFiles.length.displayFilesKeyword,
-                          ].join(' | '),
-                          style: textTheme.displayMedium,
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
+                          child: Text(
+                            [
+                              if (_currentFolders.isNotEmpty) _currentFolders.length.displayFolderKeyword,
+                              if (_currentFiles.isNotEmpty) _currentFiles.length.displayFilesKeyword,
+                            ].join(' | '),
+                            style: textTheme.displayMedium,
+                          ),
                         ),
                       ),
-                    const Spacer(),
+                    if (T == Directory)
+                      IconButton(
+                        tooltip: lang.newDirectory,
+                        padding: EdgeInsets.zero,
+                        visualDensity: VisualDensity.compact,
+                        style: const ButtonStyle(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                        onPressed: () {
+                          final dirController = TextEditingController();
+                          NamidaNavigator.inst.navigateDialog(
+                            onDisposing: () {
+                              dirController.dispose();
+                            },
+                            dialogBuilder: (theme) => CustomBlurryDialog(
+                              title: lang.newDirectory,
+                              actions: [
+                                const CancelButton(),
+                                NamidaButton(
+                                  text: lang.create,
+                                  onTap: () async {
+                                    final name = dirController.text;
+                                    final fullPath = FileParts.joinPath(_currentFolderPath, name);
+                                    try {
+                                      Directory(fullPath).createSync(recursive: true);
+                                      await _fetchFiles(Directory(_currentFolderPath), clearPrevious: false);
+                                    } catch (e) {
+                                      snackyy(title: lang.error, message: e.toString(), isError: true);
+                                    }
+                                    NamidaNavigator.inst.closeDialog();
+                                  },
+                                ),
+                              ],
+                              child: Column(
+                                children: [
+                                  const SizedBox(height: 12.0),
+                                  CustomTagTextField(
+                                    controller: dirController,
+                                    hintText: '',
+                                    labelText: lang.newDirectory,
+                                    validatorMode: AutovalidateMode.always,
+                                    validator: (name) {
+                                      name ??= '';
+                                      if (name.isEmpty) {
+                                        return lang.pleaseEnterAName;
+                                      }
+                                      try {
+                                        final fullPath = FileParts.joinPath(_currentFolderPath, name);
+                                        if (DirectoryIndexLocal(fullPath).existsSync()) {
+                                          return lang.alreadyExists;
+                                        }
+                                      } catch (e) {
+                                        return e.toString();
+                                      }
+
+                                      return null;
+                                    },
+                                  ),
+                                  const SizedBox(height: 12.0),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                        icon: Icon(
+                          Broken.add_circle,
+                          size: 20.0,
+                          color: context.defaultIconColor(),
+                        ),
+                      ),
+                    IconButton(
+                      tooltip: 'Show empty folders',
+                      padding: EdgeInsets.zero,
+                      visualDensity: VisualDensity.compact,
+                      style: const ButtonStyle(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                      onPressed: () {
+                        setState(() => _showEmptyFolders = !_showEmptyFolders);
+                      },
+                      icon: StackedIcon(
+                        baseIcon: Broken.folder,
+                        secondaryIcon: _showEmptyFolders ? Broken.eye : Broken.eye_slash,
+                        iconSize: 20.0,
+                        secondaryIconSize: 12.0,
+                        disableColor: _showEmptyFolders,
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'Show hidden files/folders',
+                      padding: EdgeInsets.zero,
+                      visualDensity: VisualDensity.compact,
+                      style: const ButtonStyle(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                      onPressed: () {
+                        _showHiddenFiles.value = !_showHiddenFiles.value;
+                        _fetchFiles(Directory(_currentFolderPath));
+                      },
+                      icon: Obx(
+                        (context) => Icon(
+                          _showHiddenFiles.valueR ? Broken.eye : Broken.eye_slash,
+                          size: 20.0,
+                          color: _showHiddenFiles.valueR ? null : context.defaultIconColor(),
+                        ),
+                      ),
+                    ),
                     Obx(
                       (context) => SortByMenu(
                         title: _sortTypeToName[settings.fileBrowserSort.valueR] ?? '',

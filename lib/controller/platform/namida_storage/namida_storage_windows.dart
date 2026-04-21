@@ -76,8 +76,10 @@ class _NamidaStorageWindows extends NamidaStorage {
   }
 
   @override
-  Future<String?> pickDirectory({String? note}) async {
-    final options = DirectoryPicker()..title = 'Select a directory';
+  Future<String?> pickDirectory({String? note, String? initialDirectory}) async {
+    final options = DirectoryPicker()
+      ..title = 'Select a directory'
+      ..initialDirectory = initialDirectory;
     return options.getDirectory()?.path;
   }
 
@@ -87,6 +89,7 @@ class _NamidaStorageWindows extends NamidaStorage {
     bool multiple = false,
     List<NamidaFileExtensionsWrapper>? allowedExtensions,
     NamidaStorageFileMemeType? memetype = NamidaStorageFileMemeType.any,
+    String? initialDirectory,
   }) async {
     final extensionsMap = <String, String>{};
     if (allowedExtensions != null) {
@@ -102,7 +105,8 @@ class _NamidaStorageWindows extends NamidaStorage {
 
     final options = OpenFilePicker()
       ..filterSpecification = extensionsMap
-      ..title = note ?? '';
+      ..title = note ?? ''
+      ..initialDirectory = initialDirectory;
 
     if (multiple) {
       final files = options.getFiles();
