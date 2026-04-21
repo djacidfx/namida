@@ -370,7 +370,7 @@ sudo dnf install ./namida.rpm   # Fedora/RHEL (download .rpm from beta releases)
 >
 > - 🔄 [Namida Sync](https://github.com/010101-sans/namida_sync), a tool for syncing namida backups & files across android, windows and linux
 >   - by [@010101-sans](https://github.com/010101-sans)
-> - 📊 [Namida History App](https://github.com/DiWu17/namida_history_app), a companion app that shows yearly, monthly & more listening stats with charts based on namida history
+> - 📊 [Namida Charts](https://github.com/DiWu17/namida_history_app), a companion app that shows yearly, monthly & more listening stats with charts based on namida history
 >   - by [@DiWu17](https://github.com/DiWu17)
 > - 🎁 [Namida Wrapped](https://namida-wrapped.vercel.app), a local web ui for generating spotify wrapped-style stats
 >   - by [@bebrriko](https://github.com/bebrriko)

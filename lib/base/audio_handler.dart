@@ -370,7 +370,7 @@ class NamidaAudioVideoHandler<Q extends Playable> extends BasicAudioHandler<Q> {
         } else {
           title = '$title • Namida';
         }
-        await [
+        await Future.wait([
           WindowsTaskbar.setWindowTitle(title).ignoreError(),
           if (currentItem.value != null) // idk it just breaks if set after disposing
             WindowsTaskbar.setThumbnailToolbar(
@@ -420,8 +420,8 @@ class NamidaAudioVideoHandler<Q extends Playable> extends BasicAudioHandler<Q> {
                   mode: ThumbnailToolbarButtonMode.dismissionClick,
                 ),
               ],
-            ),
-        ].executeAllAndSilentReportErrors();
+            ).ignoreError(),
+        ]);
       } catch (_) {}
     }
   }
