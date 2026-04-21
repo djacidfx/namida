@@ -420,6 +420,8 @@ class ExtrasSettings extends SettingSubpageProvider {
                   final list = List<TrackSearchFilter>.from(TrackSearchFilter.values);
                   list.remove(TrackSearchFilter.comment);
                   list.remove(TrackSearchFilter.year);
+                  list.remove(TrackSearchFilter.moods);
+                  list.remove(TrackSearchFilter.tags);
                   list.remove(TrackSearchFilter.lyrics);
 
                   void resortIfNecessary() {

@@ -19,6 +19,7 @@ class MultiArtworkContainer extends StatelessWidget {
   final bool reduceQuality;
   final bool enableHero;
   final File? artworkFile;
+  final IconData? fallbackIcon;
   final int fadeMilliSeconds;
   final bool wrapArtworkFileInFullscreenOpener;
 
@@ -34,6 +35,7 @@ class MultiArtworkContainer extends StatelessWidget {
     this.reduceQuality = false,
     this.enableHero = true,
     this.artworkFile,
+    this.fallbackIcon,
     this.fadeMilliSeconds = ArtworkWidget.kDefaultFadeMilliSeconds,
     this.wrapArtworkFileInFullscreenOpener = false,
   });
@@ -81,6 +83,7 @@ class MultiArtworkContainer extends StatelessWidget {
                       fallbackToFolderCover: fallbackToFolderCover,
                       reduceQuality: reduceQuality,
                       artworkFile: artworkFile,
+                      fallbackIcon: fallbackIcon,
                       fadeMilliSeconds: fadeMilliSeconds,
                       wrapArtworkFileInFullscreenOpener: wrapArtworkFileInFullscreenOpener,
                     ),

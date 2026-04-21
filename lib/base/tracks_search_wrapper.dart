@@ -28,6 +28,8 @@ class TracksSearchWrapper {
   static Map<String, dynamic> generateParams(SendPort sendPort, Iterable<TrackExtended> tracks) {
     final filters = settings.trackSearchFilter.value;
     final addLyrics = filters.contains(TrackSearchFilter.lyrics);
+    final addMoods = filters.contains(TrackSearchFilter.moods);
+    final addTags = filters.contains(TrackSearchFilter.tags);
     return {
       'tracks': tracks
           .map(
@@ -41,6 +43,8 @@ class TracksSearchWrapper {
               'year': e.year,
               'comment': e.comment,
               if (addLyrics) 'lyrics': e.lyrics,
+              if (addMoods) 'moods': e.effectiveMoods,
+              if (addTags) 'tags': e.effectiveTags,
               'path': e.path,
               'v': e.isVideo,
             },
@@ -74,6 +78,8 @@ class TracksSearchWrapper {
     final scomposer = tsfMap[TrackSearchFilter.composer] ?? false;
     final scomment = tsfMap[TrackSearchFilter.comment] ?? false;
     final syear = tsfMap[TrackSearchFilter.year] ?? false;
+    final smoods = tsfMap[TrackSearchFilter.moods] ?? false;
+    final stags = tsfMap[TrackSearchFilter.tags] ?? false;
     final slyrics = tsfMap[TrackSearchFilter.lyrics] ?? false;
 
     final textCleanedForSearch = _functionOfCleanup(cleanup);
@@ -136,6 +142,8 @@ class TracksSearchWrapper {
               : null,
           splitComposer: splitThis(trMap['composer'], scomposer),
           splitComment: splitThis(trMap['comment'], scomment),
+          splitMoods: smoods ? _Property.fromListNull(trMap['moods'] as List<String>?) : null,
+          splitTags: stags ? _Property.fromListNull(trMap['tags'] as List<String>?) : null,
           year: !syear
               ? null
               : _mapListCleanedAndNonCleaned(
@@ -299,6 +307,8 @@ class TracksSearchWrapper {
       scoreProperty(trExt.splitGenre);
       scoreProperty(trExt.splitComposer);
       scoreProperty(trExt.splitComment);
+      scoreProperty(trExt.splitMoods);
+      scoreProperty(trExt.splitTags);
       scoreProperty(trExt.year);
       scoreProperty(trExt.lyrics);
 
@@ -338,6 +348,8 @@ class _CustomTrackExtended {
   final _Property? splitGenre;
   final _Property? splitComposer;
   final _Property? splitComment;
+  final _Property? splitMoods;
+  final _Property? splitTags;
   final _Property? year;
   final _Property? lyrics;
 
@@ -352,6 +364,8 @@ class _CustomTrackExtended {
     required this.splitGenre,
     required this.splitComposer,
     required this.splitComment,
+    required this.splitMoods,
+    required this.splitTags,
     required this.year,
     required this.lyrics,
   });

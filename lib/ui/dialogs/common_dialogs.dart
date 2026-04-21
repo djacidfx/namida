@@ -116,6 +116,42 @@ class NamidaDialogs {
     );
   }
 
+  Future<void> showMoodDialog(String name, List<Track> tracks) async {
+    await showGeneralPopupDialog(
+      tracks,
+      name,
+      [tracks.displayTrackKeyword, tracks.totalDurationFormatted].join(' - '),
+      QueueSource.moods(name),
+      extractColor: false,
+      heroTag: null,
+      forceSquared: true,
+    );
+  }
+
+  Future<void> showTagDialog(String name, List<Track> tracks) async {
+    await showGeneralPopupDialog(
+      tracks,
+      name,
+      [tracks.displayTrackKeyword, tracks.totalDurationFormatted].join(' - '),
+      QueueSource.tags(name),
+      extractColor: false,
+      heroTag: null,
+      forceSquared: true,
+    );
+  }
+
+  Future<void> showRatingDialog(String name, List<Track> tracks) async {
+    await showGeneralPopupDialog(
+      tracks,
+      name,
+      [tracks.displayTrackKeyword, tracks.totalDurationFormatted].join(' - '),
+      QueueSource.rating(name),
+      extractColor: false,
+      heroTag: null,
+      forceSquared: true,
+    );
+  }
+
   /// Supports all playlists, (History, Most Played, Favourites & others).
   Future<void> showPlaylistDialog(String playlistName) async {
     if (playlistName == k_PLAYLIST_NAME_HISTORY) {

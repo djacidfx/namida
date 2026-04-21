@@ -691,6 +691,28 @@ extension TrackExtUtils on TrackExtended {
     return parsed;
   }
 
+  TrackStats? get statsRaw => Indexer.inst.trackStatsMap[asTrack()];
+  int get effectiveRating {
+    int? r = statsRaw?.rating;
+    if (r != null && r > 0) return r;
+    var percentageRatingEmbedded = this.rating;
+    return (percentageRatingEmbedded * 100).round();
+  }
+
+  List<String> get effectiveMoods {
+    List<String>? m = statsRaw?.moods;
+    if (m != null && m.isNotEmpty) return m;
+    var moodsEmbedded = this.moodList;
+    return moodsEmbedded;
+  }
+
+  List<String> get effectiveTags {
+    List<String>? s = statsRaw?.tags;
+    if (s != null && s.isNotEmpty) return s;
+    var tagsEmbedded = this.tagsList;
+    return tagsEmbedded;
+  }
+
   String get audioInfoFormatted {
     final trExt = this;
     return TrackExtended.buildAudioInfoFormatted(

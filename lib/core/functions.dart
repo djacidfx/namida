@@ -1393,23 +1393,8 @@ class TracksAddOnTap {
                   allAvailableMoodsPlaylists.addAllNoDuplicatesForce(mood, pl.value.tracks.tracks);
                 });
               }
-              // -- moods from tracks.
-              final allAvailableMoodsTracks = <String, List<Track>>{};
-              for (final e in Indexer.inst.trackStatsMap.value.entries) {
-                final tr = e.key;
-                if (tr.hasInfoInLibrary()) {
-                  e.value.moods?.loop((mood) {
-                    allAvailableMoodsTracks.addNoDuplicatesForce(mood, tr);
-                  });
-                }
-              }
 
-              // -- moods from track embedded tag
-              allTracksInLibrary.loop((tr) {
-                tr.moodList.loop((mood) {
-                  allAvailableMoodsTracks.addNoDuplicatesForce(mood, tr);
-                });
-              });
+              final allAvailableMoodsTracks = Indexer.inst.getTracksGroupedByMoods();
 
               if (allAvailableMoodsPlaylists.isEmpty && allAvailableMoodsTracks.isEmpty) {
                 snackyy(title: lang.error, message: lang.noMoodsAvailable);
@@ -2353,7 +2338,7 @@ class _VerticalDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NamidaContainerDivider(
+    return const NamidaContainerDivider(
       height: 26.0,
       width: 1.5,
       margin: EdgeInsets.symmetric(horizontal: 2.0),

@@ -1477,6 +1477,68 @@ class Indexer<T extends Track> {
     }
   }
 
+  Map<String, List<Track>> getTracksGroupedByMoods({bool sort = true}) {
+    final allAvailableMap = <String, List<Track>>{};
+
+    // -- from stats map
+    for (final e in Indexer.inst.trackStatsMap.value.entries) {
+      final tr = e.key;
+      if (tr.hasInfoInLibrary()) {
+        e.value.moods?.loop((mood) {
+          allAvailableMap.addNoDuplicatesForce(mood, tr);
+        });
+      }
+    }
+
+    // -- from track embedded tag
+    allTracksInLibrary.loop((tr) {
+      tr.moodList.loop((mood) {
+        allAvailableMap.addNoDuplicatesForce(mood, tr);
+      });
+    });
+
+    if (sort) allAvailableMap.sortByReverse((e) => e.value.length);
+
+    return allAvailableMap;
+  }
+
+  Map<String, List<Track>> getTracksGroupedByTags({bool sort = true}) {
+    final allAvailableMap = <String, List<Track>>{};
+
+    // -- from stats map
+    for (final e in Indexer.inst.trackStatsMap.value.entries) {
+      final tr = e.key;
+      if (tr.hasInfoInLibrary()) {
+        e.value.tags?.loop((tag) {
+          allAvailableMap.addNoDuplicatesForce(tag, tr);
+        });
+      }
+    }
+
+    // -- from track embedded tag
+    allTracksInLibrary.loop((tr) {
+      tr.tagsList.loop((tag) {
+        allAvailableMap.addNoDuplicatesForce(tag, tr);
+      });
+    });
+
+    if (sort) allAvailableMap.sortByReverse((e) => e.value.length);
+
+    return allAvailableMap;
+  }
+
+  Map<String, List<Track>> getTracksGroupedByRatings({bool sort = true}) {
+    final allAvailableMap = <String, List<Track>>{};
+
+    allTracksInLibrary.loop((tr) {
+      allAvailableMap.addNoDuplicatesForce(tr.effectiveRating.toString(), tr);
+    });
+
+    if (sort) allAvailableMap.sortByReverse((e) => int.tryParse(e.key) ?? 0);
+
+    return allAvailableMap;
+  }
+
   Future<void> _readTrackData([Completer<void>? completer]) async {
     tracksInfoList.clear(); // clearing for cases which refreshing library is required (like after changing separators)
 

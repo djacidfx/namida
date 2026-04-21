@@ -255,6 +255,8 @@ enum TrackSearchFilter {
   composer,
   comment,
   year,
+  moods,
+  tags,
   lyrics,
 }
 
@@ -274,6 +276,9 @@ enum LibraryTab {
   favourites,
   history,
   mostPlayed,
+  moods,
+  tags,
+  rating,
 }
 
 enum TrackPlayMode {
@@ -305,6 +310,9 @@ enum QueueSourceEnum {
   externalFile(false),
   homePageItem(false),
   recentlyAdded(false),
+  moods(false),
+  tags(false),
+  rating(false),
 
   others(true)
   ;
@@ -390,6 +398,9 @@ class QueueSource extends QueueSourceBase<QueueSourceEnum> {
   static const externalFile = QueueSource._(QueueSourceEnum.externalFile);
   static const homePageItem = QueueSource._(QueueSourceEnum.homePageItem);
   static const recentlyAdded = QueueSource._(QueueSourceEnum.recentlyAdded);
+  static QueueSource moods(String? name) => QueueSource._(QueueSourceEnum.moods, title: name);
+  static QueueSource tags(String? name) => QueueSource._(QueueSourceEnum.tags, title: name);
+  static QueueSource rating(String? name) => QueueSource._(QueueSourceEnum.rating, title: name);
 
   static QueueSource others(String? name) => QueueSource._(QueueSourceEnum.others, title: name);
 
@@ -563,11 +574,17 @@ enum RouteType {
   PAGE_folders_music,
   PAGE_folders_videos,
   PAGE_queue,
+  PAGE_moods,
+  PAGE_tags,
+  PAGE_rating,
   PAGE_stats,
   PAGE_about,
 
   // ----- Subpages -----
   SUBPAGE_recentlyAddedTracks,
+  SUBPAGE_moodsTracks,
+  SUBPAGE_tagsTracks,
+  SUBPAGE_ratingTracks,
   SUBPAGE_albumTracks,
   SUBPAGE_artistTracks,
   SUBPAGE_albumArtistTracks,

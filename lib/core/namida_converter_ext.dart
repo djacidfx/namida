@@ -60,6 +60,7 @@ import 'package:namida/ui/pages/artists_page.dart';
 import 'package:namida/ui/pages/folders_page.dart';
 import 'package:namida/ui/pages/genres_page.dart';
 import 'package:namida/ui/pages/home_page.dart';
+import 'package:namida/ui/pages/moods_tags_page.dart';
 import 'package:namida/ui/pages/playlists_page.dart';
 import 'package:namida/ui/pages/queues_page.dart';
 import 'package:namida/ui/pages/settings_page.dart';
@@ -117,6 +118,9 @@ extension LibraryTabUtils on LibraryTab {
       LibraryTab.favourites => null,
       LibraryTab.history => null,
       LibraryTab.mostPlayed => null,
+      LibraryTab.moods => null,
+      LibraryTab.tags => null,
+      LibraryTab.rating => null,
     };
   }
 
@@ -159,6 +163,9 @@ extension LibraryTabUtils on LibraryTab {
       ),
       LibraryTab.history => const HistoryTracksPage(),
       LibraryTab.mostPlayed => const MostPlayedTracksPage(),
+      LibraryTab.moods => const MoodsPage(),
+      LibraryTab.tags => const TagsPage(),
+      LibraryTab.rating => const RatingsPage(),
     };
   }
 }
@@ -860,7 +867,7 @@ extension TrackExecuteActionsUtils on TrackExecuteActions {
             showTrackDeletePermanentlyDialog(
               [finalItem],
               null,
-              afterConfirm: NamidaNavigator.inst.closeDialog,
+              afterDone: NamidaNavigator.inst.closeDialog,
             );
           },
           youtubeID: (finalItem) {},
@@ -1181,6 +1188,9 @@ extension RouteUtils on NamidaRoute {
           RouteType.SUBPAGE_albumArtistTracks => name?.getAlbumArtistTracks(),
           RouteType.SUBPAGE_composerTracks => name?.getComposerTracks(),
           RouteType.SUBPAGE_genreTracks => name?.getGenresTracks(),
+          RouteType.SUBPAGE_moodsTracks => Indexer.inst.getTracksGroupedByMoods(sort: false)[name ?? ''],
+          RouteType.SUBPAGE_tagsTracks => Indexer.inst.getTracksGroupedByTags(sort: false)[name ?? ''],
+          RouteType.SUBPAGE_ratingTracks => Indexer.inst.getTracksGroupedByRatings(sort: false)[name ?? ''],
           RouteType.SUBPAGE_queueTracks => name?.getQueue()?.tracks,
           RouteType.SUBPAGE_playlistTracks => name == null ? null : PlaylistController.inst.getPlaylist(name!)?.tracks,
           RouteType.SUBPAGE_favPlaylistTracks => name == null ? null : PlaylistController.inst.favouritesPlaylist.value.tracks,
@@ -1344,6 +1354,9 @@ extension RouteUtils on NamidaRoute {
         route == RouteType.SUBPAGE_albumArtistTracks ||
         route == RouteType.SUBPAGE_composerTracks ||
         route == RouteType.SUBPAGE_genreTracks ||
+        route == RouteType.SUBPAGE_moodsTracks ||
+        route == RouteType.SUBPAGE_tagsTracks ||
+        route == RouteType.SUBPAGE_ratingTracks ||
         route == RouteType.SUBPAGE_queueTracks;
 
     final showPlaylistMenu =
@@ -1495,6 +1508,15 @@ extension RouteUtils on NamidaRoute {
             case RouteType.SUBPAGE_genreTracks:
               NamidaDialogs.inst.showGenreDialog(name);
               break;
+            case RouteType.SUBPAGE_moodsTracks:
+              NamidaDialogs.inst.showMoodDialog(name, tracksListInside().whereType<Track>().toList());
+              break;
+            case RouteType.SUBPAGE_tagsTracks:
+              NamidaDialogs.inst.showTagDialog(name, tracksListInside().whereType<Track>().toList());
+              break;
+            case RouteType.SUBPAGE_ratingTracks:
+              NamidaDialogs.inst.showRatingDialog(name, tracksListInside().whereType<Track>().toList());
+              break;
             case RouteType.SUBPAGE_queueTracks:
               NamidaDialogs.inst.showQueueDialog(int.parse(name));
               break;
@@ -1620,6 +1642,9 @@ extension LibraryTabL10n on LibraryTab {
     LibraryTab.favourites => lang.favourites,
     LibraryTab.history => lang.history,
     LibraryTab.mostPlayed => lang.mostPlayed,
+    LibraryTab.moods => lang.moods,
+    LibraryTab.tags => lang.tags,
+    LibraryTab.rating => lang.rating,
   };
 
   IconData toIcon() => switch (this) {
@@ -1638,6 +1663,9 @@ extension LibraryTabL10n on LibraryTab {
     LibraryTab.favourites => Broken.heart,
     LibraryTab.history => Broken.refresh,
     LibraryTab.mostPlayed => Broken.award,
+    LibraryTab.moods => Broken.smileys,
+    LibraryTab.tags => Broken.tag,
+    LibraryTab.rating => Broken.grammerly,
   };
 }
 
@@ -1911,6 +1939,9 @@ extension QueueSourceL10n on QueueSourceEnum {
     QueueSourceEnum.selectedTracks => lang.selectedTracks,
     QueueSourceEnum.externalFile => lang.externalFiles,
     QueueSourceEnum.recentlyAdded => lang.recentlyAdded,
+    QueueSourceEnum.moods => lang.moods,
+    QueueSourceEnum.tags => lang.tags,
+    QueueSourceEnum.rating => lang.rating,
     QueueSourceEnum.homePageItem => lang.home,
     QueueSourceEnum.others => lang.others,
   };
@@ -2227,6 +2258,8 @@ extension TrackSearchFilterL10n on TrackSearchFilter {
     TrackSearchFilter.composer => lang.composer,
     TrackSearchFilter.comment => lang.comment,
     TrackSearchFilter.year => lang.year,
+    TrackSearchFilter.moods => lang.moods,
+    TrackSearchFilter.tags => lang.tags,
     TrackSearchFilter.lyrics => lang.lyrics,
   };
 }
