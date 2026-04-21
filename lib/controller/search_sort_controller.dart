@@ -341,7 +341,7 @@ class SearchSortController extends SearchPortsProvider {
         if (isTemp) {
           if (fetchedQuery == lastSearchText) {
             trackSearchTemp.value = r.$1;
-            sortTracksSearch(canSkipSorting: true);
+            sortTracksSearch();
           }
         } else {
           if (fetchedQuery == LibraryTab.tracks.textSearchController?.text) trackSearchList.value = r.$1;
@@ -754,16 +754,19 @@ class SearchSortController extends SearchPortsProvider {
     _tracksInfoList.refresh();
   }
 
-  void sortTracksSearch({SortType? sortBy, bool? reverse, bool canSkipSorting = false}) {
+  void sortTracksSearch({SortType? sortBy, bool? reverse, bool canSkipSorting = true}) {
     final isAuto = settings.tracksSortSearchIsAuto.value;
+    if (isAuto) {
+      // -- already sorted by most relevant
+      return;
+    }
 
-    sortBy ??= isAuto ? settings.mediaItemsTrackSorting.value[MediaType.track]?.firstOrNull ?? settings.tracksSortSearch.value : settings.tracksSortSearch.value;
-    reverse ??= isAuto ? settings.mediaItemsTrackSortingReverse.value[MediaType.track] ?? settings.tracksSortSearchReversed.value : settings.tracksSortSearchReversed.value;
+    sortBy ??= settings.tracksSortSearch.value;
+    reverse ??= settings.tracksSortSearchReversed.value;
 
     if (canSkipSorting) {
-      final identicalToMainOne = isAuto
-          ? true
-          : sortBy == settings.mediaItemsTrackSorting.value[MediaType.track]?.firstOrNull && reverse == settings.mediaItemsTrackSortingReverse.value[MediaType.track];
+      final identicalToMainOne =
+          sortBy == settings.mediaItemsTrackSorting.value[MediaType.track]?.firstOrNull && reverse == settings.mediaItemsTrackSortingReverse.value[MediaType.track];
       if (identicalToMainOne) return; // since the looped list already has the same order
     }
 

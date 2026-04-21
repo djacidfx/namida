@@ -79,7 +79,7 @@ class TracksSearchWrapper {
     final textCleanedForSearch = _functionOfCleanup(cleanup);
     final textNonCleanedForSearch = cleanup ? _functionOfCleanup(false) : null;
 
-    List<String>? splitThis(String? property, bool split) {
+    _Property? splitThis(String? property, bool split) {
       if (!split || property == null) return null;
       return _splitTextCleanedAndNonCleaned(
         property,
@@ -111,7 +111,7 @@ class TracksSearchWrapper {
                   textCleanedForSearch,
                   textNonCleanedForSearch,
                 )
-              : [],
+              : null,
           splitAlbumArtist: splitThis(trMap['albumArtist'], salbumartist),
           splitArtist: sartist
               ? _mapListCleanedAndNonCleaned(
@@ -123,7 +123,7 @@ class TracksSearchWrapper {
                   textCleanedForSearch,
                   textNonCleanedForSearch,
                 )
-              : [],
+              : null,
           splitGenre: sgenre
               ? _mapListCleanedAndNonCleaned(
                   Indexer.splitGenre(
@@ -133,7 +133,7 @@ class TracksSearchWrapper {
                   textCleanedForSearch,
                   textNonCleanedForSearch,
                 )
-              : [],
+              : null,
           splitComposer: splitThis(trMap['composer'], scomposer),
           splitComment: splitThis(trMap['comment'], scomment),
           year: !syear
@@ -161,7 +161,7 @@ class TracksSearchWrapper {
     );
   }
 
-  static List<String>? _fillAllAvailableLyrics(Track track, String embedded, String lyricsCacheDirectory) {
+  static _Property? _fillAllAvailableLyrics(Track track, String embedded, String lyricsCacheDirectory) {
     final lyrics = <String>[];
 
     final lrcUtils = LrcSearchUtilsSelectableIsolate(
@@ -206,26 +206,27 @@ class TracksSearchWrapper {
         }
       }
     }
-    return lyrics;
+    return _Property.fromList(lyrics);
   }
 
-  static List<String> _splitTextCleanedAndNonCleaned(String text, String Function(String) textCleanedForSearch, String Function(String)? textNonCleanedForSearch) {
+  static _Property? _splitTextCleanedAndNonCleaned(String text, String Function(String) textCleanedForSearch, String Function(String)? textNonCleanedForSearch) {
     final splitted = text.split(' ');
     return _mapListCleanedAndNonCleaned(splitted, textCleanedForSearch, textNonCleanedForSearch);
   }
 
-  static List<String> _mapListCleanedAndNonCleaned(List<String> splitted, String Function(String) textCleanedForSearch, String Function(String)? textNonCleanedForSearch) {
+  static _Property? _mapListCleanedAndNonCleaned(List<String> splitted, String Function(String) textCleanedForSearch, String Function(String)? textNonCleanedForSearch) {
     final allParts = <String>[];
-    allParts.addAll(splitted.map((e) => textCleanedForSearch(e)));
+    allParts.addAll(splitted.map((e) => textCleanedForSearch(e)).where((e) => e.isNotEmpty));
     if (textNonCleanedForSearch != null) {
       for (int i = 0; i < splitted.length; i++) {
         var s = textNonCleanedForSearch(splitted[i]);
+        if (s.isEmpty) continue;
         if (!allParts.contains(s)) {
           allParts.add(s);
         }
       }
     }
-    return allParts;
+    return _Property.fromList(allParts);
   }
 
   List<Track> filter(String text) {
@@ -249,50 +250,73 @@ class TracksSearchWrapper {
   void _filter(String text, void Function(_CustomTrackExtended trExt, int index) onMatch) {
     final lctext = textCleanedForSearch(text);
     final lctextNonCleaned = textNonCleanedForSearch == null ? null : textNonCleanedForSearch!(text);
-    final lctextSplit = _splitTextCleanedAndNonCleaned(text, textCleanedForSearch, textNonCleanedForSearch);
+    final lctextProperty = _splitTextCleanedAndNonCleaned(text, textCleanedForSearch, textNonCleanedForSearch);
+    final lctextSplit = lctextProperty?.splits ?? [];
 
-    bool isMatch(List<String>? propertySplit) {
-      if (propertySplit == null) return false;
+    int matchScore(_CustomTrackExtended trExt) {
+      int score = 0;
 
-      final match1 = lctextSplit.every((element) => propertySplit.any((p) => p.contains(element)));
-      if (match1) return true;
+      void scoreProperty(_Property? property, {int multiplier = 1}) {
+        if (property == null) return;
 
-      if (cleanup) {
-        // cleanup means symbols and *spaces* are ignored.
-        final propertyJoined = propertySplit.join();
+        final propertyJoined = property.joined;
 
-        final match2 = propertyJoined.contains(lctext);
-        if (match2) return true;
+        if (propertyJoined == lctext) {
+          score += 200 * multiplier;
+          return;
+        }
 
-        if (lctextNonCleaned != null) {
-          final match3 = propertyJoined.contains(lctextNonCleaned);
-          if (match3) return true;
+        if (propertyJoined.contains(lctext) || (lctextNonCleaned != null && propertyJoined.contains(lctextNonCleaned))) {
+          score += 100 * multiplier;
+          return;
+        }
+
+        final allWordsMatch = lctextSplit.every((word) => propertyJoined.contains(word));
+        if (allWordsMatch) {
+          score += 50 * multiplier;
+          return;
+        }
+
+        final allWordsMatchSplit = lctextSplit.every((word) => property.splits.any((p) => p.contains(word)));
+        if (allWordsMatchSplit) {
+          score += 20 * multiplier;
+          return;
+        }
+
+        for (final word in lctextSplit) {
+          if (propertyJoined.contains(word)) {
+            score += 5 * multiplier;
+          }
         }
       }
 
-      return false;
+      scoreProperty(trExt.splitTitle, multiplier: 3);
+      scoreProperty(trExt.splitFilename, multiplier: 2);
+      scoreProperty(trExt.splitArtist, multiplier: 2);
+      scoreProperty(trExt.splitAlbum, multiplier: 2);
+      scoreProperty(trExt.splitFolder);
+      scoreProperty(trExt.splitAlbumArtist);
+      scoreProperty(trExt.splitGenre);
+      scoreProperty(trExt.splitComposer);
+      scoreProperty(trExt.splitComment);
+      scoreProperty(trExt.year);
+      scoreProperty(trExt.lyrics);
+
+      return score;
     }
 
-    bool isTrackMatch(_CustomTrackExtended trExt) {
-      if (isMatch(trExt.splitTitle) ||
-          isMatch(trExt.splitFolder) ||
-          isMatch(trExt.splitFilename) ||
-          isMatch(trExt.splitAlbum) ||
-          isMatch(trExt.splitAlbumArtist) ||
-          isMatch(trExt.splitArtist) ||
-          isMatch(trExt.splitGenre) ||
-          isMatch(trExt.splitComposer) ||
-          isMatch(trExt.splitComment) ||
-          isMatch(trExt.year) ||
-          isMatch(trExt.lyrics)) {
-        return true;
-      }
-      return false;
-    }
+    final scored = <int, List<(_CustomTrackExtended, int)>>{};
 
     for (var i = 0; i < _tracksExtended.length; i++) {
-      var trExt = _tracksExtended[i];
-      if (isTrackMatch(trExt)) {
+      final trExt = _tracksExtended[i];
+      final score = matchScore(trExt);
+      if (score <= 0) continue;
+      (scored[score] ??= []).add((trExt, i));
+    }
+
+    final sortedKeys = scored.keys.toList()..sort((a, b) => b.compareTo(a));
+    for (final key in sortedKeys) {
+      for (final (trExt, i) in scored[key]!) {
         onMatch(trExt, i);
       }
     }
@@ -305,17 +329,17 @@ class TracksSearchWrapper {
 
 class _CustomTrackExtended {
   final Track track;
-  final List<String>? splitTitle;
-  final List<String>? splitFilename;
-  final List<String>? splitFolder;
-  final List<String>? splitAlbum;
-  final List<String>? splitAlbumArtist;
-  final List<String>? splitArtist;
-  final List<String>? splitGenre;
-  final List<String>? splitComposer;
-  final List<String>? splitComment;
-  final List<String>? year;
-  final List<String>? lyrics;
+  final _Property? splitTitle;
+  final _Property? splitFilename;
+  final _Property? splitFolder;
+  final _Property? splitAlbum;
+  final _Property? splitAlbumArtist;
+  final _Property? splitArtist;
+  final _Property? splitGenre;
+  final _Property? splitComposer;
+  final _Property? splitComment;
+  final _Property? year;
+  final _Property? lyrics;
 
   const _CustomTrackExtended({
     required this.track,
@@ -331,4 +355,24 @@ class _CustomTrackExtended {
     required this.year,
     required this.lyrics,
   });
+}
+
+class _Property {
+  final List<String> splits;
+  final String joined;
+
+  const _Property._({
+    required this.splits,
+    required this.joined,
+  });
+
+  static _Property? fromListNull(List<String>? list) {
+    if (list == null) return null;
+    return _Property.fromList(list);
+  }
+
+  static _Property? fromList(List<String> list) {
+    if (list.isEmpty) return null;
+    return _Property._(splits: list, joined: list.join(' '));
+  }
 }

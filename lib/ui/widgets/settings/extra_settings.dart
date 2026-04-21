@@ -388,6 +388,7 @@ class ExtrasSettings extends SettingSubpageProvider {
                                 child: Obx(
                                   (context) => ListTileWithCheckMark(
                                     title: e.toText(),
+                                    subtitle: e == TrackSearchFilter.lyrics ? lang.performanceNote : '',
                                     onTap: () => _trackFilterOnTap(e),
                                     active: settings.trackSearchFilter.contains(e),
                                   ),
@@ -439,7 +440,6 @@ class ExtrasSettings extends SettingSubpageProvider {
                           tooltip: lang.restoreDefaults,
                           onPressed: () {
                             settings.removeFromList(ignoreCommonPrefixForTypesAll: TrackSearchFilter.values);
-
                             settings.save(ignoreCommonPrefixForTypes: []);
                           },
                         ),
@@ -587,7 +587,10 @@ class ExtrasSettings extends SettingSubpageProvider {
                 title: lang.enableSearchCleanup,
                 subtitle: lang.enableSearchCleanupSubtitle,
                 value: settings.enableSearchCleanup.valueR,
-                onChanged: (p0) => settings.save(enableSearchCleanup: !p0),
+                onChanged: (p0) {
+                  settings.save(enableSearchCleanup: !p0);
+                  SearchSortController.inst.disposeResources();
+                },
               ),
             ),
           ),

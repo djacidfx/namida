@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:namida/controller/navigator_controller.dart';
+import 'package:namida/controller/scroll_search_controller.dart';
 import 'package:namida/controller/search_sort_controller.dart';
 import 'package:namida/controller/settings_controller.dart';
 import 'package:namida/core/enums.dart';
@@ -105,7 +106,11 @@ class SortByMenuTracksSearch extends StatelessWidget {
                     activeRx: settings.tracksSortSearchIsAuto,
                     onTap: () {
                       settings.save(tracksSortSearchIsAuto: !settings.tracksSortSearchIsAuto.value);
-                      SearchSortController.inst.sortTracksSearch(canSkipSorting: false);
+                      if (settings.tracksSortSearchIsAuto.value) {
+                        SearchSortController.inst.searchTracks(ScrollSearchController.inst.searchTextEditingController.text, temp: true);
+                      } else {
+                        SearchSortController.inst.sortTracksSearch(canSkipSorting: false);
+                      }
                     },
                   ),
                 ),
@@ -124,9 +129,9 @@ class SortByMenuTracksSearch extends StatelessWidget {
                               padding: const EdgeInsets.only(left: 4.0, right: 4.0, bottom: 4.0),
                               child: ListTileWithCheckMark(
                                 borderRadius: 10.0,
-                                active: isAuto ? settings.mediaItemsTrackSortingReverse.valueR[MediaType.track] == true : reversed,
+                                active: isAuto ? false : reversed,
                                 onTap: () {
-                                  SearchSortController.inst.sortTracksSearch(reverse: !reversed);
+                                  SearchSortController.inst.sortTracksSearch(reverse: !reversed, canSkipSorting: false);
                                 },
                               ),
                             ),
@@ -138,7 +143,7 @@ class SortByMenuTracksSearch extends StatelessWidget {
                                 trailingIcon: e.toIcon(),
                                 active: (isAuto ? settings.mediaItemsTrackSorting[MediaType.track]?.firstOrNull : tracksSortSearch) == e,
                                 onTap: () {
-                                  SearchSortController.inst.sortTracksSearch(sortBy: e);
+                                  SearchSortController.inst.sortTracksSearch(sortBy: e, canSkipSorting: false);
                                 },
                               ),
                             ),

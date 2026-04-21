@@ -361,7 +361,7 @@ class _SettingsController with SettingsFileWriter {
     trackArtistsSeparatorsBlacklist.value = <String>['T & Sugah', 'Miles & Miles'];
     tracksSortSearch.value = SortType.mostPlayed;
     tracksSortSearchReversed.value = false;
-    tracksSortSearchIsAuto.value = false;
+    tracksSortSearchIsAuto.value = true;
     albumSort.value = GroupSortType.numberOfTracks;
     albumSortReversed.value = true;
     artistSort.value = GroupSortType.numberOfTracks;
@@ -544,7 +544,7 @@ class _SettingsController with SettingsFileWriter {
       fileBrowserSortReversed.value = json['fileBrowserSortReversed'] ?? fileBrowserSortReversed.value;
       tracksSortSearch.value = SortType.values.getEnum(json['tracksSortSearch']) ?? tracksSortSearch.value;
       tracksSortSearchReversed.value = json['tracksSortSearchReversed'] ?? tracksSortSearchReversed.value;
-      tracksSortSearchIsAuto.value = json['tracksSortSearchIsAuto'] ?? tracksSortSearchIsAuto.value;
+      tracksSortSearchIsAuto.value = json['tracksSortSearchIsAuto_v2'] ?? tracksSortSearchIsAuto.value;
       albumSort.value = GroupSortType.values.getEnum(json['albumSort']) ?? albumSort.value;
       albumSortReversed.value = json['albumSortReversed'] ?? albumSortReversed.value;
       artistSort.value = GroupSortType.values.getEnum(json['artistSort']) ?? artistSort.value;
@@ -808,7 +808,7 @@ class _SettingsController with SettingsFileWriter {
     'fileBrowserSortReversed': fileBrowserSortReversed.value,
     'tracksSortSearch': tracksSortSearch.value.name,
     'tracksSortSearchReversed': tracksSortSearchReversed.value,
-    'tracksSortSearchIsAuto': tracksSortSearchIsAuto.value,
+    'tracksSortSearchIsAuto_v2': tracksSortSearchIsAuto.value,
     'albumSort': albumSort.value.name,
     'albumSortReversed': albumSortReversed.value,
     'artistSort': artistSort.value.name,

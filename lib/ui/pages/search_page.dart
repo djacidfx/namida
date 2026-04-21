@@ -451,11 +451,12 @@ class SearchPage extends StatelessWidget {
                                                         child: Obx(
                                                           (context) {
                                                             final isAuto = settings.tracksSortSearchIsAuto.valueR;
-                                                            final activeType = isAuto
-                                                                ? settings.mediaItemsTrackSorting.valueR[MediaType.track]?.firstOrNull
-                                                                : settings.tracksSortSearch.valueR;
+                                                            final activeType = isAuto ? null : settings.tracksSortSearch.valueR;
                                                             return Text(
-                                                              (activeType?.toText() ?? '') + (isAuto ? ' (${lang.auto})' : ''),
+                                                              [
+                                                                ?activeType?.toText(),
+                                                                if (isAuto) '(${lang.auto})',
+                                                              ].join(' '),
                                                               style: textTheme.displaySmall?.copyWith(
                                                                 color: isAuto ? null : theme.colorScheme.secondary,
                                                               ),
@@ -468,14 +469,12 @@ class SearchPage extends StatelessWidget {
                                                     NamidaInkWell(
                                                       onTap: () {
                                                         if (settings.tracksSortSearchIsAuto.value) return;
-                                                        SearchSortController.inst.sortTracksSearch(reverse: !settings.tracksSortSearchReversed.value);
+                                                        SearchSortController.inst.sortTracksSearch(reverse: !settings.tracksSortSearchReversed.value, canSkipSorting: false);
                                                       },
                                                       child: Obx(
                                                         (context) {
                                                           final isAuto = settings.tracksSortSearchIsAuto.valueR;
-                                                          final activeReverse = isAuto
-                                                              ? settings.mediaItemsTrackSortingReverse.valueR[MediaType.track] == true
-                                                              : settings.tracksSortSearchReversed.valueR;
+                                                          final activeReverse = isAuto ? false : settings.tracksSortSearchReversed.valueR;
                                                           return Icon(
                                                             activeReverse ? Broken.arrow_up_3 : Broken.arrow_down_2,
                                                             size: 16.0,
