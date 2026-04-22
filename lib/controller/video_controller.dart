@@ -566,7 +566,7 @@ class VideoController {
 
     if (downloadedVideo != null) {
       final ytId = downloadedVideo.ytID;
-      if (ytId != null) {
+      if (ytId != null && ytId.isNotEmpty) {
         _videoCacheIDMap.addNoDuplicatesForce(ytId, downloadedVideo);
         _saveCachedVideos(ytId);
       }

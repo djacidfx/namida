@@ -101,7 +101,7 @@ class SortByMenuTracksSearch extends StatelessWidget {
                   padding: const EdgeInsets.only(left: 4.0, right: 4.0, bottom: 4.0),
                   child: ListTileWithCheckMark(
                     borderRadius: 10.0,
-                    icon: Broken.arrow_swap_horizontal,
+                    icon: Broken.medal_star,
                     title: lang.auto,
                     activeRx: settings.tracksSortSearchIsAuto,
                     onTap: () {

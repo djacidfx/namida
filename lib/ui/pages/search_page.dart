@@ -455,7 +455,7 @@ class SearchPage extends StatelessWidget {
                                                             return Text(
                                                               [
                                                                 ?activeType?.toText(),
-                                                                if (isAuto) '(${lang.auto})',
+                                                                if (isAuto) lang.auto,
                                                               ].join(' '),
                                                               style: textTheme.displaySmall?.copyWith(
                                                                 color: isAuto ? null : theme.colorScheme.secondary,

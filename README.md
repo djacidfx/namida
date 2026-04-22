@@ -252,8 +252,8 @@ note: some cleanup is made to improve the matching, all symbols & whitespaces ar
 
 ### Usage Preview
 
-|                                            Animating Thumbnail                                            |                                           Recommends & Listens                                            |
-| :-------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------: |
+| Animating Thumbnail | Recommends & Listens |
+| --- | --- |
 | <video src="https://github.com/namidaco/namida/assets/85245079/da47c270-9f45-4ff5-a08e-e99e4b7ebb7c.mp4"> | <video src="https://github.com/namidaco/namida/assets/85245079/72e978b3-6e15-4b4e-948a-03b470802b30.mp4"> |
 
 # Installation
@@ -294,7 +294,13 @@ note: some cleanup is made to improve the matching, all symbols & whitespaces ar
 
 <tr>
 <td align="center"><b>Windows</b></td>
-<td align="center"><i>Soon</i></td>
+<td align="center" width="200">
+  <div style="display:flex; flex-direction:column; align-items:center;">
+    <a href="https://github.com/namidaco/namida/releases/latest">
+      <img src="./some stuff/badge_github.png" height="50">
+    </a>
+  </div>
+</td>
 <td align="center" width="200">
   <div style="display:flex; flex-direction:column; align-items:center;">
     <a href="https://github.com/namidaco/namida-snapshots/releases/latest">

@@ -1479,13 +1479,16 @@ class Indexer<T extends Track> {
 
   Map<String, List<Track>> getTracksGroupedByMoods({bool sort = true}) {
     final allAvailableMap = <String, List<Track>>{};
+    final tempSet = <Track>{};
 
     // -- from stats map
     for (final e in Indexer.inst.trackStatsMap.value.entries) {
       final tr = e.key;
       if (tr.hasInfoInLibrary()) {
         e.value.moods?.loop((mood) {
-          allAvailableMap.addNoDuplicatesForce(mood, tr);
+          if (tempSet.add(tr)) {
+            allAvailableMap.addForce(mood, tr);
+          }
         });
       }
     }
@@ -1493,7 +1496,9 @@ class Indexer<T extends Track> {
     // -- from track embedded tag
     allTracksInLibrary.loop((tr) {
       tr.moodList.loop((mood) {
-        allAvailableMap.addNoDuplicatesForce(mood, tr);
+        if (tempSet.add(tr)) {
+          allAvailableMap.addForce(mood, tr);
+        }
       });
     });
 
@@ -1504,13 +1509,16 @@ class Indexer<T extends Track> {
 
   Map<String, List<Track>> getTracksGroupedByTags({bool sort = true}) {
     final allAvailableMap = <String, List<Track>>{};
+    final tempSet = <Track>{};
 
     // -- from stats map
     for (final e in Indexer.inst.trackStatsMap.value.entries) {
       final tr = e.key;
       if (tr.hasInfoInLibrary()) {
         e.value.tags?.loop((tag) {
-          allAvailableMap.addNoDuplicatesForce(tag, tr);
+          if (tempSet.add(tr)) {
+            allAvailableMap.addForce(tag, tr);
+          }
         });
       }
     }
@@ -1518,7 +1526,9 @@ class Indexer<T extends Track> {
     // -- from track embedded tag
     allTracksInLibrary.loop((tr) {
       tr.tagsList.loop((tag) {
-        allAvailableMap.addNoDuplicatesForce(tag, tr);
+        if (tempSet.add(tr)) {
+          allAvailableMap.addForce(tag, tr);
+        }
       });
     });
 
@@ -1531,7 +1541,7 @@ class Indexer<T extends Track> {
     final allAvailableMap = <String, List<Track>>{};
 
     allTracksInLibrary.loop((tr) {
-      allAvailableMap.addNoDuplicatesForce(tr.effectiveRating.toString(), tr);
+      allAvailableMap.addForce(tr.effectiveRating.toString(), tr);
     });
 
     if (sort) allAvailableMap.sortByReverse((e) => int.tryParse(e.key) ?? 0);

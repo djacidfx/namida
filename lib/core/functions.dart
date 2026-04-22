@@ -1388,9 +1388,15 @@ class TracksAddOnTap {
 
               // -- moods from playlists.
               final allAvailableMoodsPlaylists = <String, List<Track>>{};
+              final tempPlaylistTracksSet = <Track>{};
               for (final pl in PlaylistController.inst.playlistsMap.value.entries) {
                 pl.value.moods.loop((mood) {
-                  allAvailableMoodsPlaylists.addAllNoDuplicatesForce(mood, pl.value.tracks.tracks);
+                  final list = allAvailableMoodsPlaylists[mood] ??= <Track>[];
+                  for (final tr in pl.value.tracks.tracks) {
+                    if (tempPlaylistTracksSet.add(tr)) {
+                      list.add(tr);
+                    }
+                  }
                 });
               }
 

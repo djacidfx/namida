@@ -267,6 +267,8 @@ class TracksSearchWrapper {
       void scoreProperty(_Property? property, {int multiplier = 1}) {
         if (property == null) return;
 
+        if (score >= 500) return;
+
         final propertyJoined = property.joined;
 
         if (propertyJoined == lctext) {
