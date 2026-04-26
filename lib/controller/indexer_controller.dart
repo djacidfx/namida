@@ -1449,7 +1449,7 @@ class Indexer<T extends Track> {
     for (final track in trackStatsMap.value.keys.toList()) {
       final normalizedPath = replaceFunctionNormalizePath(track.path);
       final shouldUpdate = replaceFunctionForUpdatedPaths(
-        track,
+        track.path,
         normalizedOldDir,
         normalizedNewDir,
         pathsOnlySet,

@@ -30,6 +30,7 @@ class _ExtraSettings with SettingsFileWriter {
   int? ytAddToPlaylistsTabIndex;
   int? ytPlaylistsPageIndex;
   int? ytChannelsPageIndex;
+  int? audioConfigPageIndex;
 
   Rect? windowBounds;
 
@@ -52,6 +53,7 @@ class _ExtraSettings with SettingsFileWriter {
     int? ytAddToPlaylistsTabIndex,
     int? ytPlaylistsPageIndex,
     int? ytChannelsPageIndex,
+    int? audioConfigPageIndex,
     Rect? windowBounds,
   }) {
     if (selectedLibraryTab != null) this.selectedLibraryTab.value = selectedLibraryTab;
@@ -72,6 +74,7 @@ class _ExtraSettings with SettingsFileWriter {
     if (ytAddToPlaylistsTabIndex != null) this.ytAddToPlaylistsTabIndex = ytAddToPlaylistsTabIndex;
     if (ytPlaylistsPageIndex != null) this.ytPlaylistsPageIndex = ytPlaylistsPageIndex;
     if (ytChannelsPageIndex != null) this.ytChannelsPageIndex = ytChannelsPageIndex;
+    if (audioConfigPageIndex != null) this.audioConfigPageIndex = audioConfigPageIndex;
     if (windowBounds != null) this.windowBounds = windowBounds;
     _writeToStorage();
   }
@@ -109,6 +112,7 @@ class _ExtraSettings with SettingsFileWriter {
       ytAddToPlaylistsTabIndex = json['ytAddToPlaylistsTabIndex'] ?? ytAddToPlaylistsTabIndex;
       ytPlaylistsPageIndex = json['ytPlaylistsPageIndex'] ?? ytPlaylistsPageIndex;
       ytChannelsPageIndex = json['ytChannelsPageIndex'] ?? ytChannelsPageIndex;
+      audioConfigPageIndex = json['audioConfigPageIndex'] ?? audioConfigPageIndex;
 
       final windowBoundsJson = json['windowBounds'];
       if (windowBoundsJson is Map) {
@@ -145,6 +149,7 @@ class _ExtraSettings with SettingsFileWriter {
     'ytAddToPlaylistsTabIndex': ytAddToPlaylistsTabIndex,
     'ytPlaylistsPageIndex': ytPlaylistsPageIndex,
     'ytChannelsPageIndex': ytChannelsPageIndex,
+    'audioConfigPageIndex': audioConfigPageIndex,
     if (windowBounds != null)
       'windowBounds': {
         'l': windowBounds!.left,

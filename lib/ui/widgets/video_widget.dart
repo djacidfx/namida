@@ -342,12 +342,12 @@ class NamidaVideoControlsState extends State<NamidaVideoControls> with TickerPro
   double get defaultLongPressSpeed => settings.player.longPressSpeed.value;
 
   void _startLongPressAction() {
-    Player.inst.setPlayerSpeed(defaultLongPressSpeed);
+    Player.inst.setSpeed(defaultLongPressSpeed);
     _isLongPressActive.value = true;
   }
 
   void _endLongPressAction() {
-    Player.inst.setPlayerSpeed(settings.player.speed.value);
+    Player.inst.setSpeed(settings.player.speed.value);
     _isLongPressActive.value = false;
   }
 
@@ -1206,7 +1206,7 @@ class NamidaVideoControlsState extends State<NamidaVideoControls> with TickerPro
                                                 _startTimer();
                                                 final isSelected = Player.inst.currentSpeed.value == speed;
                                                 if (!isSelected) {
-                                                  Player.inst.setPlayerSpeed(speed);
+                                                  Player.inst.setSpeed(speed);
                                                   settings.player.save(speed: speed);
                                                   NamidaNavigator.inst.popMenu();
                                                 }
@@ -2776,7 +2776,7 @@ class _YTVideoEndcardsState extends State<_YTVideoEndcards> {
   }
 }
 
-class _VideoTitleSubtitleWidget extends StatefulWidget {
+class _VideoTitleSubtitleWidget extends StatelessWidget {
   final bool isLocal;
 
   const _VideoTitleSubtitleWidget({
@@ -2784,93 +2784,30 @@ class _VideoTitleSubtitleWidget extends StatefulWidget {
   });
 
   @override
-  State<_VideoTitleSubtitleWidget> createState() => _VideoIdToTitleWidgetState();
-}
-
-class _VideoIdToTitleWidgetState extends State<_VideoTitleSubtitleWidget> {
-  String? _videoName;
-  String? _channelName;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.isLocal) {
-      _onLocalChange();
-      Player.inst.currentItem.addListener(_onLocalChange);
-    } else {
-      _onYTChange();
-      Player.inst.currentItem.addListener(_onYTChange);
-      YoutubeInfoController.current.currentVideoPage.addListener(_onYTChange);
-      YoutubeInfoController.current.currentYTStreams.addListener(_onYTChange);
-    }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    if (widget.isLocal) {
-      Player.inst.currentItem.removeListener(_onLocalChange);
-    } else {
-      Player.inst.currentItem.removeListener(_onYTChange);
-      YoutubeInfoController.current.currentVideoPage.removeListener(_onYTChange);
-      YoutubeInfoController.current.currentYTStreams.removeListener(_onYTChange);
-    }
-  }
-
-  void _onLocalChange() async {
-    final item = Player.inst.currentItem.value;
-    if (item is! Selectable) return;
-    final track = item.track;
-    _videoName = track.title;
-    _channelName = track.originalArtist;
-
-    refreshState();
-  }
-
-  void _onYTChange() async {
-    final item = Player.inst.currentItem.value;
-    if (item is! YoutubeID) return;
-    final vidId = item.id;
-
-    String? videoName = YoutubeInfoController.current.currentVideoPage.value?.videoInfo?.title;
-    if (videoName == null || videoName.isEmpty) videoName = YoutubeInfoController.current.currentYTStreams.value?.info?.title;
-    if (videoName == null || videoName.isEmpty) videoName = await YoutubeInfoController.utils.getVideoName(vidId);
-
-    String? channelName = YoutubeInfoController.current.currentVideoPage.value?.channelInfo?.title;
-    if (channelName == null || channelName.isEmpty) channelName = YoutubeInfoController.current.currentYTStreams.value?.info?.channelName;
-    if (channelName == null || channelName.isEmpty) channelName = await YoutubeInfoController.utils.getVideoChannelName(vidId);
-
-    if (videoName != _videoName || channelName != _channelName) {
-      _videoName = videoName;
-      _channelName = channelName;
-      refreshState();
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     final textTheme = context.textTheme;
-    final videoName = _videoName;
-    final channelName = _channelName;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (videoName != null && videoName.isNotEmpty)
-          Text(
-            videoName,
-            style: textTheme.displayLarge?.copyWith(color: const Color.fromRGBO(255, 255, 255, 0.85)),
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-          ),
-        if (channelName != null && channelName.isNotEmpty)
-          Text(
-            channelName,
-            style: textTheme.displaySmall?.copyWith(color: const Color.fromRGBO(255, 255, 255, 0.7)),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-      ],
+    return PlayableTitleSubtitleWidget(
+      isYTID: !isLocal,
+      builder: (title, subtitle) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (title != null && title.isNotEmpty)
+            Text(
+              title,
+              style: textTheme.displayLarge?.copyWith(color: const Color.fromRGBO(255, 255, 255, 0.85)),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+          if (subtitle != null && subtitle.isNotEmpty)
+            Text(
+              subtitle,
+              style: textTheme.displaySmall?.copyWith(color: const Color.fromRGBO(255, 255, 255, 0.7)),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+        ],
+      ),
     );
   }
 }

@@ -26,6 +26,9 @@ part 'album_identifier_wrapper.dart';
 
 class TrackWithDate extends Selectable<Map<String, dynamic>> with ItemWithDate implements PlaylistItemWithDate {
   @override
+  String get key => track.key;
+
+  @override
   Track get track => _track;
 
   @override
@@ -206,6 +209,8 @@ class PlayableItemStats {
 abstract class Playable<T extends Object> {
   const Playable();
 
+  String get key;
+
   T toJson();
 }
 
@@ -230,6 +235,9 @@ extension SelectableListUtils on Iterable<Selectable> {
 }
 
 class Track extends Selectable<String> {
+  @override
+  String get key => path;
+
   Folder get folder => Folder.explicit(folderPath);
 
   @override

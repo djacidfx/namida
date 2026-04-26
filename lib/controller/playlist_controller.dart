@@ -136,7 +136,7 @@ class PlaylistController extends PlaylistManager<TrackWithDate, Track, SortType>
       (e) {
         final tr = e.track;
         normalizedPathCache[tr.path] ??= replaceFunctionNormalizePath(tr.path);
-        return replaceFunctionForUpdatedPaths(tr, normalizedOldDir, normalizedNewDir, pathsOnlySet, ensureNewFileExists, existenceCache);
+        return replaceFunctionForUpdatedPaths(tr.path, normalizedOldDir, normalizedNewDir, pathsOnlySet, ensureNewFileExists, existenceCache);
       },
       (old) {
         final normalized = normalizedPathCache[old.track.path] ?? replaceFunctionNormalizePath(old.track.path);

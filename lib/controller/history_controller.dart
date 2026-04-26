@@ -46,7 +46,7 @@ class HistoryController with HistoryManager<TrackWithDate, Track> {
         final tr = e.track;
         normalizedPathCache[tr.path] ??= replaceFunctionNormalizePath(tr.path);
         return replaceFunctionForUpdatedPaths(
-          tr,
+          tr.path,
           normalizedOldDir,
           normalizedNewDir,
           pathsOnlySet,

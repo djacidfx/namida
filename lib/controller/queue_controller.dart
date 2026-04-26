@@ -195,7 +195,7 @@ class QueueController {
           final tr = e.track;
           normalizedPathCache[tr.path] ??= replaceFunctionNormalizePath(tr.path);
           return replaceFunctionForUpdatedPaths(
-            tr,
+            tr.path,
             normalizedOldDir,
             normalizedNewDir,
             pathsOnlySet,

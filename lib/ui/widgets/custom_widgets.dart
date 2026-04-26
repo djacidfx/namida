@@ -8,6 +8,7 @@ import 'package:flutter/material.dart' hide ReorderableListView, ReorderCallback
 import 'package:flutter/rendering.dart' as fr;
 import 'package:flutter/services.dart';
 
+import 'package:basic_audio_handler/basic_audio_handler.dart';
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:checkmark/checkmark.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -23,6 +24,7 @@ import 'package:selectable_autolink_text/selectable_autolink_text.dart';
 import 'package:sleek_circular_slider/sleek_circular_slider.dart';
 import 'package:super_sliver_list/super_sliver_list.dart';
 
+import 'package:namida/base/audio_handler.dart';
 import 'package:namida/base/pull_to_refresh.dart';
 import 'package:namida/class/faudiomodel.dart';
 import 'package:namida/class/file_parts.dart';
@@ -64,6 +66,8 @@ import 'package:namida/ui/widgets/custom_tooltip.dart';
 import 'package:namida/ui/widgets/library/track_tile.dart';
 import 'package:namida/ui/widgets/popup_wrapper.dart';
 import 'package:namida/ui/widgets/settings/extra_settings.dart';
+import 'package:namida/youtube/class/youtube_id.dart';
+import 'package:namida/youtube/controller/youtube_info_controller.dart';
 
 import 'custom_reorderable_list.dart';
 
@@ -5667,42 +5671,49 @@ class SoundControlButton extends StatelessWidget {
   });
 
   void _onTap() {
-    NamidaOnTaps.inst.openEqualizer();
+    NamidaOnTaps.inst.openSoundControl();
   }
 
-  String _buildTooltip() {
-    return lang.equalizer;
-  }
+  String _buildTooltip() => lang.soundControl;
 
   @override
   Widget build(BuildContext context) {
-    final tooltip = lang.equalizer;
+    final tooltip = lang.soundControl;
     final iconColor = color ?? context.theme.colorScheme.onSecondaryContainer;
-    final child = StreamBuilder<bool>(
-      initialData: Player.inst.equalizer.enabled,
-      stream: Player.inst.equalizer.enabledStream,
-      builder: (context, snapshot) {
-        return Obx(
-          (context) {
-            final isSoundModified = settings.player.speed.valueR != 1.0 || settings.player.pitch.valueR != 1.0;
-            final enabled = isSoundModified || (snapshot.data ?? false);
-            return enabled
-                ? StackedIcon(
-                    baseIcon: Broken.sound,
-                    secondaryIcon: isSoundModified ? Broken.edit_2 : Broken.tick_circle,
-                    iconSize: iconSize,
-                    secondaryIconSize: iconSize * 0.5,
-                    baseIconColor: iconColor,
-                    secondaryIconColor: iconColor,
-                    blurRadius: 12.0,
-                  )
-                : Icon(
-                    Broken.sound,
-                    size: iconSize,
-                    color: iconColor,
-                  );
-          },
-        );
+    final child = Obx(
+      (context) {
+        PlayerConfigModificationScale? soundModificationScale;
+        final currentItem = Player.inst.currentItem.valueR;
+        if (!settings.player.isPerTrackAudioConfigOverriden.valueR) {
+          final currentItemConfig = Player.audioConfigs.map.valueR[currentItem?.key ?? ''];
+          if (currentItemConfig != null) {
+            // -- if any config exists in map, it will be used even it's default, so global config means nothing here
+            soundModificationScale = currentItemConfig.getModificationScale();
+          }
+        }
+        soundModificationScale ??= Player.inst.getDefaultPlayerConfigR(currentItem).getModificationScale();
+
+        final secondaryIcon = switch (soundModificationScale) {
+          PlayerConfigModificationScale.main => Broken.edit_2,
+          PlayerConfigModificationScale.alt => Broken.magicpen,
+          PlayerConfigModificationScale.none => null,
+        };
+
+        return secondaryIcon != null
+            ? StackedIcon(
+                baseIcon: Broken.sound,
+                secondaryIcon: secondaryIcon,
+                iconSize: iconSize,
+                secondaryIconSize: iconSize * 0.5,
+                baseIconColor: iconColor,
+                secondaryIconColor: iconColor,
+                blurRadius: 12.0,
+              )
+            : Icon(
+                Broken.sound,
+                size: iconSize,
+                color: iconColor,
+              );
       },
     );
 
@@ -7501,5 +7512,225 @@ class CustomIconButtonTonal extends StatelessWidget {
       ),
       tooltip: tooltip,
     );
+  }
+}
+
+class SplitPageInfo {
+  final String title;
+  final Widget page;
+  final Widget? titleIconWidget;
+
+  const SplitPageInfo({
+    required this.title,
+    required this.page,
+    this.titleIconWidget,
+  });
+}
+
+class SplitPage extends StatefulWidget {
+  final int initialIndex;
+  final void Function(int index) onIndexChanged;
+  final List<SplitPageInfo> pages;
+  final bool expanded;
+  final bool joinHeaderChips;
+  final bool showDivider;
+
+  const SplitPage({
+    super.key,
+    required this.initialIndex,
+    required this.onIndexChanged,
+    required this.pages,
+    this.expanded = true,
+    this.joinHeaderChips = false,
+    this.showDivider = true,
+  });
+
+  @override
+  State<SplitPage> createState() => SplitPageState();
+}
+
+class SplitPageState extends State<SplitPage> {
+  int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    _selectedIndex = widget.initialIndex.clampInt(0, widget.pages.length - 1);
+    super.initState();
+  }
+
+  void _onButtonTap(int index) {
+    if (index == _selectedIndex) return;
+    setState(() => _selectedIndex = index);
+    widget.onIndexChanged(index);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+    final pages = widget.pages;
+    final selectedIndex = _selectedIndex;
+    return Column(
+      mainAxisSize: .min,
+      children: [
+        const SizedBox(height: 8.0),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: pages
+                .mapIndexed(
+                  (e, i) {
+                    final isSelected = i == selectedIndex;
+                    BorderRadius borderRadius;
+                    final brValue = 8.0.multipliedRadius;
+                    if (widget.joinHeaderChips) {
+                      final brValueSmall = brValue * 0.25;
+                      borderRadius = i == 0
+                          ? BorderRadius.horizontal(
+                              left: Radius.circular(brValue),
+                              right: Radius.circular(brValueSmall),
+                            )
+                          : i == pages.length - 1
+                          ? BorderRadius.horizontal(
+                              left: Radius.circular(brValueSmall),
+                              right: Radius.circular(brValue),
+                            )
+                          : BorderRadius.circular(brValueSmall);
+                    } else {
+                      borderRadius = BorderRadius.circular(brValue);
+                    }
+                    return Expanded(
+                      child: NamidaInkWell(
+                        alignment: Alignment.center,
+                        animationDurationMS: 200,
+                        borderRadius: 8.0,
+                        bgColor: theme.cardTheme.color,
+                        padding: const EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                          border: isSelected
+                              ? Border.all(
+                                  color: theme.colorScheme.primary.withOpacityExt(0.6),
+                                  width: 1.2,
+                                )
+                              : null,
+                          borderRadius: borderRadius,
+                        ),
+                        onTap: () => _onButtonTap(i),
+                        child: Row(
+                          mainAxisAlignment: .center,
+                          children: [
+                            ?e.titleIconWidget,
+                            Flexible(
+                              fit: e.titleIconWidget == null ? FlexFit.tight : FlexFit.loose,
+                              child: Text(
+                                e.title,
+                                style: theme.textTheme.displayMedium,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                )
+                .addSeparators(
+                  separator: widget.joinHeaderChips ? const SizedBox(width: 4.0) : const SizedBox(width: 8.0),
+                  skipFirst: 1,
+                )
+                .toList(),
+          ),
+        ),
+
+        const SizedBox(height: 6.0),
+
+        if (widget.showDivider)
+          NamidaContainerDivider(
+            margin: const EdgeInsets.symmetric(horizontal: 18.0),
+          ),
+
+        Flexible(
+          fit: widget.expanded ? FlexFit.tight : FlexFit.loose,
+          child: pages[_selectedIndex].page,
+        ),
+      ],
+    );
+  }
+}
+
+class PlayableTitleSubtitleWidget extends StatefulWidget {
+  final bool isYTID;
+  final Widget Function(String? title, String? subtitle) builder;
+
+  const PlayableTitleSubtitleWidget({
+    super.key,
+    required this.isYTID,
+    required this.builder,
+  });
+
+  @override
+  State<PlayableTitleSubtitleWidget> createState() => _PlayableTitleSubtitleWidgetState();
+}
+
+class _PlayableTitleSubtitleWidgetState extends State<PlayableTitleSubtitleWidget> {
+  String? _videoName;
+  String? _channelName;
+
+  @override
+  void initState() {
+    super.initState();
+    _onPlayableChange();
+    Player.inst.currentItem.addListener(_onPlayableChange);
+    if (widget.isYTID) {
+      YoutubeInfoController.current.currentVideoPage.addListener(_onPlayableChange);
+      YoutubeInfoController.current.currentYTStreams.addListener(_onPlayableChange);
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    Player.inst.currentItem.removeListener(_onPlayableChange);
+    YoutubeInfoController.current.currentVideoPage.removeListener(_onPlayableChange);
+    YoutubeInfoController.current.currentYTStreams.removeListener(_onPlayableChange);
+  }
+
+  void _onPlayableChange() async {
+    final item = Player.inst.currentItem.value;
+    item?.execute(
+      selectable: _onLocalChange,
+      youtubeID: _onYTChange,
+    );
+  }
+
+  void _onLocalChange(Selectable item) async {
+    final track = item.track;
+    _videoName = track.title;
+    _channelName = track.originalArtist;
+
+    refreshState();
+  }
+
+  void _onYTChange(YoutubeID item) async {
+    final vidId = item.id;
+
+    String? videoName = YoutubeInfoController.current.currentVideoPage.value?.videoInfo?.title;
+    if (videoName == null || videoName.isEmpty) videoName = YoutubeInfoController.current.currentYTStreams.value?.info?.title;
+    if (videoName == null || videoName.isEmpty) videoName = await YoutubeInfoController.utils.getVideoName(vidId);
+
+    String? channelName = YoutubeInfoController.current.currentVideoPage.value?.channelInfo?.title;
+    if (channelName == null || channelName.isEmpty) channelName = YoutubeInfoController.current.currentYTStreams.value?.info?.channelName;
+    if (channelName == null || channelName.isEmpty) channelName = await YoutubeInfoController.utils.getVideoChannelName(vidId);
+
+    if (videoName != _videoName || channelName != _channelName) {
+      _videoName = videoName;
+      _channelName = channelName;
+      refreshState();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.builder(_videoName, _channelName);
   }
 }

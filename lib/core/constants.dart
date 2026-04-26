@@ -302,6 +302,7 @@ enum AppPathsBackupEnum {
   TRACKS_DB_INFO,
   TRACKS_STATS_DB_INFO,
   LATEST_PLAYED_FOR_SOURCE,
+  AUDIO_CONFIGS,
   VIDEOS_LOCAL_DB_INFO,
   VIDEOS_CACHE_DB_INFO,
   LATEST_QUEUE,
@@ -372,6 +373,7 @@ enum AppPathsBackupEnum {
       AppPathsBackupEnum.TRACKS_DB_INFO => AppPaths.TRACKS_DB_INFO.file.path,
       AppPathsBackupEnum.TRACKS_STATS_DB_INFO => AppPaths.TRACKS_STATS_DB_INFO.file.path,
       AppPathsBackupEnum.LATEST_PLAYED_FOR_SOURCE => AppPaths.LATEST_PLAYED_FOR_SOURCE.file.path,
+      AppPathsBackupEnum.AUDIO_CONFIGS => AppPaths.AUDIO_CONFIGS.file.path,
       AppPathsBackupEnum.VIDEOS_LOCAL_DB_INFO => AppPaths.VIDEOS_LOCAL_DB_INFO.file.path,
       AppPathsBackupEnum.VIDEOS_CACHE_DB_INFO => AppPaths.VIDEOS_CACHE_DB_INFO.file.path,
       AppPathsBackupEnum.LATEST_QUEUE => AppPaths.LATEST_QUEUE,
@@ -438,6 +440,7 @@ class AppPathsBackupEnumCategories {
     AppPathsBackupEnum.TRACKS_STATS_OLD,
     AppPathsBackupEnum.TRACKS_STATS_DB_INFO,
     AppPathsBackupEnum.LATEST_PLAYED_FOR_SOURCE,
+    AppPathsBackupEnum.AUDIO_CONFIGS,
     AppPathsBackupEnum.TOTAL_LISTEN_TIME,
     AppPathsBackupEnum.VIDEOS_CACHE_OLD,
     AppPathsBackupEnum.VIDEOS_CACHE_DB_INFO,
@@ -544,6 +547,7 @@ class AppPaths {
   static final TRACKS_DB_INFO = DbWrapperFileInfo(directory: _USER_DATA, dbName: 'tracks');
   static final TRACKS_STATS_DB_INFO = DbWrapperFileInfo(directory: _USER_DATA, dbName: 'tracks_stats');
   static final LATEST_PLAYED_FOR_SOURCE = DbWrapperFileInfo(directory: _USER_DATA, dbName: 'latest_played');
+  static final AUDIO_CONFIGS = DbWrapperFileInfo(directory: _USER_DATA, dbName: 'audio_configs');
   static final VIDEOS_LOCAL_DB_INFO = DbWrapperFileInfo(directory: _USER_DATA, dbName: 'local_videos');
   static final VIDEOS_CACHE_DB_INFO = DbWrapperFileInfo(directory: _USER_DATA, dbName: 'cache_videos');
   static final LATEST_QUEUE = _join(_USER_DATA, 'latest_queue.json');

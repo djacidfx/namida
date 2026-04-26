@@ -102,6 +102,7 @@ class BackupController {
           AppPaths.TRACKS_STATS_OLD,
           AppPaths.TRACKS_STATS_DB_INFO.file.path,
           AppPaths.LATEST_PLAYED_FOR_SOURCE.file.path,
+          AppPaths.AUDIO_CONFIGS.file.path,
           AppPaths.TOTAL_LISTEN_TIME,
           AppPaths.VIDEOS_CACHE_OLD,
           AppPaths.VIDEOS_CACHE_DB_INFO.file.path,

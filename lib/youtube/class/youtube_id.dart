@@ -16,6 +16,9 @@ import 'package:namida/youtube/controller/youtube_history_controller.dart';
 import 'package:namida/youtube/widgets/yt_thumbnail.dart';
 
 class YoutubeID with ItemWithDate implements Playable<Map<String, dynamic>>, PlaylistItemWithDate {
+  @override
+  String get key => id;
+
   final String id;
   final YTWatch? watchNull;
   final PlaylistID? playlistID;

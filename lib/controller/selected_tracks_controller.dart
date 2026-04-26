@@ -200,7 +200,7 @@ class SelectedTracksController {
       (e) {
         final tr = e.track;
         return replaceFunctionForUpdatedPaths(
-          tr,
+          tr.path,
           normalizedOldDir,
           normalizedNewDir,
           pathsOnlySet,

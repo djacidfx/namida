@@ -595,8 +595,8 @@ class YoutubeMiniPlayerState extends State<YoutubeMiniPlayer> {
                                   onDismiss: dismissibleMiniplayer ? Player.inst.clearQueue : null,
                                   onDismissing: (dismissPercentage) {
                                     if (Player.inst.isPlaying.value) {
-                                      final maxVolume = settings.player.volume.value;
-                                      Player.inst.setPlayerVolume((dismissPercentage * maxVolume).clampDouble(0.0, maxVolume));
+                                      final maxVolume = Player.inst.userPlayerVolumeForItem;
+                                      Player.inst.setVolume((dismissPercentage * maxVolume).clampDouble(0.0, maxVolume));
                                     }
                                   },
                                   onHeightChange: (percentage) {

@@ -640,9 +640,9 @@ class NamidaDesktopAppBarState extends State<NamidaDesktopAppBar> with WindowLis
                                   ),
                                   _DesktopShortcutIcon(
                                     type: _DesktopShortcutActionType.opensRoute,
-                                    tooltip: lang.equalizer,
+                                    tooltip: lang.soundControl,
                                     icon: Broken.sound,
-                                    onTap: NamidaOnTaps.inst.openEqualizer,
+                                    onTap: NamidaOnTaps.inst.openSoundControl,
                                   ),
                                   _DesktopShortcutIcon(
                                     type: _DesktopShortcutActionType.opensDialog,

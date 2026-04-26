@@ -175,7 +175,7 @@ class _CustomMPRISService extends MPRISService {
 
   @override
   Future<void> onPlaybackRate(double rate) async {
-    await Player.inst.setPlayerSpeed(rate);
+    await Player.inst.setSpeed(rate);
     snackyy(message: "${lang.speed}: ${rate.roundDecimals(2)}");
   }
 

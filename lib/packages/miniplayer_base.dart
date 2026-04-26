@@ -1083,15 +1083,15 @@ class _NamidaMiniPlayerBaseState<E, S> extends State<NamidaMiniPlayerBase<E, S>>
                                             NamidaNavigator.inst.navigateDialog(
                                               dialog: CustomBlurryDialog(
                                                 title: lang.configure,
-                                                contentPadding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+                                                contentPadding: const EdgeInsets.symmetric(horizontal: 0.0, vertical: 12.0),
                                                 actions: [
                                                   NamidaIconButton(
                                                     icon: Broken.refresh,
                                                     onPressed: () {
                                                       const val = 1.0;
-                                                      Player.inst.setPlayerPitch(val);
-                                                      Player.inst.setPlayerSpeed(val);
-                                                      Player.inst.setPlayerVolume(val);
+                                                      Player.inst.setPitch(val);
+                                                      Player.inst.setSpeed(val);
+                                                      Player.inst.setVolume(val);
                                                       settings.player.save(
                                                         pitch: val,
                                                         speed: val,
@@ -1101,9 +1101,10 @@ class _NamidaMiniPlayerBaseState<E, S> extends State<NamidaMiniPlayerBase<E, S>>
                                                   ),
                                                   const DoneButton(),
                                                 ],
-                                                child: const EqualizerMainSlidersColumn(
-                                                  verticalInBetweenPadding: 18.0,
+                                                child: const SoundControlMainSlidersColumn(
+                                                  verticalInBetweenPadding: 6.0,
                                                   tapToUpdate: false,
+                                                  isInDialog: true,
                                                 ),
                                               ),
                                             );

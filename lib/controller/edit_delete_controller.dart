@@ -169,6 +169,7 @@ class EditDeleteController {
       HistoryController.inst.replaceTheseTracksInHistoryBulk(oldNewTrack),
       PlaylistController.inst.replaceTrackInAllPlaylistsBulk(oldNewTrack),
       Indexer.inst.moveStatsPath(oldNewTrack),
+      Player.audioConfigs.movePaths(oldNewTrack),
       QueueController.inst.replaceTrackInAllQueues(oldNewTrack),
       Player.inst.replaceAllTracksInQueueBulk(oldNewTrack),
     ]);
@@ -194,6 +195,7 @@ class EditDeleteController {
       HistoryController.inst.replaceAllTracksInsideHistory(oldTrack, newTrack),
       PlaylistController.inst.replaceTrackInAllPlaylists(oldTrack, newTrack),
       Indexer.inst.moveStatsPath(oldNewMap),
+      Player.audioConfigs.movePaths(oldNewMap),
       QueueController.inst.replaceTrackInAllQueues(oldNewMap),
       Player.inst.replaceAllTracksInQueueBulk(oldNewMap),
     ]);
@@ -221,6 +223,7 @@ class EditDeleteController {
       HistoryController.inst.replaceTracksDirectoryInHistory(normalizedOldDir, normalizedNewDir, forThesePathsOnly: forThesePathsOnly, ensureNewFileExists: ensureNewFileExists),
       PlaylistController.inst.replaceTracksDirectory(normalizedOldDir, normalizedNewDir, forThesePathsOnly: forThesePathsOnly, ensureNewFileExists: ensureNewFileExists),
       Indexer.inst.moveStatsDirectory(normalizedOldDir, normalizedNewDir, forThesePathsOnly: forThesePathsOnly, ensureNewFileExists: ensureNewFileExists),
+      Player.audioConfigs.moveDirectory(normalizedOldDir, normalizedNewDir, forThesePathsOnly: forThesePathsOnly, ensureNewFileExists: ensureNewFileExists),
       QueueController.inst.replaceTracksDirectoryInQueues(normalizedOldDir, normalizedNewDir, forThesePathsOnly: forThesePathsOnly, ensureNewFileExists: ensureNewFileExists),
       Player.inst.replaceTracksDirectoryInQueue(normalizedOldDir, normalizedNewDir, forThesePathsOnly: forThesePathsOnly, ensureNewFileExists: ensureNewFileExists),
     ]);

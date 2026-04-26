@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:basic_audio_handler/basic_audio_handler.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:namico_db_wrapper/namico_db_wrapper.dart';
 import 'package:youtipie/class/streams/audio_stream.dart';
 import 'package:youtipie/class/streams/video_stream.dart';
 import 'package:youtipie/class/streams/video_streams_result.dart';
@@ -39,9 +40,10 @@ import 'package:namida/youtube/controller/youtube_info_controller.dart';
 import 'package:namida/youtube/yt_utils.dart';
 
 class Player {
-  static Player get inst => _instance;
-  static final Player _instance = Player._internal();
-  Player._internal();
+  static final inst = Player._();
+  Player._();
+
+  static final audioConfigs = _AudioConfigsManager();
 
   late NamidaAudioVideoHandler<Playable> _audioHandler;
 
@@ -73,10 +75,10 @@ class Player {
   RxBaseCore<List<AudioTrack>?> get audioTracks => _audioHandler.audioTracks;
   RxBaseCore<VideoInfoData?> get videoPlayerInfo => _audioHandler.videoPlayerInfo;
 
-  AndroidEqualizer get equalizer => _audioHandler.equalizer;
-  AndroidLoudnessEnhancerExtended get loudnessEnhancer => _audioHandler.loudnessEnhancer;
+  AndroidEqualizerExtended? get equalizerExtended => _audioHandler.equalizerExtended;
+  AndroidLoudnessEnhancerExtended? get loudnessEnhancerExtended => _audioHandler.loudnessEnhancerExtended;
   int? get androidSessionId => _audioHandler.androidSessionId;
-  Rx<double> get replayGainLinearVolume => _audioHandler.replayGainLinearVolume;
+  Rx<double> get replayGainLinearVolumeMultiplierRx => _audioHandler.replayGainLinearVolumeMultiplierRx;
 
   // RxBaseCore<VideoInfo?> get currentVideoInfo => _audioHandler.currentVideoInfo;
   // RxBaseCore<YoutubeChannel?> get currentChannelInfo => _audioHandler.currentChannelInfo;
@@ -124,6 +126,7 @@ class Player {
   RxBaseCore<int> get nowPlayingPosition => _audioHandler.currentPositionMS;
   int get nowPlayingPositionR => _audioHandler.currentPositionMS.valueR;
   RxBaseCore<double> get currentSpeed => _audioHandler.currentSpeed;
+  double get userPlayerVolumeForItem => _audioHandler.userPlayerVolumeForItem;
   RxBaseCore<Duration?> get currentItemDuration => _audioHandler.currentItemDuration;
   RxBaseCore<bool> get isPlaying => _audioHandler.isPlaying;
   bool get isBufferingR => _audioHandler.currentState.valueR == ProcessingState.buffering;
@@ -140,6 +143,9 @@ class Player {
   RxBaseCore<Duration> get buffered => _audioHandler.buffered;
   RxBaseCore<int> get numberOfRepeats => _audioHandler.numberOfRepeats;
   int get latestInsertedIndex => _audioHandler.latestInsertedIndex;
+
+  PlayerConfig getDefaultPlayerConfig(Playable? item) => _audioHandler.getDefaultPlayerConfig(item);
+  PlayerConfig getDefaultPlayerConfigR(Playable? item) => _audioHandler.getDefaultPlayerConfigR(item);
 
   RxBaseCore<SleepTimerConfig> get sleepTimerConfig => _audioHandler.sleepTimerConfig;
 
@@ -240,27 +246,8 @@ class Player {
         }
       }
     });
-    final internalPlayer = settings.player.internalPlayer.value.ensureResolved();
-    if (internalPlayer == InternalPlayerType.exoplayer || internalPlayer == InternalPlayerType.exoplayer_sw) _initializeEqualizer();
-  }
 
-  void _initializeEqualizer() async {
-    final eq = settings.equalizer;
-    _audioHandler.equalizer.setEnabled(eq.equalizerEnabled);
-    if (eq.preset != null) {
-      _audioHandler.equalizer.setPreset(eq.preset!);
-    } else {
-      if (eq.equalizer.isNotEmpty) {
-        _audioHandler.equalizer.parameters.then((parameters) {
-          parameters.bands.loop((b) {
-            final userGain = eq.equalizer[b.centerFrequency];
-            if (userGain != null) b.setGain(userGain);
-          });
-        });
-      }
-    }
-    _audioHandler.loudnessEnhancer.setTargetGainUser(eq.loudnessEnhancer);
-    _audioHandler.loudnessEnhancer.setEnabledUser(eq.loudnessEnhancerEnabled);
+    unawaited(audioConfigs.prepareAll());
   }
 
   void onVolumeChangeAddListener(String key, void Function(double musicVolume) fn) {
@@ -291,35 +278,27 @@ class Player {
     await _audioHandler.setSkipSilenceEnabled(enabled);
   }
 
-  Future<void> setPlayerPitch(double value) async {
-    await _audioHandler.setPlayerPitch(value);
-  }
-
-  Future<void> setPlayerSpeed(double value) async {
-    await _audioHandler.setPlayerSpeed(value);
-  }
-
-  Future<void> setPlayerVolume(double value) async {
-    await _audioHandler.setPlayerVolume(replayGainLinearVolume.value * value);
-  }
-
   Future<void> setReplayGainLinearVolume(double vol) async {
-    this.replayGainLinearVolume.value = vol;
-    await this.setVolume(settings.player.volume.value); // refresh volume
+    this.replayGainLinearVolumeMultiplierRx.value = vol;
+    await this.setVolume(Player.inst.userPlayerVolumeForItem); // refresh volume
+  }
+
+  Future<void> refreshCurrentItemPlayerConfig() async {
+    await _audioHandler.refreshCurrentItemPlayerConfig();
   }
 
   double volumeUp() {
-    final val = settings.player.volume.value;
+    final val = Player.inst.userPlayerVolumeForItem;
     final newVal = (val + 0.05).withMaximum(1.0);
-    setPlayerVolume(newVal);
+    setVolume(newVal);
     settings.player.save(volume: newVal);
     return newVal;
   }
 
   double volumeDown() {
-    final val = settings.player.volume.value;
+    final val = Player.inst.userPlayerVolumeForItem;
     final newVal = (val - 0.05).withMinimum(0.0);
-    setPlayerVolume(newVal);
+    setVolume(newVal);
     settings.player.save(volume: newVal);
     return newVal;
   }
@@ -355,7 +334,15 @@ class Player {
   }
 
   Future<void> setVolume(double volume) async {
-    await _audioHandler.setVolume(replayGainLinearVolume.value * volume);
+    await _audioHandler.setVolumeWithMultiplier(volume);
+  }
+
+  Future<void> setPitch(double value) async {
+    await _audioHandler.setPlayerPitch(value);
+  }
+
+  Future<void> setSpeed(double value) async {
+    await _audioHandler.setPlayerSpeed(value);
   }
 
   void invokeQueueModifyLock() {
@@ -532,7 +519,7 @@ class Player {
         (e) {
           final tr = (e as Selectable).track;
           normalizedPathCache[tr.path] ??= replaceFunctionNormalizePath(tr.path);
-          return replaceFunctionForUpdatedPaths(tr, normalizedOldDir, normalizedNewDir, pathsOnlySet, ensureNewFileExists, existenceCache);
+          return replaceFunctionForUpdatedPaths(tr.path, normalizedOldDir, normalizedNewDir, pathsOnlySet, ensureNewFileExists, existenceCache);
         },
         (old) {
           old as Selectable;
@@ -739,7 +726,6 @@ class Player {
                 as Playable,
       );
     }
-
     await _audioHandler.assignNewQueue(
       playAtIndex: index,
       queue: queue,
@@ -806,5 +792,144 @@ class Player {
       exoplayerCreator: () => AudioPlayer(preferSWDecoders: false),
       exoplayerSWCreator: () => AudioPlayer(preferSWDecoders: true),
     );
+  }
+}
+
+class _AudioConfigsManager {
+  RxBaseCore<Map<String, PlayerConfig>> get map => _mapRx;
+  static final _mapRx = <String, PlayerConfig>{}.obs;
+
+  Timer? _updateDebouncer;
+
+  late final _dBManager = DBWrapper.openFromInfo(
+    fileInfo: AppPaths.AUDIO_CONFIGS,
+    config: const DBConfig(createIfNotExist: true),
+  );
+
+  Future<void> prepareAll() async {
+    final res = await _dBManager.loadEverythingKeyedResult();
+    for (final entry in res.entries) {
+      try {
+        final config = PlayerConfig.fromMap(entry.value);
+        _mapRx.value[entry.key] ??= config;
+      } catch (_) {}
+    }
+    _mapRx.refresh();
+  }
+
+  FutureOr<PlayerConfig?> get(String key) async {
+    var config = _mapRx.value[key];
+    if (config != null) return config;
+    try {
+      final configMapInDb = await _dBManager.get(key);
+      if (configMapInDb != null) {
+        config = PlayerConfig.fromMap(configMapInDb);
+        _mapRx[key] ??= config;
+        return config;
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  bool itemHasCustomConfig(String? key) => key == null ? false : _mapRx.value[key] != null;
+  PlayerConfig? getSyncOrNull(String key) => _mapRx.value[key];
+
+  Future<void> updateProperty(String key, PlayerConfig Function(PlayerConfig current) builder) async {
+    final currentConfig = await get(key);
+    final config = builder(currentConfig ?? PlayerConfig.initial);
+    _mapRx.value[key] = config;
+    _scheduleSave(key);
+  }
+
+  void _scheduleSave(String key) {
+    _updateDebouncer?.cancel();
+    _updateDebouncer = Timer(
+      const Duration(milliseconds: 600),
+      () async {
+        final config = _mapRx.value[key];
+        _mapRx.refresh();
+        await _dBManager.put(key, config?.toMap());
+      },
+    );
+  }
+
+  Future<void> move(String oldKey, String newKey) async {
+    final oldValue = _mapRx.value.remove(oldKey);
+    if (oldValue != null) {
+      _mapRx.value[newKey] = oldValue;
+      _mapRx.refresh();
+    }
+    final oldValueDB = await _dBManager.get(oldKey);
+    await _dBManager.put(newKey, oldValueDB);
+    await delete(oldKey);
+  }
+
+  Future<void> delete(String key) async {
+    _mapRx.remove(key);
+    await _dBManager.delete(key);
+  }
+
+  Future<void> deleteMultiple(List<String> keys) async {
+    for (final key in keys) {
+      _mapRx.value.remove(key);
+    }
+    _mapRx.refresh();
+    await _dBManager.deleteBulk(keys);
+  }
+
+  Future<void> movePaths(Map<Track, Track> oldNewMap) async {
+    for (final entry in oldNewMap.entries) {
+      final k = entry.key.path;
+      final v = entry.value.path;
+      final oldValue = _mapRx.value.remove(k);
+      if (oldValue != null) {
+        _mapRx.value[v] = oldValue;
+        _mapRx.refresh();
+      }
+      final oldValueDB = await _dBManager.get(k);
+      await _dBManager.put(v, oldValueDB);
+      // await _dBManager.delete(k); // not so important ig, preserve just in case
+    }
+  }
+
+  Future<void> moveDirectory(
+    String normalizedOldDir,
+    String normalizedNewDir, {
+    Iterable<String>? forThesePathsOnly,
+    bool ensureNewFileExists = false,
+  }) async {
+    final pathsOnlySet = forThesePathsOnly?.toSet();
+    final existenceCache = <String, bool>{};
+    final toUpdate = <String, String>{};
+
+    for (final key in _mapRx.value.keys.toList()) {
+      final normalizedKey = replaceFunctionNormalizePath(key);
+      final shouldUpdate = replaceFunctionForUpdatedPaths(
+        key,
+        normalizedOldDir,
+        normalizedNewDir,
+        pathsOnlySet,
+        ensureNewFileExists,
+        existenceCache,
+      );
+      if (shouldUpdate) {
+        final newKey = replaceFunctionGetNewPath(normalizedKey, normalizedOldDir, normalizedNewDir);
+        toUpdate[key] = newKey;
+      }
+    }
+
+    if (toUpdate.isEmpty) return;
+
+    for (final entry in toUpdate.entries) {
+      final config = _mapRx.value.remove(entry.key);
+      if (config != null) _mapRx.value[entry.value] = config;
+    }
+    _mapRx.refresh();
+
+    for (final entry in toUpdate.entries) {
+      final oldValueDB = await _dBManager.get(entry.key);
+      await _dBManager.put(entry.value, oldValueDB);
+      // await _dBManager.delete(entry.key); // preserve just in case
+    }
   }
 }

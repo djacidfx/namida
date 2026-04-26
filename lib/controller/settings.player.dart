@@ -13,6 +13,7 @@ class _PlayerSettings with SettingsFileWriter {
   final longPressSpeed = 2.0.obs;
   final linkSpeedPitch = false.obs;
   final useSemitones = false.obs;
+  final isPerTrackAudioConfigOverriden = false.obs;
 
   var speeds = <double>[0.25, 0.5, 0.75, 0.9, 1.0, 1.1, 1.25, 1.5, 1.75, 2.0];
 
@@ -59,6 +60,7 @@ class _PlayerSettings with SettingsFileWriter {
     double? longPressSpeed,
     bool? linkSpeedPitch,
     bool? useSemitones,
+    bool? isPerTrackAudioConfigOverriden,
     List<double>? speeds,
     int? seekDurationInSeconds,
     int? seekDurationInPercentage,
@@ -95,6 +97,7 @@ class _PlayerSettings with SettingsFileWriter {
     if (longPressSpeed != null) this.longPressSpeed.value = longPressSpeed;
     if (linkSpeedPitch != null) this.linkSpeedPitch.value = linkSpeedPitch;
     if (useSemitones != null) this.useSemitones.value = useSemitones;
+    if (isPerTrackAudioConfigOverriden != null) this.isPerTrackAudioConfigOverriden.value = isPerTrackAudioConfigOverriden;
     if (speeds != null) this.speeds = speeds;
     if (seekDurationInSeconds != null) this.seekDurationInSeconds.value = seekDurationInSeconds;
     if (seekDurationInPercentage != null) this.seekDurationInPercentage.value = seekDurationInPercentage;
@@ -151,6 +154,7 @@ class _PlayerSettings with SettingsFileWriter {
       longPressSpeed.value = json['longPressSpeed'] ?? longPressSpeed.value;
       linkSpeedPitch.value = json['linkSpeedPitch'] ?? linkSpeedPitch.value;
       useSemitones.value = json['useSemitones'] ?? useSemitones.value;
+      isPerTrackAudioConfigOverriden.value = json['isPerTrackAudioConfigOverriden'] ?? isPerTrackAudioConfigOverriden.value;
       speeds = (json['speeds'] as List?)?.cast<double>() ?? speeds;
       seekDurationInSeconds.value = json['seekDurationInSeconds'] ?? seekDurationInSeconds.value;
       seekDurationInPercentage.value = json['seekDurationInPercentage'] ?? seekDurationInPercentage.value;
@@ -210,6 +214,7 @@ class _PlayerSettings with SettingsFileWriter {
     'longPressSpeed': longPressSpeed.value,
     'linkSpeedPitch': linkSpeedPitch.value,
     'useSemitones': useSemitones.value,
+    'isPerTrackAudioConfigOverriden': isPerTrackAudioConfigOverriden.value,
     'speeds': speeds,
     'seekDurationInSeconds': seekDurationInSeconds.value,
     'seekDurationInPercentage': seekDurationInPercentage.value,

@@ -466,8 +466,8 @@ class NamidaOnTaps {
     );
   }
 
-  void openEqualizer() {
-    NamidaNavigator.inst.navigateToRoot(const EqualizerPage());
+  void openSoundControl() {
+    NamidaNavigator.inst.navigateToRoot(const SoundControlPage());
   }
 
   static Map<int, int> _getQueuesSize(String dir) {
@@ -2363,18 +2363,18 @@ String replaceFunctionGetNewPath(String old, String normalizedOldDir, String nor
       Platform.pathSeparator,
     );
 bool replaceFunctionForUpdatedPaths(
-  Track tr,
+  String trackPathPre,
   String normalizedOldDir,
   String normalizedNewDir,
   Set<String>? pathsOnlySet,
   bool ensureNewFileExists,
   Map<String, bool> existenceCache,
 ) {
-  final trackPath = replaceFunctionNormalizePath(tr.path);
+  final trackPath = replaceFunctionNormalizePath(trackPathPre);
 
   if (!trackPath.startsWith(normalizedOldDir)) return false;
 
-  if (pathsOnlySet != null && !pathsOnlySet.contains(tr.path)) return false;
+  if (pathsOnlySet != null && !pathsOnlySet.contains(trackPathPre)) return false;
 
   if (ensureNewFileExists) {
     final newPath = replaceFunctionGetNewPath(trackPath, normalizedOldDir, normalizedNewDir);
