@@ -1,6 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:flex_color_picker/flex_color_picker.dart';
 
 import 'package:namida/base/setting_subpage_provider.dart';
 import 'package:namida/class/lang.dart';
@@ -311,21 +313,21 @@ class ThemeSetting extends SettingSubpageProvider {
                   ),
                   onTap: () {
                     NamidaNavigator.inst.navigateDialog(
-                      dialog: Obx(
-                        (context) => Theme(
-                          data: AppThemes.inst.getAppTheme(playerStaticColorLight),
-                          child: NamidaColorPickerDialog(
-                            initialColor: playerStaticColorLight,
-                            doneText: lang.done,
-                            onColorChanged: (value) => _updateColorLight(value),
-                            onDonePressed: NamidaNavigator.inst.closeDialog,
-                            onRefreshButtonPressed: () {
-                              _updateColorLight(kMainColorLight);
-                              NamidaNavigator.inst.closeDialog();
-                            },
-                            cancelButton: false,
-                          ),
-                        ),
+                      dialog: NamidaColorPickerDialog(
+                        initialColor: playerStaticColorLight,
+                        doneText: lang.done,
+                        onColorChanged: (value) => _updateColorLight(value),
+                        colorChangedDebouncer: true,
+                        themeFollowsColor: true,
+                        onDonePressed: (color) {
+                          _updateColorLight(color);
+                          NamidaNavigator.inst.closeDialog();
+                        },
+                        onRefreshButtonPressed: () {
+                          _updateColorLight(kMainColorLight);
+                          NamidaNavigator.inst.closeDialog();
+                        },
+                        cancelButton: false,
                       ),
                     );
                   },
@@ -355,21 +357,21 @@ class ThemeSetting extends SettingSubpageProvider {
                   ),
                   onTap: () {
                     NamidaNavigator.inst.navigateDialog(
-                      dialog: Obx(
-                        (context) => Theme(
-                          data: AppThemes.inst.getAppTheme(playerStaticColorDark),
-                          child: NamidaColorPickerDialog(
-                            initialColor: playerStaticColorDark,
-                            doneText: lang.done,
-                            onColorChanged: (value) => _updateColorDark(value),
-                            onDonePressed: NamidaNavigator.inst.closeDialog,
-                            onRefreshButtonPressed: () {
-                              _updateColorDark(kMainColorDark);
-                              NamidaNavigator.inst.closeDialog();
-                            },
-                            cancelButton: false,
-                          ),
-                        ),
+                      dialog: NamidaColorPickerDialog(
+                        initialColor: playerStaticColorDark,
+                        doneText: lang.done,
+                        onColorChanged: (value) => _updateColorDark(value),
+                        colorChangedDebouncer: true,
+                        themeFollowsColor: true,
+                        onDonePressed: (color) {
+                          _updateColorDark(color);
+                          NamidaNavigator.inst.closeDialog();
+                        },
+                        onRefreshButtonPressed: () {
+                          _updateColorDark(kMainColorDark);
+                          NamidaNavigator.inst.closeDialog();
+                        },
+                        cancelButton: false,
                       ),
                     );
                   },
@@ -508,11 +510,13 @@ class _ToggleThemeModeContainerState extends State<ToggleThemeModeContainer> {
   }
 }
 
-class NamidaColorPickerDialog extends StatelessWidget {
+class NamidaColorPickerDialog extends StatefulWidget {
   final String doneText;
   final VoidCallback? onRefreshButtonPressed;
-  final ValueChanged<Color> onColorChanged;
-  final VoidCallback onDonePressed;
+  final ValueChanged<Color>? onColorChanged;
+  final bool colorChangedDebouncer;
+  final bool themeFollowsColor;
+  final void Function(Color color) onDonePressed;
   final bool cancelButton;
   final Color initialColor;
 
@@ -520,37 +524,120 @@ class NamidaColorPickerDialog extends StatelessWidget {
     super.key,
     required this.doneText,
     this.onRefreshButtonPressed,
-    required this.onColorChanged,
+    this.onColorChanged,
+    this.colorChangedDebouncer = false,
+    this.themeFollowsColor = false,
     required this.onDonePressed,
     required this.cancelButton,
     required this.initialColor,
   });
 
   @override
+  State<NamidaColorPickerDialog> createState() => _NamidaColorPickerDialogState();
+}
+
+class _NamidaColorPickerDialogState extends State<NamidaColorPickerDialog> {
+  late Color _currentColor;
+  Timer? colorChangedDebouncer;
+  void _onColorChanged(Color color) {
+    if (widget.themeFollowsColor) {
+      setState(() => _currentColor = color);
+    } else {
+      _currentColor = color;
+    }
+
+    final onColorChanged = widget.onColorChanged;
+    if (onColorChanged != null) {
+      if (widget.colorChangedDebouncer) {
+        colorChangedDebouncer?.cancel();
+        colorChangedDebouncer = Timer(
+          const Duration(milliseconds: 300),
+          () => onColorChanged(color),
+        );
+      } else {
+        onColorChanged(color);
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    _currentColor = widget.initialColor;
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    colorChangedDebouncer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return CustomBlurryDialog(
+    final theme = widget.themeFollowsColor ? AppThemes.inst.getAppTheme(_currentColor) : context.theme;
+    Widget pickerWidget = CustomBlurryDialog(
       actions: [
-        if (onRefreshButtonPressed != null)
+        if (widget.onRefreshButtonPressed != null)
           IconButton(
             icon: const Icon(Broken.refresh),
             tooltip: lang.restoreDefaults,
-            onPressed: onRefreshButtonPressed,
+            onPressed: widget.onRefreshButtonPressed,
           ),
-        if (cancelButton) const CancelButton(),
+        if (widget.cancelButton) const CancelButton(),
         NamidaButton(
-          text: doneText,
-          onTap: onDonePressed,
+          text: widget.doneText,
+          onTap: () => widget.onDonePressed(_currentColor),
         ),
       ],
       child: ColorPicker(
-        pickerColor: initialColor,
-        onColorChanged: onColorChanged,
-        labelTypes: ColorLabelType.values,
-        hexInputBar: true,
-        portraitOnly: true,
-        pickerAreaBorderRadius: BorderRadius.circular(8.0.multipliedRadius),
-        enableAlpha: true,
+        color: _currentColor,
+        onColorChanged: _onColorChanged,
+        hasBorder: true,
+        enableTonalPalette: true,
+        enableOpacity: true,
+        showMaterialName: false,
+        showColorCode: true,
+        colorCodeHasColor: true,
+        focusedEditHasNoColor: true,
+        showEditIconButton: true,
+        editIcon: Broken.edit_2,
+        wheelSquarePadding: 12.0,
+        wheelDiameter: 224.0,
+        borderRadius: 8.0.multipliedRadius,
+        opacityThumbRadius: 16.0,
+        opacityTrackHeight: 12.0,
+        selectedPickerTypeColor: theme.colorScheme.secondary.withOpacityExt(0.4),
+        pickersEnabled: {
+          ColorPickerType.wheel: true,
+          ColorPickerType.both: true,
+          ColorPickerType.customSecondary: false,
+          ColorPickerType.custom: false,
+          ColorPickerType.primary: false,
+          ColorPickerType.accent: false,
+          ColorPickerType.bw: false,
+        },
+        pickerTypeTextStyle: theme.textTheme.displayMedium,
+        colorNameTextStyle: theme.textTheme.displaySmall,
+        materialNameTextStyle: theme.textTheme.displaySmall,
+        colorCodePrefixStyle: theme.textTheme.displaySmall?.copyWith(fontWeight: FontWeight.w300),
+        colorCodeTextStyle: theme.textTheme.displayMedium?.copyWith(fontWeight: FontWeight.w400),
+        copyPasteBehavior: ColorPickerCopyPasteBehavior(
+          copyFormat: ColorPickerCopyFormat.hexAARRGGBB,
+          ctrlC: true,
+          ctrlV: true,
+          editFieldCopyButton: true,
+          copyIcon: Broken.copy,
+        ),
       ),
     );
+
+    if (widget.themeFollowsColor) {
+      pickerWidget = Theme(
+        data: theme,
+        child: pickerWidget,
+      );
+    }
+
+    return pickerWidget;
   }
 }

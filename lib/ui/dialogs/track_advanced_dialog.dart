@@ -711,18 +711,14 @@ void _showTrackColorPaletteDialog({
         ];
 
   void showAddNewColorPaletteDialog() {
-    Color? color;
     NamidaNavigator.inst.navigateDialog(
       colorScheme: colorScheme,
       dialogBuilder: (theme) => NamidaColorPickerDialog(
         initialColor: allPaletteColor.value.lastOrNull ?? Colors.black,
         doneText: lang.add,
-        onColorChanged: (value) => color = value,
-        onDonePressed: () {
-          if (color != null) {
-            allPaletteColor.add(color!);
-            didChangeOriginalPalette.value = true;
-          }
+        onDonePressed: (color) {
+          allPaletteColor.add(color);
+          didChangeOriginalPalette.value = true;
           NamidaNavigator.inst.closeDialog();
         },
         cancelButton: true,
@@ -911,7 +907,10 @@ void _showTrackColorPaletteDialog({
                         onTap: showAddNewColorPaletteDialog,
                         child: getColorWidget(
                           theme.cardColor.withAlpha(200),
-                          const Icon(Broken.add),
+                          Icon(
+                            Broken.add,
+                            color: theme.cardColor.withAlpha(200).invert(),
+                          ),
                         ),
                       ),
                     ),

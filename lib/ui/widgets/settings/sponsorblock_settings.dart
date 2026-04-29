@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-
 import 'package:namida/class/route.dart';
 import 'package:namida/controller/navigator_controller.dart';
 import 'package:namida/controller/player_controller.dart';
@@ -15,6 +13,7 @@ import 'package:namida/core/translations/language.dart';
 import 'package:namida/core/utils.dart';
 import 'package:namida/ui/dialogs/edit_tags_dialog.dart';
 import 'package:namida/ui/widgets/custom_widgets.dart';
+import 'package:namida/ui/widgets/settings/theme_settings.dart';
 import 'package:namida/ui/widgets/settings_card.dart';
 import 'package:namida/youtube/class/sponsorblock.dart';
 import 'package:namida/youtube/class/youtube_id.dart';
@@ -255,33 +254,19 @@ class _SponsorBlockCategoryTile extends StatelessWidget {
   }
 
   void _showColorPicker(BuildContext context) {
-    var currentColor = config.color;
-
     NamidaNavigator.inst.navigateDialog(
-      dialog: CustomBlurryDialog(
-        title: lang.defaultColor,
-        normalTitleStyle: true,
-        actions: [
-          NamidaIconButton(
-            tooltip: () => lang.restoreDefaults,
-            onPressed: () {
-              onChanged(config.copyWith(color: category.defaultConfig.color));
-              NamidaNavigator.inst.closeDialog();
-            },
-            icon: Broken.refresh,
-          ),
-          DoneButton(
-            additional: () {
-              onChanged(config.copyWith(color: currentColor));
-            },
-          ),
-        ],
-        child: ColorPicker(
-          pickerColor: currentColor,
-          onColorChanged: (color) => currentColor = color,
-          hexInputBar: true,
-          pickerAreaHeightPercent: 0.8,
-        ),
+      dialog: NamidaColorPickerDialog(
+        cancelButton: true,
+        doneText: lang.save,
+        initialColor: config.color,
+        onDonePressed: (color) {
+          onChanged(config.copyWith(color: color));
+          NamidaNavigator.inst.closeDialog();
+        },
+        onRefreshButtonPressed: () {
+          onChanged(config.copyWith(color: category.defaultConfig.color));
+          NamidaNavigator.inst.closeDialog();
+        },
       ),
     );
   }
