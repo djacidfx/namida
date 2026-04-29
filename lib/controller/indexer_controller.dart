@@ -686,6 +686,7 @@ class Indexer<T extends Track> {
         originalMood: UnknownTags.MOOD,
         moodList: [UnknownTags.MOOD],
         trackNo: 0,
+        trackTo: 0,
         durationMS: 0,
         year: 0,
         yearText: '',
@@ -761,6 +762,9 @@ class Indexer<T extends Track> {
           config: splittersConfigs.generalConfig,
         );
 
+        final trackNoParsed = TrackExtended.parseTrackNumber(trackInfo.tags.trackNumber);
+        final discNoParsed = TrackExtended.parseTrackNumber(trackInfo.tags.discNumber);
+
         String? trimOrNull(String? value) => value == null ? value : value.trimAll();
         String? nullifyEmpty(String? value) => value == '' ? null : value;
         String? doMagic(String? value) => nullifyEmpty(trimOrNull(value));
@@ -777,7 +781,8 @@ class Indexer<T extends Track> {
           originalMood: doMagic(tags.mood),
           moodList: moods,
           composer: doMagic(tags.composer),
-          trackNo: TrackExtended.parseTrackNumber(trackInfo.tags.trackNumber)?.$1,
+          trackNo: trackNoParsed?.$1,
+          trackTo: trackNoParsed?.$2 ?? TrackExtended.parseTrackNumber(trackInfo.tags.trackTotal)?.$1,
           durationMS: durationInMS,
           year: TrackExtended.enforceYearFormat(yearText),
           yearText: yearText,
@@ -790,7 +795,7 @@ class Indexer<T extends Track> {
           isLossless: trackInfo.isLossless,
           format: trackInfo.format,
           channels: trackInfo.channels,
-          discNo: TrackExtended.parseTrackNumber(tags.discNumber)?.$1,
+          discNo: discNoParsed?.$1,
           language: tags.language,
           lyrics: tags.lyrics,
           label: tags.recordLabel,
@@ -1781,6 +1786,7 @@ class Indexer<T extends Track> {
         moodList: moods,
         composer: e.composer ?? '',
         trackNo: e.track ?? 0,
+        trackTo: 0,
         durationMS: e.duration ?? 0, // `e.duration` => milliseconds
         year: TrackExtended.enforceYearFormat(yearString) ?? 0,
         yearText: yearString ?? '',

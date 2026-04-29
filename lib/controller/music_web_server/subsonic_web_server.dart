@@ -221,6 +221,7 @@ class _SubsonicWebServer extends MusicWebServer {
       moodList: [],
       composer: '',
       trackNo: media.track ?? 0,
+      trackTo: 0,
       durationMS: media.duration?.inMilliseconds ?? 0,
       year: year ?? 0,
       yearText: yearString,

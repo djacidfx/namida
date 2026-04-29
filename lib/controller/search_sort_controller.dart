@@ -507,10 +507,10 @@ class SearchSortController extends SearchPortsProvider {
     if (showSingles == false && showAlbums == false) return [];
 
     if (!showSingles) {
-      return original.where((element) => !(element.getAlbumTracks().length == 1)).toList();
+      return original.where((element) => !(element.isSingle())).toList();
     }
     if (!showAlbums) {
-      return original.where((element) => element.getAlbumTracks().length == 1).toList();
+      return original.where((element) => element.isSingle()).toList();
     }
 
     return original.toList();

@@ -550,7 +550,7 @@ class TrackTile extends StatelessWidget {
                                             padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 1.0),
                                             borderRadius: BorderRadius.only(topLeft: Radius.circular(4.0.multipliedRadius)),
                                             child: Text(
-                                              (track.trackNo).toString(),
+                                              track.trackNo.toString(),
                                               style: textTheme.displaySmall,
                                             ),
                                           ),

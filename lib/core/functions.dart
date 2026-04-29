@@ -81,10 +81,10 @@ class NamidaOnTaps {
     for (final a in albumIdsFinalList) {
       final albumArtist = (albumIdsMap[a.key] ?? a.key.getAlbumTracks()).albumArtist;
       if (albumArtist.contains(name)) {
-        if (a.value.length > 1) {
-          albumIds.add(a.key);
-        } else {
+        if (a.key.isSingle()) {
           singlesIds.add(a.key);
+        } else {
+          albumIds.add(a.key);
         }
       } else {
         extrasIds.add(a.key);

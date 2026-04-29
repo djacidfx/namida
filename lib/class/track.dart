@@ -297,6 +297,7 @@ class TrackExtended {
   final List<String> moodList;
   final String composer;
   final int trackNo;
+  final int trackTo;
 
   /// track's duration in milliseconds.
   final int durationMS;
@@ -345,6 +346,7 @@ class TrackExtended {
     required this.moodList,
     required this.composer,
     required this.trackNo,
+    required this.trackTo,
     required this.durationMS,
     required this.year,
     required this.yearText,
@@ -531,6 +533,7 @@ class TrackExtended {
       ),
       composer: json['composer'] ?? '',
       trackNo: json['trackNo'] ?? 0,
+      trackTo: json['trackTo'] ?? 0,
       durationMS: json['durationMS'] ?? (json['duration'] is int ? json['duration'] * 1000 : 0),
       year: year ?? 0,
       yearText: json['yearText'] ?? '',
@@ -576,6 +579,7 @@ class TrackExtended {
       if (originalMood.isNotEmpty) 'originalMood': originalMood,
       if (composer.isNotEmpty) 'composer': composer,
       if (trackNo > 0) 'trackNo': trackNo,
+      if (trackTo > 0) 'trackTo': trackTo,
       if (durationMS > 0) 'durationMS': durationMS,
       if (year > 0) 'year': year,
       if (yearText.isNotEmpty) 'yearText': yearText,
@@ -804,6 +808,8 @@ extension TrackExtUtils on TrackExtended {
 
     final newPath = path ?? this.path;
     String? newHashKey = TrackExtended.generateHashKeyIfEnabled(path, newPath, this.hashKey);
+    final trackNoParsed = TrackExtended.parseTrackNumber(tag.trackNumber);
+    final discNoParsed = TrackExtended.parseTrackNumber(tag.discNumber);
     return TrackExtended(
       title: finaltitle,
       originalArtist: tag.artist ?? originalArtist,
@@ -816,7 +822,8 @@ extension TrackExtUtils on TrackExtended {
       originalMood: tag.mood ?? originalMood,
       moodList: finalmoods,
       composer: tag.composer ?? composer,
-      trackNo: TrackExtended.parseTrackNumber(tag.trackNumber)?.$1 ?? trackNo,
+      trackNo: trackNoParsed?.$1 ?? trackNo,
+      trackTo: trackNoParsed?.$2 ?? TrackExtended.parseTrackNumber(tag.trackTotal)?.$1 ?? trackTo,
       year: year,
       yearText: yearText,
       dateModified: dateModified ?? this.dateModified,
@@ -824,7 +831,7 @@ extension TrackExtUtils on TrackExtended {
       comment: tag.comment ?? comment,
       description: tag.description ?? description,
       synopsis: tag.synopsis ?? synopsis,
-      discNo: TrackExtended.parseTrackNumber(tag.discNumber)?.$1 ?? discNo,
+      discNo: discNoParsed?.$1 ?? discNo,
       language: tag.language ?? language,
       lyrics: tag.lyrics ?? lyrics,
       label: tag.recordLabel ?? label,
@@ -868,6 +875,7 @@ extension TrackExtUtils on TrackExtended {
     List<String>? moodList,
     String? composer,
     int? trackNo,
+    int? trackTo,
 
     /// track's duration in milliseconds.
     int? durationMS,
@@ -915,6 +923,7 @@ extension TrackExtUtils on TrackExtended {
       moodList: moodList ?? this.moodList,
       composer: composer ?? this.composer,
       trackNo: trackNo ?? this.trackNo,
+      trackTo: trackTo ?? this.trackTo,
       durationMS: durationMS ?? this.durationMS,
       year: year ?? this.year,
       yearText: yearText ?? this.yearText,
@@ -976,6 +985,7 @@ extension TrackUtils on Track {
   List<String> get tagsList => toTrackExt().tagsList;
   String get composer => toTrackExt().composer;
   int get trackNo => toTrackExt().trackNo;
+  int get trackTo => toTrackExt().trackTo;
   int get durationMS => toTrackExt().durationMS;
   int get year => toTrackExt().year;
   DateTime? yearAsDateTime({String? yearString}) => toTrackExt().yearAsDateTime(yearString: yearString);

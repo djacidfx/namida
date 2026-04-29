@@ -159,6 +159,7 @@ class _JellyfinServer extends MusicWebServer {
       moodList: [],
       composer: '',
       trackNo: item.indexNumber ?? 0,
+      trackTo: 0,
       durationMS: durationMs,
       year: year,
       yearText: yearString,
