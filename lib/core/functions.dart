@@ -987,21 +987,18 @@ Future<String?> showNamidaBottomSheetWithTextField({
                   const SizedBox(height: 18.0),
                   Row(
                     children: [
-                      SizedBox(width: maxWidth * 0.1),
-                      CancelButton(onPressed: context.safePop),
                       Expanded(
-                        child: NamidaInkWell(
+                        flex: 1,
+                        child: CancelButton(onPressed: context.safePop),
+                      ),
+                      const SizedBox(width: 12.0),
+                      Expanded(
+                        flex: 2,
+                        child: NamidaButton(
                           borderRadius: 12.0,
-                          padding: const EdgeInsets.all(12.0),
-                          height: 48.0,
-                          bgColor: buttonColor ?? CurrentColor.inst.color,
-                          decoration: const BoxDecoration(),
-                          child: Center(
-                            child: Text(
-                              buttonText,
-                              style: buttonTextStyle ?? textTheme.displayMedium?.copyWith(color: Colors.white.withOpacityExt(0.9)),
-                            ),
-                          ),
+                          text: buttonText,
+                          minHeight: NamidaButton.kDefaultMinHeight * 1.25,
+                          colors: .saturated,
                           onTap: () async {
                             if (formKey.currentState!.validate()) {
                               loadingController.startLoading();

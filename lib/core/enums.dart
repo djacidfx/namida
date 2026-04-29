@@ -290,6 +290,7 @@ enum TrackPlayMode {
 }
 
 enum QueueSourceEnum {
+  allTracksAll(false, supportResuming: true),
   allTracks(false, supportResuming: true),
   album(false, supportResuming: true),
   artist(false, supportResuming: true),
@@ -377,6 +378,7 @@ class QueueSource extends QueueSourceBase<QueueSourceEnum> {
 
   const QueueSource._(super.s, {super.title}) : super._();
 
+  static const allTracksAll = QueueSource._(QueueSourceEnum.allTracksAll);
   static const allTracks = QueueSource._(QueueSourceEnum.allTracks);
   static QueueSource album(AlbumIdentifierWrapper? identifier, String? name) => QueueSource._(QueueSourceEnum.album, title: identifier?.displayAlbumName ?? name);
   static QueueSource artist(String? name) => QueueSource._(QueueSourceEnum.artist, title: name);

@@ -307,21 +307,21 @@ class ExtrasSettings extends SettingSubpageProvider {
                             ),
                           ),
                           const SizedBox(height: 12.0),
-                          ...settings.libraryTabs.value.asMap().entries.map(
-                            (e) => Obx(
+                          ...settings.libraryTabs.value.mapIndexed(
+                            (tab, index) => Obx(
                               (context) => Padding(
                                 padding: const EdgeInsets.all(3.0),
                                 child: ListTileWithCheckMark(
-                                  title: "${e.key + 1}. ${e.value.toText()}",
-                                  icon: e.value.toIcon(),
+                                  title: "${index + 1}. ${tab.toText()}",
+                                  icon: tab.toIcon(),
                                   onTap: () {
                                     settings.extra.save(
-                                      selectedLibraryTab: e.value,
-                                      staticLibraryTab: e.value,
+                                      selectedLibraryTab: tab,
+                                      staticLibraryTab: tab,
                                       autoLibraryTab: false,
                                     );
                                   },
-                                  active: !settings.extra.autoLibraryTab.valueR && settings.extra.selectedLibraryTab.valueR == e.value,
+                                  active: !settings.extra.autoLibraryTab.valueR && settings.extra.selectedLibraryTab.valueR == tab,
                                 ),
                               ),
                             ),

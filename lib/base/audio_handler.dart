@@ -66,6 +66,8 @@ class NamidaAudioVideoHandler<Q extends Playable> extends BasicAudioHandler<Q> {
   @override
   bool getLoudnessEnhancerEnabledTrackValueR() => settings.player.replayGainType.valueR.isLoudnessEnhancerEnabled;
 
+  QueueSourceBase<Enum> latestQueueSource = QueueSource.others(null);
+
   bool get _willPlayWhenReady => playWhenReady.value;
 
   RxBaseCore<Duration?> get currentItemDuration => _currentItemDuration;
@@ -508,7 +510,7 @@ class NamidaAudioVideoHandler<Q extends Playable> extends BasicAudioHandler<Q> {
       ].execute();
     } else {
       refreshNotification(currentItem.value);
-      await QueueController.inst.updateLatestQueue(currentQueue.value, source: null);
+      await QueueController.inst.updateLatestQueue(currentQueue.value, source: latestQueueSource);
     }
   }
 
@@ -824,7 +826,7 @@ class NamidaAudioVideoHandler<Q extends Playable> extends BasicAudioHandler<Q> {
         },
       );
     }
-    Lyrics.inst.updateLyrics(tr);
+    Lyrics.inst.updateLyrics(tr).ignoreError();
 
     Duration? duration;
     bool checkInterrupted() {
@@ -1512,7 +1514,7 @@ class NamidaAudioVideoHandler<Q extends Playable> extends BasicAudioHandler<Q> {
       }
     }
 
-    Lyrics.inst.updateLyrics(item);
+    Lyrics.inst.updateLyrics(item).ignoreError();
 
     Duration? initialPosition = await _getItemInitialPosition(pi, duration);
 

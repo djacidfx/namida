@@ -210,7 +210,7 @@ class LyricsLRCParsedViewState extends State<LyricsLRCParsedView> {
   }
 
   void _updateHighlightedLine(int durMS, {bool force = false, bool forceAnimate = false, bool jump = false}) {
-    final lrcDur = lyrics.lastWhereEff((e) => e.timestamp <= Duration(milliseconds: durMS + 5) && !e.isBGLyrics) ?? lyrics.firstOrNull;
+    final lrcDur = lyrics.lastWhereEff((e) => e.timestamp <= Duration(milliseconds: durMS + 5) && !e.isBGLyrics) /* ?? lyrics.firstOrNull */;
     final newLineDuration = lrcDur?.timestamp;
 
     // -- prefer index checks, cuz duration is used in ui directly to highlight
@@ -799,6 +799,9 @@ class LyricsLRCParsedViewState extends State<LyricsLRCParsedView> {
                                   listController: _listController,
                                   itemCount: lyrics.length,
                                   itemBuilder: (context, index) {
+                                    // -- usually not needed, but helps cuz sometimes gets called on stale index
+                                    if (index >= lyrics.length) return const SizedBox.shrink();
+
                                     final distanceDiffFromSelected = selectedIndex == null ? null : index - selectedIndex; // -- does not account for empty lines
                                     final distanceDiffFromSelectedAbs = distanceDiffFromSelected?.abs();
                                     final lrc = lyrics[index];

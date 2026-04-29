@@ -56,10 +56,11 @@ class QueueController {
 
     if (!await _allowSavingQueue(tracks.length)) return;
 
-    // -- Prevents saving [allTracks] source over and over.
+    // -- Prevents saving [allTracksAll] source over and over.
     final latestQueue = _latestQueueInMap;
     if (latestQueue != null) {
-      if ((source == QueueSource.allTracks && latestQueue.source == QueueSource.allTracks) || dateComparison == latestQueue.date) {
+      if ((source.s == QueueSourceEnum.allTracksAll && latestQueue.source.s == QueueSourceEnum.allTracksAll) ||
+          (dateComparison == latestQueue.date && (source == latestQueue.source || source.s == QueueSourceEnum.queuePage))) {
         await removeQueue(latestQueue);
       }
     }
@@ -118,7 +119,7 @@ class QueueController {
     await _saveQueueToStorage(newQueue);
   }
 
-  Future<void> updateLatestQueue(List<Playable> items, {required QueueSourceBase? source, HomePageItems? homePageItem}) async {
+  Future<void> updateLatestQueue(List<Playable> items, {required QueueSourceBase<Enum> source, HomePageItems? homePageItem}) async {
     await Future.wait([
       _saveLatestQueueToStorage(items),
       () async {
@@ -127,7 +128,7 @@ class QueueController {
           final firstItem = items.firstOrNull;
           if (firstItem is Selectable) {
             int? queueDate;
-            if (source != null && source.s == QueueSourceEnum.queuePage) {
+            if (source.s == QueueSourceEnum.queuePage) {
               // -- allow skip adding as a new queue (if same as latest queue)
               final dateText = source.title;
               if (dateText != null) {
@@ -137,7 +138,7 @@ class QueueController {
 
             final tracks = items.cast<Selectable>().tracks.toList();
             final latestQueueInsideMap = _latestQueueInMap;
-            final shouldUpdateLatestQueueInsteadOfAdding = latestQueueInsideMap != null && (source == null || latestQueueInsideMap.source == source);
+            final shouldUpdateLatestQueueInsteadOfAdding = latestQueueInsideMap != null && latestQueueInsideMap.source == source;
             if (shouldUpdateLatestQueueInsteadOfAdding) {
               await updateQueue(
                 latestQueueInsideMap,
@@ -148,14 +149,12 @@ class QueueController {
                 ),
               );
             } else {
-              if (source != null) {
-                await this.addNewQueue(
-                  source: source,
-                  dateComparison: queueDate,
-                  homePageItem: homePageItem,
-                  tracks: tracks,
-                );
-              }
+              await this.addNewQueue(
+                source: source,
+                dateComparison: queueDate,
+                homePageItem: homePageItem,
+                tracks: tracks,
+              );
             }
           }
         } catch (_) {

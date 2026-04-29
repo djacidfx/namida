@@ -545,7 +545,11 @@ class NamidaColorPickerDialog extends StatelessWidget {
       child: ColorPicker(
         pickerColor: initialColor,
         onColorChanged: onColorChanged,
+        labelTypes: ColorLabelType.values,
         hexInputBar: true,
+        portraitOnly: true,
+        pickerAreaBorderRadius: BorderRadius.circular(8.0.multipliedRadius),
+        enableAlpha: true,
       ),
     );
   }

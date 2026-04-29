@@ -3,6 +3,7 @@ import 'package:namida/core/extensions.dart';
 
 class VersionWrapper {
   final String name;
+  final String prettyVersionRaw;
   final String prettyVersion;
   final int? buildNumber;
   final DateTime? buildDate;
@@ -10,6 +11,7 @@ class VersionWrapper {
 
   const VersionWrapper._({
     required this.name,
+    required this.prettyVersionRaw,
     required this.prettyVersion,
     required this.buildNumber,
     required this.buildDate,
@@ -20,20 +22,23 @@ class VersionWrapper {
   static Future<void> get waitForCurrentVersionFetch => NamidaDeviceInfo.packageInfoCompleter.future;
 
   factory VersionWrapper(String name, [String? buildNumber]) {
+    const betaSuffix = '-beta';
     final parts = name.split('+'); // 5.0.1-beta 250223230
     name = parts.first;
-    final betaParts = name.split('-beta');
+    final betaParts = name.split(betaSuffix);
     bool isBeta = false;
     if (betaParts.length > 1) {
       isBeta = true;
       name = betaParts.first;
     }
-    String prettyVersion = name;
-    if (!prettyVersion.startsWith('v')) prettyVersion = "v${prettyVersion.splitFirst('+')}";
+    String prettyVersionRaw = name;
+    if (!prettyVersionRaw.startsWith('v')) prettyVersionRaw = "v${prettyVersionRaw.splitFirst('+')}";
     if (name.startsWith('v')) name = name.substring(1);
     buildNumber ??= parts.last;
+    final prettyVersion = prettyVersionRaw.endsWith(betaSuffix) ? prettyVersionRaw : '$prettyVersionRaw$betaSuffix';
     return VersionWrapper._(
       name: name,
+      prettyVersionRaw: prettyVersionRaw,
       prettyVersion: prettyVersion,
       buildNumber: int.tryParse(buildNumber),
       buildDate: _parseBuildNumber(buildNumber),

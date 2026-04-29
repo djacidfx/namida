@@ -437,14 +437,14 @@ class PlaybackSettings extends SettingSubpageProvider {
                             builder: (context, youtubeVideoQualities) => SuperSmoothListView(
                               padding: EdgeInsets.zero,
                               children: [
-                                ...kStockVideoQualities.asMap().entries.map(
-                                  (e) => Padding(
+                                ...kStockVideoQualities.mapIndexed(
+                                  (q, index) => Padding(
                                     padding: const EdgeInsets.all(3.0),
                                     child: ListTileWithCheckMark(
                                       icon: Broken.story,
-                                      active: youtubeVideoQualities.contains(e.value),
-                                      title: e.value,
-                                      onTap: () => tileOnTap(e.value, e.key),
+                                      active: youtubeVideoQualities.contains(q),
+                                      title: q,
+                                      onTap: () => tileOnTap(q, index),
                                     ),
                                   ),
                                 ),

@@ -81,14 +81,14 @@ class _TracksPageState extends State<TracksPage> with TickerProviderStateMixin, 
                   leftWidgets: [
                     NamidaIconButton(
                       icon: Broken.shuffle,
-                      onPressed: () => Player.inst.playOrPause(0, SearchSortController.inst.trackSearchList.value, QueueSource.allTracks, shuffle: true, gentlePlay: false),
+                      onPressed: () => Player.inst.playOrPause(0, SearchSortController.inst.trackSearchList.value, QueueSource.allTracksAll, shuffle: true, gentlePlay: false),
                       iconSize: 18.0,
                       horizontalPadding: 2.0,
                     ),
                     const SizedBox(width: 10.0),
                     NamidaIconButton(
                       icon: Broken.play,
-                      onPressed: () => Player.inst.playOrPause(0, SearchSortController.inst.trackSearchList.value, QueueSource.allTracks, gentlePlay: false),
+                      onPressed: () => Player.inst.playOrPause(0, SearchSortController.inst.trackSearchList.value, QueueSource.allTracksAll, gentlePlay: false),
                       iconSize: 18.0,
                       horizontalPadding: 2.0,
                     ),

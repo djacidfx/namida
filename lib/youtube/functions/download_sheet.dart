@@ -800,6 +800,7 @@ Future<void> showDownloadVideoBottomSheet({
                                               child: NamidaButton(
                                                 colorScheme: filenameExists.valueR ? Colors.red.withAlpha(80) : null,
                                                 minHeight: NamidaButton.kDefaultMinHeight * 1.5,
+                                                colors: .saturated,
                                                 icon: Broken.import,
                                                 text: '${confirmButtonText == '' ? lang.download : confirmButtonText} $sizeText',
                                                 onTap: () async {

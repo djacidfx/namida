@@ -260,37 +260,28 @@ class _JellyfinApi {
     required String itemId,
     required _JellyfinImageType imageType,
   }) async {
-    final res = await dio.get<Uint8List>(
-      '/Items/$itemId/Images/${imageType.value}',
-      options: Options(responseType: ResponseType.bytes),
-    );
-    return res.data;
-  }
-
-  Future<({List<_JellyfinItem> items, int totalCount})> getItems({
-    required String userId,
-    required List<_JellyfinItemKind> includeItemTypes,
-    required bool recursive,
-    required int startIndex,
-    required int limit,
-    required List<_JellyfinItemField> fields,
-  }) async {
-    final res = await dio.get<Map<String, dynamic>>(
-      '/Items',
-      queryParameters: {
-        'UserId': userId,
-        'IncludeItemTypes': includeItemTypes.map((e) => e.value).join(','),
-        'Recursive': recursive,
-        'StartIndex': startIndex,
-        'Limit': limit,
-        'Fields': fields.map((e) => e.value).join(','),
-      },
-    );
-    final data = res.data;
-    if (data == null) return (items: <_JellyfinItem>[], totalCount: 0);
-    return (
-      items: (data['Items'] as List<dynamic>?)?.map((e) => _JellyfinItem.fromJson(e as Map<String, dynamic>)).toList() ?? [],
-      totalCount: data['TotalRecordCount'] as int? ?? 0,
-    );
+    try {
+      final res = await dio.get<Uint8List>(
+        '/Items/$itemId/Images/${imageType.value}',
+        options: Options(responseType: ResponseType.bytes),
+      );
+      return res.data;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        // -- get parent image instead if item image was not found
+        final itemRes = await dio.get('/Items/$itemId');
+        final albumId = itemRes.data['AlbumId'];
+        final res = await dio.get<Uint8List>(
+          '/Items/$albumId/Images/Primary',
+          queryParameters: {
+            'imageIndex': 0,
+          },
+          options: Options(responseType: ResponseType.bytes),
+        );
+        return res.data;
+      } else {
+        rethrow;
+      }
+    }
   }
 }

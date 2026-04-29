@@ -479,7 +479,7 @@ class TrackTile extends StatelessWidget {
                       onPlaying!();
                       return;
                     }
-                    if (queueSource == QueueSource.search) {
+                    if (queueSource.s == QueueSourceEnum.search) {
                       ScrollSearchController.inst.unfocusKeyboard();
                       await Player.inst.playOrPause(
                         settings.trackPlayMode.value.shouldBeIndex0 ? 0 : index,
@@ -489,10 +489,11 @@ class TrackTile extends StatelessWidget {
                         maximumItems: null,
                       );
                     } else {
+                      final queueSourceNormalized = queueSource.s == QueueSourceEnum.allTracks ? QueueSource.allTracksAll : queueSource;
                       await Player.inst.playOrPause(
                         index,
                         tracks,
-                        queueSource,
+                        queueSourceNormalized,
                         homePageItem: homePageItem,
                         maximumItems: null,
                       );

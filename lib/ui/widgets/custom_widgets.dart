@@ -7660,7 +7660,7 @@ class SplitPageState extends State<SplitPage> {
 
 class PlayableTitleSubtitleWidget extends StatefulWidget {
   final bool isYTID;
-  final Widget Function(String? title, String? subtitle) builder;
+  final Widget Function(String? title, String? artist) builder;
 
   const PlayableTitleSubtitleWidget({
     super.key,

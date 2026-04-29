@@ -529,21 +529,21 @@ class _SoundControlMainSlidersColumnBaseState extends State<_SoundControlMainSli
                 constraints: const BoxConstraints(minHeight: 38.0),
                 child: PlayableTitleSubtitleWidget(
                   isYTID: currentItem is YoutubeID,
-                  builder: (title, subtitle) => NamidaCoolBox(
+                  builder: (title, artist) => NamidaCoolBox(
                     extraVPadding: true,
                     colorScheme: theme.colorScheme.secondary,
                     builder: (context) => Row(
                       children: [
                         const Icon(
-                          Broken.info_circle,
+                          Broken.music_square,
                           size: 20.0,
                         ),
                         const SizedBox(width: 8.0),
                         Expanded(
                           child: Text(
                             [
+                              artist,
                               title,
-                              subtitle,
                             ].joinText(separator: ' - '),
                             style: textTheme.displayMedium?.copyWith(fontSize: 14.0),
                           ),

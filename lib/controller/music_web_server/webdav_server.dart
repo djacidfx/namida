@@ -254,17 +254,19 @@ class _WebDAVServer extends MusicWebServer {
     for (final lrc in lrcFiles) {
       final lrcPath = lrc.$1.path;
       if (lrcPath != null) {
-        final lrcPathWOExt = p.basenameWithoutExtension(lrcPath);
-        final trackInfo = lrcFilesInfoToExtractLater[lrcPathWOExt];
-        if (trackInfo != null) {
-          final bytes = await _api?.read(lrcPath);
-          if (bytes != null) {
-            final lrcUtils = LrcSearchUtilsSelectable(trackInfo, trackInfo.asTrack());
-            final isSynced = lrc.$2;
-            final lrcFileInCache = isSynced ? lrcUtils.cachedLRCFile : lrcUtils.cachedTxtFile;
-            await lrcFileInCache.writeAsBytes(bytes);
+        try {
+          final lrcPathWOExt = p.basenameWithoutExtension(lrcPath);
+          final trackInfo = lrcFilesInfoToExtractLater[lrcPathWOExt];
+          if (trackInfo != null) {
+            final bytes = await _api?.read(lrcPath);
+            if (bytes != null) {
+              final lrcUtils = LrcSearchUtilsSelectableFromNetwork(trackInfo, trackInfo.asTrack());
+              final isSynced = lrc.$2;
+              final lrcFileInCache = isSynced ? lrcUtils.cachedLRCFile : lrcUtils.cachedTxtFile;
+              await lrcFileInCache.writeAsBytes(bytes);
+            }
           }
-        }
+        } catch (_) {}
       }
     }
 
@@ -272,15 +274,17 @@ class _WebDAVServer extends MusicWebServer {
     for (final img in imageFiles) {
       final imgPath = img.path;
       if (imgPath != null) {
-        final bytes = await _api?.read(imgPath);
-        final serverPathWOExt = p.basenameWithoutExtension(imgPath);
-        final artworksToExtract = artworksToExtractLater[serverPathWOExt];
-        if (artworksToExtract != null) {
-          for (final e in artworksToExtract) {
-            await _writeOrExtractArtwork(e, bytes);
+        try {
+          final bytes = await _api?.read(imgPath);
+          final serverPathWOExt = p.basenameWithoutExtension(imgPath);
+          final artworksToExtract = artworksToExtractLater[serverPathWOExt];
+          if (artworksToExtract != null) {
+            for (final e in artworksToExtract) {
+              await _writeOrExtractArtwork(e, bytes);
+            }
+            artworksToExtractLater.remove(serverPathWOExt);
           }
-          artworksToExtractLater.remove(serverPathWOExt);
-        }
+        } catch (_) {}
       }
     }
 

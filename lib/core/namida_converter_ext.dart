@@ -409,6 +409,9 @@ extension QueueNameGetter on Queue {
 //     final trs = <Selectable>[];
 //     void addThese(Iterable<Selectable> tracks) => trs.addAll(tracks.withLimit(limit));
 //     switch (this) {
+//       case QueueSource.allTracksAll:
+//         addThese(SearchSortController.inst.trackSearchList.value);
+//         break;
 //       case QueueSource.allTracks:
 //         addThese(SearchSortController.inst.trackSearchList.value);
 //         break;
@@ -1144,7 +1147,7 @@ extension RouteUtils on NamidaRoute {
 
   QueueSourceBase toQueueSource() {
     return switch (route) {
-      RouteType.PAGE_allTracks => QueueSource.allTracks,
+      RouteType.PAGE_allTracks => QueueSource.allTracksAll,
       RouteType.PAGE_folders => QueueSource.folder(name),
       RouteType.PAGE_folders_music => QueueSource.folderMusic(name),
       RouteType.PAGE_folders_videos => QueueSource.folderVideos(name),
@@ -1920,6 +1923,7 @@ extension TrackTileItemL10n on TrackTileItem {
 
 extension QueueSourceL10n on QueueSourceEnum {
   String toText() => switch (this) {
+    QueueSourceEnum.allTracksAll => lang.tracks,
     QueueSourceEnum.allTracks => lang.tracks,
     QueueSourceEnum.album => lang.album,
     QueueSourceEnum.artist => lang.artist,

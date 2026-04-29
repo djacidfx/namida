@@ -5,6 +5,7 @@ import 'package:path/path.dart' as p;
 import 'package:namida/class/track.dart';
 import 'package:namida/controller/lyrics_search_utils/lrc_search_details.dart';
 import 'package:namida/core/extensions.dart';
+import 'package:namida/youtube/class/download_task_base.dart';
 
 import 'lrc_search_utils_base.dart';
 
@@ -116,4 +117,14 @@ class LrcSearchUtilsSelectableIsolate extends LrcSearchUtilsSelectable {
     super.track, {
     required this.mainLyricsCacheDirectory,
   });
+}
+
+class LrcSearchUtilsSelectableFromNetwork extends LrcSearchUtilsSelectable {
+  const LrcSearchUtilsSelectableFromNetwork(super.trackExt, super.track);
+
+  @override
+  File get cachedTxtFile => File(p.join(mainLyricsCacheDirectory, "${DownloadTaskFilename.cleanupFilename(track.rawCacheKey)}.txt"));
+
+  @override
+  File get cachedLRCFile => File(p.join(mainLyricsCacheDirectory, "${DownloadTaskFilename.cleanupFilename(track.rawCacheKey)}.lrc"));
 }

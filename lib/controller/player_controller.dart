@@ -726,6 +726,7 @@ class Player {
                 as Playable,
       );
     }
+    _audioHandler.latestQueueSource = source;
     await _audioHandler.assignNewQueue(
       playAtIndex: index,
       queue: queue,

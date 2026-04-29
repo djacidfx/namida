@@ -370,7 +370,7 @@ class __MainPageFABButtonState extends State<_MainPageFABButton> {
         ScrollSearchController.inst.searchBarKey.currentState?.openCloseSearchBar();
       }
     } else if (fab == FABType.shuffle || fab == FABType.play) {
-      Player.inst.playOrPause(0, SelectedTracksController.inst.getCurrentAllTracks(), QueueSource.allTracks, shuffle: fab == FABType.shuffle);
+      Player.inst.playOrPause(0, SelectedTracksController.inst.getCurrentAllTracks(), QueueSource.allTracksAll, shuffle: fab == FABType.shuffle);
     }
   }
 
