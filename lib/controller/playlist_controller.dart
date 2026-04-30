@@ -405,7 +405,6 @@ class PlaylistController extends PlaylistManager<TrackWithDate, Track, SortType>
 
     Future<void> loadTracksDb() async {
       try {
-        NamicoDBWrapper.initialize();
         tracksDBManager = await DBWrapper.openFromInfoSyncTry(
           fileInfo: params.tracksDbInfo,
           config: DBConfig(

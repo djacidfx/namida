@@ -1599,8 +1599,6 @@ class _YTDownloadManager with PortsProvider<SendPort> {
 
 class _IsolateFunctions {
   static Future<_DownloadTaskInitWrapper> loadDownloadTasksInfoFileSync(_DownloadTasksLoadParams params) async {
-    NamicoDBWrapper.initialize();
-
     late final downloadTasksMainDBManager = DBWrapperMainSync(params.tasksDatabasesPath);
 
     final youtubeDownloadTasksMap = <DownloadTaskGroupName, Map<DownloadTaskFilename, YoutubeItemDownloadConfig>>{};

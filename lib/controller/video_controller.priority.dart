@@ -27,7 +27,6 @@ class VideosPriorityManager {
   final _videosPriorityMap = <String, CacheVideoPriority>{};
 
   static Future<Map<String, CacheVideoPriority>> loadEverythingSync(DbWrapperFileInfo fileInfo) async {
-    NamicoDBWrapper.initialize();
     final values = CacheVideoPriority.values;
     final db = await DBWrapper.openFromInfoSyncTry(
       fileInfo: fileInfo,

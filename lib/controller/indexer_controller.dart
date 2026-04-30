@@ -1954,7 +1954,6 @@ class _IndexerIsolateExecuter {
     final statsDbInfo = paramsList[0] as DbWrapperFileInfo;
     final oldJsonFilePath = paramsList[1] as String;
 
-    NamicoDBWrapper.initialize();
     final statsDBManager = await DBWrapper.openFromInfoSyncTry(
       fileInfo: statsDbInfo,
       config: const DBConfig(
@@ -2011,7 +2010,6 @@ class _IndexerIsolateExecuter {
     final generatePathHash = paramsList[6] as bool? ?? false;
     final tracksInitPort = paramsList[7] as SendPort;
 
-    NamicoDBWrapper.initialize();
     final tracksDBManager = await DBWrapper.openFromInfoSyncTry(
       fileInfo: tracksDbInfo,
       config: DBConfig(

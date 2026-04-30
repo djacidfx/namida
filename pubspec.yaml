@@ -211,6 +211,11 @@ dev_dependencies:
     git:
       url: https://github.com/MSOB7YY/inno_bundle
 
+hooks:
+  user_defines:
+    sqlite3:
+      source: sqlite3mc
+
 flutter_native_splash:
   image: assets/namida_icon.png
   color: "#fff5eb"

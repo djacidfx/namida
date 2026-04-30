@@ -857,7 +857,6 @@ class _VideoControllerIsolateFunctions {
     final oldJsonFilePath = params[0] as String;
     final dbFileInfo = params[1] as DbWrapperFileInfo;
     final oldJsonFile = File(oldJsonFilePath);
-    NamicoDBWrapper.initialize();
     final db = await DBWrapper.openFromInfoSyncTry(
       fileInfo: dbFileInfo,
       config: const DBConfig(
@@ -894,7 +893,6 @@ class _VideoControllerIsolateFunctions {
   static Future<_VideoControllerIsolateResult> _fetchAndCheckCachedVideosMainIsolate(_VideoControllerIsolateRequest params) async {
     final oldJsonFile = File(params.oldJsonFilePath);
     final dbFileInfo = params.dbFileInfo;
-    NamicoDBWrapper.initialize();
     final db = await DBWrapper.openFromInfoSyncTry(
       fileInfo: dbFileInfo,
       config: const DBConfig(

@@ -145,8 +145,6 @@ Future<bool> _mainAppInitialization() async {
       NamidaTaggerController.inst.updateLogsPath();
     });
 
-    NamicoDBWrapper.initialize();
-
     Future<void> fetchAppData() async {
       final appDatas = await NamidaStorage.inst.getStorageDirectoriesAppData();
       AppDirs.USER_DATA = NamidaStorage.inst.getUserDataDirectory(appDatas);
