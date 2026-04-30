@@ -45,7 +45,6 @@ class YoutubeThumbnail extends StatefulWidget {
   final bool displayFallbackIcon;
   final bool extractColor;
   final double blur;
-  final bool? enableGlow;
   final bool compressed;
   final bool isImportantInCache;
   final bool preferLowerRes;
@@ -80,7 +79,6 @@ class YoutubeThumbnail extends StatefulWidget {
     this.displayFallbackIcon = true,
     this.extractColor = false,
     this.blur = 5.0,
-    this.enableGlow,
     this.compressed = true,
     required this.isImportantInCache,
     this.preferLowerRes = true,
@@ -250,7 +248,6 @@ class _YoutubeThumbnailState extends State<YoutubeThumbnail> with LoadingItemsDe
         bgcolor: context.theme.cardColor.withAlpha(60),
         compressed: widget.compressed,
         blur: widget.blur,
-        enableGlow: widget.enableGlow,
         disableBlurBgSizeShrink: widget.disableBlurBgSizeShrink,
         borderRadius: widget.isCircle ? 0.0 : widget.borderRadius,
         fadeMilliSeconds: widget.fadeMilliSeconds,

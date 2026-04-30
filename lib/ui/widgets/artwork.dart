@@ -48,7 +48,6 @@ class ArtworkWidget extends StatefulWidget {
   final Widget? child;
   final List<Widget>? onTopWidgets;
   final List<BoxShadow>? boxShadow;
-  final bool? enableGlow;
   final bool displayIcon;
   final IconData? icon;
   final bool isCircle;
@@ -83,7 +82,6 @@ class ArtworkWidget extends StatefulWidget {
     this.staggered = false,
     this.boxShadow,
     this.onTopWidgets,
-    this.enableGlow,
     this.displayIcon = true,
     this.icon,
     this.isCircle = false,
@@ -286,7 +284,7 @@ class _ArtworkWidgetState extends State<ArtworkWidget> with LoadingItemsDelayMix
     final boxWidth = widget.width ?? widget.thumbnailSize;
     final boxHeight = widget.height ?? widget.thumbnailSize;
 
-    final dropShadowEnabled = widget.enableGlow ?? (settings.enableGlowEffect.value && widget.blur != 0.0);
+    final dropShadowEnabled = settings.enableGlowEffect.value && widget.blur != 0.0;
     final sizePercentage = widget.disableBlurBgSizeShrink || !dropShadowEnabled ? 1.0 : DropShadow.defaultSizePercentage;
 
     // -- dont display stock widget if image can be obtained.

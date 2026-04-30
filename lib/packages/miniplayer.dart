@@ -935,15 +935,16 @@ class _TrackImage extends StatelessWidget {
         borderRadius: 6.0 + brMultiplier(8.0.multipliedRadius) * (maxWidth * 0.004),
         fadeMilliSeconds: 0,
         forceSquared: settings.forceSquaredTrackThumbnail.value,
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
-            color: context.theme.shadowColor.withAlpha(100),
-            blurRadius: 24.0,
-            offset: const Offset(0.0, 8.0),
+            color: Color.fromARGB(40, 12, 12, 12),
+            blurRadius: 18.0,
+            offset: Offset(0.0, 6.0),
           ),
         ],
         iconSize: maxWidth * 0.5,
-        enableGlow: false,
+        blur: 32.0 * MiniPlayerController.inst.animation.value,
+        disableBlurBgSizeShrink: true,
         allowFloating: true,
       ),
     );
@@ -973,15 +974,16 @@ class _YoutubeIDImage extends StatelessWidget {
         preferLowerRes: false,
         fadeMilliSeconds: 0,
         borderRadius: 6.0 + brMultiplier(8.0.multipliedRadius) * (maxWidth * 0.004),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
-            color: context.theme.shadowColor.withAlpha(100),
-            blurRadius: 24.0,
-            offset: const Offset(0.0, 8.0),
+            color: Color.fromARGB(40, 12, 12, 12),
+            blurRadius: 18.0,
+            offset: Offset(0.0, 6.0),
           ),
         ],
         iconSize: maxWidth * 0.5,
-        enableGlow: false,
+        blur: 32.0 * MiniPlayerController.inst.animation.value,
+        disableBlurBgSizeShrink: true,
         allowFloating: true,
       ),
     );

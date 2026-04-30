@@ -79,7 +79,6 @@ class NetworkArtwork extends StatefulWidget {
   final List<Widget>? onTopWidgets;
   final bool displayFallbackIcon;
   final double blur;
-  final bool? enableGlow;
   final bool compressed;
   final bool staggered;
   final double? iconSize;
@@ -100,7 +99,6 @@ class NetworkArtwork extends StatefulWidget {
     this.height,
     this.width,
     this.margin,
-    this.enableGlow,
     this.boxShadow,
     this.alignment = Alignment.center,
     this.borderRadius = 12.0,
@@ -323,7 +321,6 @@ class _NetworkArtworkState extends State<NetworkArtwork> with LoadingItemsDelayM
         bgcolor: context.theme.cardColor.withAlpha(60),
         compressed: widget.compressed,
         blur: widget.blur,
-        enableGlow: widget.enableGlow,
         disableBlurBgSizeShrink: widget.disableBlurBgSizeShrink,
         borderRadius: widget.isCircle ? 0.0 : widget.borderRadius,
         fadeMilliSeconds: widget.fadeMilliSeconds,
