@@ -166,6 +166,8 @@ class LibraryGroup<T extends Track> {
       MediaType.folder => mainMapFoldersTracksAndVideos.values,
       MediaType.folderMusic => mainMapFoldersTracks.values,
       MediaType.folderVideo => mainMapFoldersVideos.values as Iterable<List<T>>,
+      MediaType.mood => null,
+      MediaType.tag => null,
       MediaType.playlist => null,
     };
   }

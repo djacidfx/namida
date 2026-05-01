@@ -8,6 +8,7 @@ import 'package:namida/class/track.dart';
 import 'package:namida/class/video.dart';
 import 'package:namida/controller/clipboard_controller.dart';
 import 'package:namida/controller/folders_controller.dart';
+import 'package:namida/controller/indexer_controller.dart';
 import 'package:namida/controller/playlist_controller.dart';
 import 'package:namida/controller/scroll_search_controller.dart';
 import 'package:namida/controller/search_sort_controller.dart';
@@ -22,6 +23,7 @@ import 'package:namida/core/translations/language.dart';
 import 'package:namida/core/utils.dart';
 import 'package:namida/ui/dialogs/common_dialogs.dart';
 import 'package:namida/ui/pages/main_page.dart';
+import 'package:namida/ui/pages/subpages/moods_tags_tracks_subpage.dart';
 import 'package:namida/ui/widgets/artwork.dart';
 import 'package:namida/ui/widgets/custom_widgets.dart';
 import 'package:namida/ui/widgets/library/album_card.dart';
@@ -234,6 +236,8 @@ class SearchPage extends StatelessWidget {
                                     final composerSearchTemp = !activeList.contains(MediaType.composer) ? null : SearchSortController.inst.composerSearchTemp.valueR;
                                     final genreSearchTemp = !activeList.contains(MediaType.genre) ? null : SearchSortController.inst.genreSearchTemp.valueR;
                                     final playlistSearchTemp = !activeList.contains(MediaType.playlist) ? null : SearchSortController.inst.playlistSearchTemp.valueR;
+                                    final moodSearchTemp = !activeList.contains(MediaType.mood) ? null : SearchSortController.inst.moodSearchTemp.valueR;
+                                    final tagSearchTemp = !activeList.contains(MediaType.tag) ? null : SearchSortController.inst.tagSearchTemp.valueR;
 
                                     final isFolderTracksSearchActive = activeList.contains(MediaType.folderMusic) || activeList.contains(MediaType.folder);
                                     final isFolderVideosSearchActive = activeList.contains(MediaType.folderVideo) || activeList.contains(MediaType.folder);
@@ -434,6 +438,46 @@ class SearchPage extends StatelessWidget {
                                           ),
                                         ],
 
+                                        if (moodSearchTemp != null && moodSearchTemp.isNotEmpty) ...[
+                                          SliverToBoxAdapter(
+                                            child: SearchPageTitleRow(
+                                              title: '${lang.moods} • ${moodSearchTemp.length}',
+                                              icon: Broken.smileys,
+                                            ),
+                                          ),
+                                          _horizontalSliverList(
+                                            height: 32.0 + 4,
+                                            itemExtent: null,
+                                            list: moodSearchTemp,
+                                            builder: (item) => _MoodTagSmallCard(
+                                              icon: Broken.smileys,
+                                              name: item,
+                                              onTap: () => MoodsTracksSubPage.open(item, Indexer.inst.getTracksForMood(item) ?? []),
+                                              onLongPress: () => NamidaDialogs.inst.showMoodDialog(item, Indexer.inst.getTracksForMood(item) ?? []),
+                                            ),
+                                          ),
+                                        ],
+
+                                        if (tagSearchTemp != null && tagSearchTemp.isNotEmpty) ...[
+                                          SliverToBoxAdapter(
+                                            child: SearchPageTitleRow(
+                                              title: '${lang.tags} • ${tagSearchTemp.length}',
+                                              icon: Broken.tag,
+                                            ),
+                                          ),
+                                          _horizontalSliverList(
+                                            height: 32.0 + 4,
+                                            itemExtent: null,
+                                            list: tagSearchTemp,
+                                            builder: (item) => _MoodTagSmallCard(
+                                              icon: Broken.tag,
+                                              name: item,
+                                              onTap: () => TagsTracksSubPage.open(item, Indexer.inst.getTracksForTag(item) ?? []),
+                                              onLongPress: () => NamidaDialogs.inst.showTagDialog(item, Indexer.inst.getTracksForTag(item) ?? []),
+                                            ),
+                                          ),
+                                        ],
+
                                         // == Tracks ==
                                         if (tracksSearchTemp.isNotEmpty) ...[
                                           SliverToBoxAdapter(
@@ -607,6 +651,59 @@ class _FolderSmallCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12.0),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MoodTagSmallCard extends StatelessWidget {
+  final String name;
+  final IconData icon;
+  final void Function() onTap;
+  final void Function() onLongPress;
+
+  const _MoodTagSmallCard({
+    required this.name,
+    required this.icon,
+    required this.onTap,
+    required this.onLongPress,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+    final textTheme = theme.textTheme;
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: context.width * 0.75),
+      child: NamidaInkWell(
+        margin: const EdgeInsets.only(left: 6.0),
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
+        onTap: onTap,
+        onLongPress: onLongPress,
+        borderRadius: 8.0,
+        bgColor: theme.colorScheme.secondary.withOpacityExt(0.12),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(width: 8.0),
+            Icon(
+              icon,
+              size: 16.0,
+            ),
+            const SizedBox(width: 6.0),
+            Flexible(
+              child: Text(
+                name,
+                softWrap: false,
+                overflow: TextOverflow.fade,
+                style: textTheme.displayMedium?.copyWith(
+                  fontSize: 13.0,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8.0),
           ],
         ),
       ),

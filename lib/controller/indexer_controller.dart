@@ -447,6 +447,8 @@ class Indexer<T extends Track> {
           MediaType.folder => settings.mediaItemsTrackSorting.value[MediaType.folder]?.firstOrNull?.requiresHistory ?? false,
           MediaType.folderMusic => settings.mediaItemsTrackSorting.value[MediaType.folderMusic]?.firstOrNull?.requiresHistory ?? false,
           MediaType.folderVideo => settings.mediaItemsTrackSorting.value[MediaType.folderVideo]?.firstOrNull?.requiresHistory ?? false,
+          MediaType.mood => false,
+          MediaType.tag => false,
         };
         if (sortRequiresHistory) SearchSortController.inst.sortMedia(e);
       }
@@ -1482,17 +1484,68 @@ class Indexer<T extends Track> {
     }
   }
 
+  Set<String> getAllLibraryMoods() {
+    final items = <String>{};
+    _loopLibraryMoods((name, tr) => items.add(name));
+    return items;
+  }
+
+  Set<String> getAllLibraryTags() {
+    final items = <String>{};
+    _loopLibraryTags((name, tr) => items.add(name));
+    return items;
+  }
+
+  List<Track>? getTracksForMood(String? name) {
+    if (name == null) return null;
+    final trs = <Track>[];
+    _loopLibraryMoods((currentName, tr) {
+      if (currentName == name) {
+        trs.add(tr);
+      }
+    });
+    return trs;
+  }
+
+  List<Track>? getTracksForTag(String? name) {
+    if (name == null) return null;
+    final trs = <Track>[];
+    _loopLibraryTags((currentName, tr) {
+      if (currentName == name) {
+        trs.add(tr);
+      }
+    });
+    return trs;
+  }
+
+  List<Track>? getTracksForRating(String? name) {
+    if (name == null) return null;
+    final trs = <Track>[];
+    _loopLibraryRatings((currentName, tr) {
+      if (currentName == name) {
+        trs.add(tr);
+      }
+    });
+    return trs;
+  }
+
   Map<String, List<Track>> getTracksGroupedByMoods({bool sort = true}) {
     final allAvailableMap = <String, List<Track>>{};
-    final tempSet = <Track>{};
+    _loopLibraryMoods((mood, tr) => allAvailableMap.addForce(mood, tr));
+    if (sort) allAvailableMap.sortByReverse((e) => e.value.length);
+    return allAvailableMap;
+  }
+
+  void _loopLibraryMoods(void Function(String name, Track tr) callback) {
+    final tempSet = <(Track, String)>{};
 
     // -- from stats map
     for (final e in Indexer.inst.trackStatsMap.value.entries) {
       final tr = e.key;
       if (tr.hasInfoInLibrary()) {
         e.value.moods?.loop((mood) {
-          if (tempSet.add(tr)) {
-            allAvailableMap.addForce(mood, tr);
+          if (tempSet.add((tr, mood))) {
+            callback(mood, tr);
           }
         });
       }
@@ -1501,28 +1554,30 @@ class Indexer<T extends Track> {
     // -- from track embedded tag
     allTracksInLibrary.loop((tr) {
       tr.moodList.loop((mood) {
-        if (tempSet.add(tr)) {
-          allAvailableMap.addForce(mood, tr);
+        if (tempSet.add((tr, mood))) {
+          callback(mood, tr);
         }
       });
     });
-
-    if (sort) allAvailableMap.sortByReverse((e) => e.value.length);
-
-    return allAvailableMap;
   }
 
   Map<String, List<Track>> getTracksGroupedByTags({bool sort = true}) {
     final allAvailableMap = <String, List<Track>>{};
-    final tempSet = <Track>{};
+    _loopLibraryTags((tag, tr) => allAvailableMap.addForce(tag, tr));
+    if (sort) allAvailableMap.sortByReverse((e) => e.value.length);
+    return allAvailableMap;
+  }
+
+  void _loopLibraryTags(void Function(String name, Track tr) callback) {
+    final tempSet = <(Track, String)>{};
 
     // -- from stats map
     for (final e in Indexer.inst.trackStatsMap.value.entries) {
       final tr = e.key;
       if (tr.hasInfoInLibrary()) {
         e.value.tags?.loop((tag) {
-          if (tempSet.add(tr)) {
-            allAvailableMap.addForce(tag, tr);
+          if (tempSet.add((tr, tag))) {
+            callback(tag, tr);
           }
         });
       }
@@ -1531,27 +1586,24 @@ class Indexer<T extends Track> {
     // -- from track embedded tag
     allTracksInLibrary.loop((tr) {
       tr.tagsList.loop((tag) {
-        if (tempSet.add(tr)) {
-          allAvailableMap.addForce(tag, tr);
+        if (tempSet.add((tr, tag))) {
+          callback(tag, tr);
         }
       });
     });
-
-    if (sort) allAvailableMap.sortByReverse((e) => e.value.length);
-
-    return allAvailableMap;
   }
 
   Map<String, List<Track>> getTracksGroupedByRatings({bool sort = true}) {
     final allAvailableMap = <String, List<Track>>{};
-
-    allTracksInLibrary.loop((tr) {
-      allAvailableMap.addForce(tr.effectiveRating.toString(), tr);
-    });
-
+    _loopLibraryRatings((rating, tr) => allAvailableMap.addForce(rating, tr));
     if (sort) allAvailableMap.sortByReverse((e) => int.tryParse(e.key) ?? 0);
-
     return allAvailableMap;
+  }
+
+  void _loopLibraryRatings(void Function(String name, Track tr) callback) {
+    allTracksInLibrary.loop((tr) {
+      callback(tr.effectiveRating.toString(), tr);
+    });
   }
 
   Future<void> _readTrackData([Completer<void>? completer]) async {

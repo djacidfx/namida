@@ -67,7 +67,7 @@ class _MoodsTagsTracksPage extends StatelessWidget with NamidaRouteWidget {
       child: NamidaTracksList(
         infoBox: (maxWidth) => SubpageInfoContainer(
           maxWidth: maxWidth,
-          source: QueueSource.mostPlayed,
+          source: queueSource,
           title: name,
           subtitle: [
             tracks.length.displayTrackKeyword,

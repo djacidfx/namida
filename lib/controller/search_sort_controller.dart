@@ -38,7 +38,9 @@ class SearchSortController extends SearchPortsProvider {
       genreSearchTemp.isNotEmpty ||
       playlistSearchTemp.isNotEmpty ||
       folderTracksSearchTemp.isNotEmpty ||
-      folderVideosSearchTemp.isNotEmpty);
+      folderVideosSearchTemp.isNotEmpty ||
+      moodSearchTemp.isNotEmpty ||
+      tagSearchTemp.isNotEmpty);
 
   final trackSearchList = <Track>[].obs;
   final albumSearchList = <AlbumIdentifierWrapper>[].obs;
@@ -60,6 +62,8 @@ class SearchSortController extends SearchPortsProvider {
     MediaType.folder: <String>[].obs,
     MediaType.folderMusic: <String>[].obs,
     MediaType.folderVideo: <String>[].obs,
+    MediaType.tag: <String>[].obs,
+    MediaType.mood: <String>[].obs,
   };
 
   final trackSearchTemp = <Track>[].obs;
@@ -71,6 +75,8 @@ class SearchSortController extends SearchPortsProvider {
   RxList<String> get genreSearchTemp => _searchMapTemp[MediaType.genre]!;
   RxList<String> get folderTracksSearchTemp => _searchMapTemp[MediaType.folderMusic]!;
   RxList<String> get folderVideosSearchTemp => _searchMapTemp[MediaType.folderVideo]!;
+  RxList<String> get moodSearchTemp => _searchMapTemp[MediaType.mood]!;
+  RxList<String> get tagSearchTemp => _searchMapTemp[MediaType.tag]!;
 
   RxList<Track> get _tracksInfoList => Indexer.inst.tracksInfoList;
 
@@ -210,7 +216,7 @@ class SearchSortController extends SearchPortsProvider {
         (e) => e.sortInfo?.albumArtist?.nullifyEmpty() ?? encapsulateSortCanIgnorePrefix(TrackSearchFilter.albumartist, (e) => e.albumArtist.toLowerCase())(e),
       SortType.artistSort => (e) => e.sortInfo?.artist?.nullifyEmpty() ?? encapsulateSortCanIgnorePrefix(TrackSearchFilter.artist, (e) => e.artistsList.join().toLowerCase())(e),
       SortType.composerSort => (e) => e.sortInfo?.composer?.nullifyEmpty() ?? encapsulateSortCanIgnorePrefix(TrackSearchFilter.composer, (e) => e.composer.toLowerCase())(e),
-      SortType.shuffle => (e) => math.Random().nextInt(3) - 1,
+      SortType.shuffle => (e) => math.Random().nextInt(1000),
     };
   }
 
@@ -322,6 +328,8 @@ class SearchSortController extends SearchPortsProvider {
       MediaType.folder => () => _prepareMediaPorts(Indexer.inst.mainMapFoldersTracksAndVideos.mapToPaths(), MediaType.folder),
       MediaType.folderMusic => () => _prepareMediaPorts(Indexer.inst.mainMapFoldersTracks.mapToPaths(), MediaType.folderMusic),
       MediaType.folderVideo => () => _prepareMediaPorts(Indexer.inst.mainMapFoldersVideos.mapToPaths(), MediaType.folderVideo),
+      MediaType.mood => () => _prepareMediaPorts(Indexer.inst.getAllLibraryMoods(), MediaType.mood),
+      MediaType.tag => () => _prepareMediaPorts(Indexer.inst.getAllLibraryTags(), MediaType.tag),
       MediaType.track => _prepareTracksPorts,
       MediaType.album => _prepareAlbumsPorts,
       MediaType.playlist => _preparePlaylistPorts,
@@ -543,6 +551,8 @@ class SearchSortController extends SearchPortsProvider {
       MediaType.folder => Indexer.inst.mainMapFoldersTracksAndVideos.mapToPaths(),
       MediaType.folderMusic => Indexer.inst.mainMapFoldersTracks.mapToPaths(),
       MediaType.folderVideo => Indexer.inst.mainMapFoldersVideos.mapToPaths(),
+      MediaType.mood => Indexer.inst.getAllLibraryMoods(),
+      MediaType.tag => Indexer.inst.getAllLibraryTags(),
       MediaType.track => <String>[],
       MediaType.album => <String>[],
       MediaType.playlist => <String>[],

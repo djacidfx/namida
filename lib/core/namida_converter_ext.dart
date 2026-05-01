@@ -95,6 +95,8 @@ extension MediaTypeUtils on MediaType {
       MediaType.folder => LibraryTab.folders,
       MediaType.folderMusic => LibraryTab.foldersMusic,
       MediaType.folderVideo => LibraryTab.foldersVideos,
+      MediaType.mood => LibraryTab.moods,
+      MediaType.tag => LibraryTab.tags,
       MediaType.playlist => LibraryTab.playlists,
     };
   }
@@ -1191,9 +1193,9 @@ extension RouteUtils on NamidaRoute {
           RouteType.SUBPAGE_albumArtistTracks => name?.getAlbumArtistTracks(),
           RouteType.SUBPAGE_composerTracks => name?.getComposerTracks(),
           RouteType.SUBPAGE_genreTracks => name?.getGenresTracks(),
-          RouteType.SUBPAGE_moodsTracks => Indexer.inst.getTracksGroupedByMoods(sort: false)[name ?? ''],
-          RouteType.SUBPAGE_tagsTracks => Indexer.inst.getTracksGroupedByTags(sort: false)[name ?? ''],
-          RouteType.SUBPAGE_ratingTracks => Indexer.inst.getTracksGroupedByRatings(sort: false)[name ?? ''],
+          RouteType.SUBPAGE_moodsTracks => Indexer.inst.getTracksForMood(name),
+          RouteType.SUBPAGE_tagsTracks => Indexer.inst.getTracksForTag(name),
+          RouteType.SUBPAGE_ratingTracks => Indexer.inst.getTracksForRating(name),
           RouteType.SUBPAGE_queueTracks => name?.getQueue()?.tracks,
           RouteType.SUBPAGE_playlistTracks => name == null ? null : PlaylistController.inst.getPlaylist(name!)?.tracks,
           RouteType.SUBPAGE_favPlaylistTracks => name == null ? null : PlaylistController.inst.favouritesPlaylist.value.tracks,
@@ -1691,6 +1693,8 @@ extension MediaTypeL10n on MediaType {
     MediaType.genre => lang.genres,
     MediaType.playlist => lang.playlists,
     MediaType.folder => lang.folders,
+    MediaType.mood => lang.moods,
+    MediaType.tag => lang.tags,
     MediaType.folderMusic => "${lang.folders}: ${lang.tracks}",
     MediaType.folderVideo => "${lang.folders}: ${lang.videos}",
   };
@@ -1724,7 +1728,7 @@ extension SortTypeL10n on SortType {
     SortType.size => lang.size,
     SortType.year => lang.year,
     SortType.rating => lang.rating,
-    SortType.shuffle => lang.shuffle,
+    SortType.shuffle => lang.random,
     SortType.mostPlayed => lang.mostPlayed,
     SortType.latestPlayed => lang.recentListens,
     SortType.firstListen => lang.firstListen,
@@ -1773,7 +1777,7 @@ extension YTSortTypeL10n on YTSortType {
     YTSortType.duration => lang.duration,
     YTSortType.date => lang.date,
     YTSortType.dateAdded => lang.dateAdded,
-    YTSortType.shuffle => lang.shuffle,
+    YTSortType.shuffle => lang.random,
     YTSortType.mostPlayed => lang.mostPlayed,
     YTSortType.latestPlayed => lang.recentListens,
     YTSortType.firstListen => lang.firstListen,
@@ -1826,7 +1830,7 @@ extension GroupSortTypeL10n on GroupSortType {
     GroupSortType.albumArtistSort => '${lang.albumArtist} (${lang.sortBy})',
     GroupSortType.artistSort => '${lang.artist} (${lang.sortBy})',
     GroupSortType.composerSort => '${lang.composer} (${lang.sortBy})',
-    GroupSortType.shuffle => lang.shuffle,
+    GroupSortType.shuffle => lang.random,
     GroupSortType.custom => lang.custom,
   };
 

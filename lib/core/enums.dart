@@ -639,6 +639,8 @@ enum MediaType {
   composer,
   genre,
   playlist,
+  mood,
+  tag,
 
   /// not used
   folder,
