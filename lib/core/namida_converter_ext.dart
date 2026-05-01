@@ -1562,12 +1562,12 @@ extension AlbumsFromMaps on AlbumIdentifierWrapper {
   List<Track> getAlbumTracks() => Indexer.inst.mainMapAlbums.value[this.modifiedOnly()] ?? [];
   bool isSingle() {
     final tracks = getAlbumTracks();
-    if (tracks.length > 1) return false;
-    if (tracks.isEmpty) return false;
-    // -- now has 1 item
-    final tr = tracks[0];
-    final isAlbum = tr.trackTo > 1 || tr.trackNo > 1;
-    return !isAlbum;
+    if (tracks.length == 1) {
+      final tr = tracks[0];
+      final isAlbum = tr.trackTo > 1 || tr.trackNo > 1;
+      return !isAlbum;
+    }
+    return false;
   }
 }
 

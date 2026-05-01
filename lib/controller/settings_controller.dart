@@ -306,6 +306,7 @@ class _SettingsController with SettingsFileWriter {
 
   final albumIdentifiers = <AlbumIdentifier>[
     AlbumIdentifier.albumName,
+    AlbumIdentifier.albumArtist,
   ].obs;
 
   final mediaItemsTrackSorting = <MediaType, List<SortType>>{
