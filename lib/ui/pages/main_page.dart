@@ -368,6 +368,8 @@ class __MainPageFABButtonState extends State<_MainPageFABButton> {
         isMenuOpened ? SearchSortController.inst.disposeResources() : SearchSortController.inst.prepareResources();
         ScrollSearchController.inst.toggleSearchMenu();
         ScrollSearchController.inst.searchBarKey.currentState?.openCloseSearchBar();
+        ScrollSearchController.inst.resetSearch();
+        ClipboardController.inst.updateTextInControllerEmpty(true);
       }
     } else if (fab == FABType.shuffle || fab == FABType.play) {
       Player.inst.playOrPause(0, SelectedTracksController.inst.getCurrentAllTracks(), QueueSource.allTracksAll, shuffle: fab == FABType.shuffle);
