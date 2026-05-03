@@ -528,6 +528,7 @@ class LocalQueueChipHeaderRow extends StatelessWidget {
       isLocal: true,
       addLeftMargin: addLeftMargin,
       onArrowDownPressed: MiniPlayerController.inst.snapToExpanded,
+      durationFormatter: (items) => items.map((e) => e as Selectable).totalDurationFormatted,
     );
   }
 }
@@ -543,6 +544,7 @@ class YTQueueChipHeaderRow extends StatelessWidget {
       isLocal: false,
       addLeftMargin: addLeftMargin,
       onArrowDownPressed: onArrowDownPressed ?? MiniPlayerController.inst.snapToExpanded,
+      durationFormatter: null,
     );
   }
 }
@@ -551,12 +553,14 @@ class QueueChipHeaderRow extends StatelessWidget {
   final bool isLocal;
   final bool addLeftMargin;
   final void Function() onArrowDownPressed;
+  final String Function(Iterable<Playable> items)? durationFormatter;
 
   const QueueChipHeaderRow({
     super.key,
     required this.isLocal,
     required this.addLeftMargin,
     required this.onArrowDownPressed,
+    required this.durationFormatter,
   });
 
   static const minHeight = 42.0;
@@ -608,6 +612,7 @@ class QueueChipHeaderRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = context.theme;
     final textTheme = theme.textTheme;
+    final textStyle = textTheme.displaySmall?.copyWith(fontWeight: FontWeight.w600);
     return ConstrainedBox(
       constraints: BoxConstraints(minHeight: 42.0, maxHeight: (context.height * 0.15).withMinimum(42.0)),
       child: Padding(
@@ -627,20 +632,46 @@ class QueueChipHeaderRow extends StatelessWidget {
                       fit: BoxFit.scaleDown,
                       child: Padding(
                         padding: const EdgeInsets.only(left: 12.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              lang.queue,
-                              style: textTheme.displayMedium,
+                        child: ObxO(
+                          rx: Player.inst.currentIndex,
+                          builder: (context, currentIndex) => ObxO(
+                            rx: Player.inst.currentQueue,
+                            builder: (context, currentQueue) => Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  lang.queue,
+                                  style: textTheme.displayMedium,
+                                ),
+
+                                if (durationFormatter != null)
+                                  Row(
+                                    mainAxisSize: .min,
+                                    children: [
+                                      Text(
+                                        "${currentIndex + 1}/${currentQueue.length} •",
+                                        style: textStyle,
+                                      ),
+                                      const SizedBox(width: 4.0),
+                                      const Icon(
+                                        Broken.timer,
+                                        size: 8.0,
+                                      ),
+                                      const SizedBox(width: 2.0),
+                                      Text(
+                                        durationFormatter!(currentQueue.skip(currentIndex)),
+                                        style: textStyle,
+                                      ),
+                                    ],
+                                  )
+                                else
+                                  Text(
+                                    "${currentIndex + 1}/${currentQueue.length}",
+                                    style: textStyle,
+                                  ),
+                              ],
                             ),
-                            Obx(
-                              (context) => Text(
-                                "${Player.inst.currentIndex.valueR + 1}/${Player.inst.currentQueue.valueR.length}",
-                                style: textTheme.displaySmall?.copyWith(fontWeight: FontWeight.w600),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ),

@@ -58,12 +58,14 @@ extension TracksSelectableUtils on Iterable<Selectable> {
   }
 }
 
-extension TracksWithDatesUtils on List<Selectable> {
+extension TracksWithDatesUtilsIterable on Iterable<Selectable> {
   int get totalDurationInMS => fold(0, (previousValue, element) => previousValue + element.track.durationMS);
   String get totalDurationFormatted {
     return (totalDurationInMS ~/ 1000).secondsFormatted;
   }
+}
 
+extension TracksWithDatesUtils on List<Selectable> {
   int getTotalListenCount() {
     int total = 0;
     final int length = this.length;
