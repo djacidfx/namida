@@ -2623,6 +2623,151 @@ class SubpageInfoContainer extends StatelessWidget {
     required this.heroTag,
   });
 
+  void _openAdvancedShuffleDialog() {
+    final tracks = tracksFn();
+    final tracksCount = tracks.length;
+    final countRx = tracksCount.obs;
+
+    Iterable<Playable> getTracksWithLimit() {
+      var all = tracksFn();
+      final requiredCount = countRx.value;
+      if (requiredCount > 1 && requiredCount < all.length) {
+        all = all.getRandomSample(requiredCount);
+      }
+      return all;
+    }
+
+    Track? playAfterTrack;
+    if (Player.inst.currentItem.value is Selectable && Player.inst.latestInsertedIndex > Player.inst.currentIndex.value) {
+      playAfterTrack = (Player.inst.currentQueue.value[Player.inst.latestInsertedIndex] as Selectable).track;
+    }
+
+    NamidaNavigator.inst.navigateDialog(
+      onDisposing: () {
+        countRx.close();
+      },
+      dialog: CustomBlurryDialog(
+        title: lang.shuffle,
+        actions: const [
+          DoneButton(),
+        ],
+        child: Column(
+          children: [
+            const SizedBox(height: 32.0),
+            Obx(
+              (context) {
+                final count = countRx.valueR;
+                return NamidaWheelSlider(
+                  initValue: countRx.value,
+                  min: 0,
+                  max: (tracks.length - 1).withMinimum(1),
+                  onValueChanged: (val) => countRx.value = (val + 1).withMaximum(tracksCount),
+                  text: count == tracksCount ? lang.all : count.displayTrackKeyword,
+                  topText: lang.tracks,
+                  textPadding: 8.0,
+                );
+              },
+            ),
+            const SizedBox(height: 12.0),
+            CustomListTile(
+              icon: Broken.shuffle,
+              title: lang.shuffle,
+              onTap: () {
+                Player.inst.playOrPause(0, getTracksWithLimit(), source, shuffle: true);
+                NamidaNavigator.inst.closeDialog();
+              },
+            ),
+            CustomListTile(
+              icon: Broken.next,
+              title: "${lang.playNext} (${lang.shuffle})",
+              onTap: () {
+                Player.inst.addToQueue(getTracksWithLimit(), insertNext: true);
+                NamidaNavigator.inst.closeDialog();
+              },
+            ),
+            if (playAfterTrack != null)
+              CustomListTile(
+                icon: Broken.hierarchy_square,
+                title: "${lang.playAfter} (${lang.shuffle})",
+                subtitle: [playAfterTrack.artistsList.firstOrNull, playAfterTrack.title].joinText(separator: ' - '),
+                onTap: () {
+                  Player.inst.addToQueue(getTracksWithLimit(), insertAfterLatest: true);
+                  NamidaNavigator.inst.closeDialog();
+                },
+              ),
+            CustomListTile(
+              icon: Broken.play_cricle,
+              title: "${lang.playLast} (${lang.shuffle})",
+              onTap: () {
+                Player.inst.addToQueue(getTracksWithLimit());
+                NamidaNavigator.inst.closeDialog();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _openAdvancedPlayDialog() {
+    Iterable<Playable> getTracksWithLimit() {
+      return tracksFn();
+    }
+
+    Track? playAfterTrack;
+    if (Player.inst.currentItem.value is Selectable && Player.inst.latestInsertedIndex > Player.inst.currentIndex.value) {
+      playAfterTrack = (Player.inst.currentQueue.value[Player.inst.latestInsertedIndex] as Selectable).track;
+    }
+
+    NamidaNavigator.inst.navigateDialog(
+      dialog: CustomBlurryDialog(
+        title: lang.play,
+        actions: const [
+          DoneButton(),
+        ],
+        child: Column(
+          children: [
+            const SizedBox(height: 12.0),
+            CustomListTile(
+              icon: Broken.play,
+              title: lang.play,
+              onTap: () {
+                Player.inst.playOrPause(0, getTracksWithLimit(), source);
+                NamidaNavigator.inst.closeDialog();
+              },
+            ),
+            CustomListTile(
+              icon: Broken.next,
+              title: lang.playNext,
+              onTap: () {
+                Player.inst.addToQueue(getTracksWithLimit(), insertNext: true);
+                NamidaNavigator.inst.closeDialog();
+              },
+            ),
+            if (playAfterTrack != null)
+              CustomListTile(
+                icon: Broken.hierarchy_square,
+                title: lang.playAfter,
+                subtitle: [playAfterTrack.artistsList.firstOrNull, playAfterTrack.title].joinText(separator: ' - '),
+                onTap: () {
+                  Player.inst.addToQueue(getTracksWithLimit(), insertAfterLatest: true);
+                  NamidaNavigator.inst.closeDialog();
+                },
+              ),
+            CustomListTile(
+              icon: Broken.play_cricle,
+              title: lang.playLast,
+              onTap: () {
+                Player.inst.addToQueue(getTracksWithLimit());
+                NamidaNavigator.inst.closeDialog();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final textTheme = context.textTheme;
@@ -2731,12 +2876,14 @@ class SubpageInfoContainer extends StatelessWidget {
                           source,
                           shuffle: true,
                         ),
+                        onLongPress: _openAdvancedShuffleDialog,
                       ),
                       const SizedBox(width: 6.0),
                       NamidaButton(
                         onTap: () => Player.inst.addToQueue(tracksFn()),
                         icon: Broken.play_cricle,
                         text: lang.playLast,
+                        onLongPress: _openAdvancedPlayDialog,
                       ),
                       const SizedBox(width: 6.0),
                     ],
