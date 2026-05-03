@@ -5438,15 +5438,50 @@ class QueueUtilsRow extends StatelessWidget {
       children: [
         const SizedBox(width: 12.0),
         NamidaButton(
-          tooltip: () => lang.removeDuplicates,
+          tooltip: () => lang.remove,
           icon: Broken.broom,
           onTap: () {
-            final removed = Player.inst.removeDuplicatesFromQueue();
-            snackyy(
+            void removedSnack(int removedCount) => snackyy(
               top: false,
               icon: Broken.filter_remove,
-              message: "${lang.removed}: ${itemsKeyword(removed)}",
+              message: "${lang.removed}: ${itemsKeyword(removedCount)}",
             );
+            NamidaPopupWrapper(
+              childrenDefault: () => [
+                NamidaPopupItem(
+                  icon: Broken.copy,
+                  title: lang.duplicatedTracks,
+                  onTap: () {
+                    final removed = Player.inst.removeDuplicatesFromQueue();
+                    removedSnack(removed);
+                  },
+                ),
+                NamidaPopupItem(
+                  icon: Broken.arrow_left,
+                  title: lang.previous,
+                  onTap: () {
+                    final removed = Player.inst.removeAllPrevious();
+                    removedSnack(removed);
+                  },
+                ),
+                NamidaPopupItem(
+                  icon: Broken.arrow_right_2,
+                  title: lang.next,
+                  onTap: () {
+                    final removed = Player.inst.removeAllNext();
+                    removedSnack(removed);
+                  },
+                ),
+                NamidaPopupItem(
+                  icon: Broken.task,
+                  title: lang.all,
+                  onTap: () {
+                    final removed = Player.inst.removeAllQueueExceptCurrent();
+                    removedSnack(removed);
+                  },
+                ),
+              ],
+            ).showPopupMenu(context);
           },
         ),
         const SizedBox(width: 6.0),

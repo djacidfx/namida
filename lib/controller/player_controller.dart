@@ -539,8 +539,20 @@ class Player {
     }
   }
 
-  void removeRangeFromQueue(int start, int end) {
-    _audioHandler.removeRangeFromQueue(start, end);
+  int removeRangeFromQueue(int start, int end) {
+    return _audioHandler.removeRangeFromQueue(start, end);
+  }
+
+  int removeAllPrevious() {
+    return _audioHandler.removeAllPrevious();
+  }
+
+  int removeAllNext() {
+    return _audioHandler.removeAllNext();
+  }
+
+  int removeAllQueueExceptCurrent() {
+    return _audioHandler.removeAllExceptCurrent();
   }
 
   Future<void> onItemPlayYoutubeIDSetQuality({
