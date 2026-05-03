@@ -26,6 +26,7 @@ import 'package:namida/controller/navigator_controller.dart';
 import 'package:namida/controller/player_controller.dart';
 import 'package:namida/controller/selected_tracks_controller.dart';
 import 'package:namida/controller/settings_controller.dart';
+import 'package:namida/controller/vibrator_controller.dart';
 import 'package:namida/controller/video_controller.dart';
 import 'package:namida/core/constants.dart';
 import 'package:namida/core/dimensions.dart';
@@ -2019,20 +2020,31 @@ class WaveformMiniplayer extends StatelessWidget {
   }
 
   void onSeekDragUpdate(double deltax, double maxWidth) {
+    if (!_canDragToSeekLatest) return;
     final percentageSwiped = deltax / maxWidth;
     final newSeek = percentageSwiped * _currentDurationInMS;
     MiniPlayerController.inst.seekValue.value = newSeek.toInt();
   }
 
-  void onSeekEnd() {
-    final ms = MiniPlayerController.inst.seekValue.value;
-    if (ms == null) {
-      //-- return early cuz not seeking
-      return;
+  void onSeekEnd({bool allowSeek = true}) {
+    if (allowSeek && _dragUpToCancel < _dragUpToCancelMax) {
+      final ms = MiniPlayerController.inst.seekValue.value;
+      if (ms != null) {
+        Player.inst.seek(Duration(milliseconds: ms));
+      }
     }
-    Player.inst.seek(Duration(milliseconds: ms));
+
+    _dragUpToCancel = 0.0;
+    _canDragToSeekLatest = true;
+
     MiniPlayerController.inst.seekValue.value = null;
   }
+
+  bool get _isMiniplayerExpanded => MiniPlayerController.inst.animation.value >= 0.95;
+
+  static bool _canDragToSeekLatest = true;
+  static double _dragUpToCancel = 0.0;
+  static final _dragUpToCancelMax = 5;
 
   @override
   Widget build(BuildContext context) {
@@ -2044,16 +2056,31 @@ class WaveformMiniplayer extends StatelessWidget {
             height: 64.0,
             child: Padding(
               padding: fixPadding ? EdgeInsets.symmetric(horizontal: (16.0 / 2).spaceX) : EdgeInsets.zero,
-              child: GestureDetector(
+              child: Listener(
                 behavior: HitTestBehavior.translucent,
-                onTapUp: (details) {
-                  onSeekDragUpdate(details.localPosition.dx, constraints.maxWidth);
-                  onSeekEnd();
+                onPointerMove: (event) {
+                  if (!_isMiniplayerExpanded) return;
+                  if (!_canDragToSeekLatest) return;
+                  if (_dragUpToCancel > _dragUpToCancelMax) {
+                    _canDragToSeekLatest = false;
+                    VibratorController.veryhigh();
+                  } else {
+                    _dragUpToCancel -= event.delta.dy * 0.1;
+                  }
                 },
-                onTapCancel: () => MiniPlayerController.inst.seekValue.value = null,
-                onHorizontalDragUpdate: (details) => onSeekDragUpdate(details.localPosition.dx, constraints.maxWidth),
-                onHorizontalDragEnd: (details) => onSeekEnd(),
-                child: const WaveformComponent(),
+                onPointerUp: (_) => _canDragToSeekLatest = true,
+                onPointerCancel: (_) => _canDragToSeekLatest = true,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTapUp: (details) {
+                    onSeekDragUpdate(details.localPosition.dx, constraints.maxWidth);
+                    onSeekEnd();
+                  },
+                  onTapCancel: () => onSeekEnd(allowSeek: false),
+                  onHorizontalDragUpdate: (details) => onSeekDragUpdate(details.localPosition.dx, constraints.maxWidth),
+                  onHorizontalDragEnd: (details) => onSeekEnd(),
+                  child: const WaveformComponent(),
+                ),
               ),
             ),
           );
