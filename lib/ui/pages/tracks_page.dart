@@ -56,7 +56,11 @@ class _TracksPageState extends State<TracksPage> with TickerProviderStateMixin, 
 
   @override
   Widget build(BuildContext context) {
-    final scrollController = LibraryTab.tracks.scrollController;
+    const libraryTab = LibraryTab.tracks;
+    final scrollController = libraryTab.scrollController;
+
+    const listHeader = ExpandableBoxEmptyAnimatedPadding(tab: libraryTab);
+
     return BackgroundWrapper(
       child: Listener(
         onPointerMove: (event) {
@@ -66,127 +70,125 @@ class _TracksPageState extends State<TracksPage> with TickerProviderStateMixin, 
           onRefresh(() async => await showRefreshPromptDialog(false, allowBypassing: true));
         },
         onPointerCancel: (event) => onVerticalDragFinish(),
-        child: Column(
-          children: [
-            Obx(
-              (context) {
-                final finalTracksLength = SearchSortController.inst.trackSearchList.valueR.length;
-                final totalTracksLength = Indexer.inst.tracksInfoList.valueR.length;
-                String leftText = finalTracksLength != totalTracksLength ? '$finalTracksLength/${totalTracksLength.displayTrackKeyword}' : finalTracksLength.displayTrackKeyword;
-                final isIndexingR = Indexer.inst.isIndexing.valueR;
-                return ExpandableBox(
-                  enableHero: false,
-                  isBarVisible: LibraryTab.tracks.isBarVisible.valueR,
-                  displayloadingIndicator: isIndexingR,
-                  leftWidgets: [
-                    NamidaIconButton(
-                      icon: Broken.shuffle,
-                      onPressed: () => Player.inst.playOrPause(0, SearchSortController.inst.trackSearchList.value, QueueSource.allTracksAll, shuffle: true, gentlePlay: false),
-                      iconSize: 18.0,
-                      horizontalPadding: 2.0,
-                    ),
-                    const SizedBox(width: 10.0),
-                    NamidaIconButton(
-                      icon: Broken.play,
-                      onPressed: () => Player.inst.playOrPause(0, SearchSortController.inst.trackSearchList.value, QueueSource.allTracksAll, gentlePlay: false),
-                      iconSize: 18.0,
-                      horizontalPadding: 2.0,
-                    ),
-                    const SizedBox(width: 10.0),
-                  ],
-                  leftText: leftText,
-                  onSearchBoxVisibilityChange: (newShow) => ScrollSearchController.inst.onSearchBoxVisibiltyChange(LibraryTab.tracks, newShow),
-                  onCloseButtonPressed: () {
-                    ScrollSearchController.inst.clearSearchTextField(LibraryTab.tracks);
+        child: ExpandableBoxColumn(
+          tab: libraryTab,
+          header: Obx(
+            (context) {
+              final finalTracksLength = SearchSortController.inst.trackSearchList.valueR.length;
+              final totalTracksLength = Indexer.inst.tracksInfoList.valueR.length;
+              String leftText = finalTracksLength != totalTracksLength ? '$finalTracksLength/${totalTracksLength.displayTrackKeyword}' : finalTracksLength.displayTrackKeyword;
+              final isIndexingR = Indexer.inst.isIndexing.valueR;
+              return ExpandableBox(
+                enableHero: false,
+                isBarVisible: libraryTab.isBarVisible.valueR,
+                displayloadingIndicator: isIndexingR,
+                leftWidgets: [
+                  NamidaIconButton(
+                    icon: Broken.shuffle,
+                    onPressed: () => Player.inst.playOrPause(0, SearchSortController.inst.trackSearchList.value, QueueSource.allTracksAll, shuffle: true, gentlePlay: false),
+                    iconSize: 18.0,
+                    horizontalPadding: 2.0,
+                  ),
+                  const SizedBox(width: 10.0),
+                  NamidaIconButton(
+                    icon: Broken.play,
+                    onPressed: () => Player.inst.playOrPause(0, SearchSortController.inst.trackSearchList.value, QueueSource.allTracksAll, gentlePlay: false),
+                    iconSize: 18.0,
+                    horizontalPadding: 2.0,
+                  ),
+                  const SizedBox(width: 10.0),
+                ],
+                leftText: leftText,
+                onSearchBoxVisibilityChange: (newShow) => ScrollSearchController.inst.onSearchBoxVisibiltyChange(libraryTab, newShow),
+                onCloseButtonPressed: () {
+                  ScrollSearchController.inst.clearSearchTextField(libraryTab);
+                },
+                sortByMenuWidget: SortByMenu(
+                  title: settings.mediaItemsTrackSorting.valueR[MediaType.track]?.firstOrNull?.toText() ?? '',
+                  popupMenuChild: const SortByMenuTracks(),
+                  isCurrentlyReversed: settings.mediaItemsTrackSortingReverse.valueR[MediaType.track] == true,
+                  onReverseIconTap: () {
+                    SearchSortController.inst.sortMedia(MediaType.track, reverse: !(settings.mediaItemsTrackSortingReverse[MediaType.track] == true));
                   },
-                  sortByMenuWidget: SortByMenu(
-                    title: settings.mediaItemsTrackSorting.valueR[MediaType.track]?.firstOrNull?.toText() ?? '',
-                    popupMenuChild: const SortByMenuTracks(),
-                    isCurrentlyReversed: settings.mediaItemsTrackSortingReverse.valueR[MediaType.track] == true,
-                    onReverseIconTap: () {
-                      SearchSortController.inst.sortMedia(MediaType.track, reverse: !(settings.mediaItemsTrackSortingReverse[MediaType.track] == true));
-                    },
-                  ),
-                  textField: CustomTextField(
-                    textFieldController: LibraryTab.tracks.textSearchControllerUI,
-                    textFieldHintText: lang.filterTracks,
-                    onTextFieldValueChanged: (value) => SearchSortController.inst.searchMedia(value, MediaType.track),
-                  ),
-                );
-              },
-            ),
-            Expanded(
-              child: AnimationLimiter(
-                child: TrackTilePropertiesProvider(
-                  configs: const TrackTilePropertiesConfigs(
-                    queueSource: QueueSource.allTracks,
-                  ),
-                  builder: (properties) => ObxO(
-                    rx: SearchSortController.inst.trackSearchList,
-                    builder: (context, trackSearchList) => trackSearchList.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  lang.noTracksFound,
-                                  style: context.textTheme.displayLarge,
-                                ),
-                                const SizedBox(height: 8.0),
-                                NamidaInkWell(
-                                  borderRadius: 8.0,
-                                  bgColor: context.theme.cardColor,
-                                  padding: const EdgeInsetsGeometry.symmetric(horizontal: 12.0, vertical: 6.0),
-                                  onTap: () {
-                                    SettingsSearchController.inst
-                                        .onResultTap(
-                                          settingPage: SettingSubpageEnum.indexer,
-                                          key: IndexerSettingsKeysGlobal.foldersToScan,
-                                          context: context,
-                                        )
-                                        .ignoreError();
-                                  },
-                                  child: Text(
-                                    lang.addFolder,
-                                    style: context.textTheme.displayLarge,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : NamidaListView(
-                            itemExtent: Dimensions.inst.trackTileItemExtent,
-                            itemCount: trackSearchList.length,
-                            scrollController: LibraryTab.tracks.scrollController,
-                            scrollStep: Dimensions.inst.trackTileItemExtent,
-                            itemBuilder: (context, i) {
-                              final track = trackSearchList[i];
-                              return AnimatingTile(
-                                key: Key("$i${track.path}"),
-                                position: i,
-                                shouldAnimate: _shouldAnimate,
-                                child: TrackTile(
-                                  properties: properties,
-                                  index: i,
-                                  trackOrTwd: track,
-                                  tracks: trackSearchList,
-                                ),
-                              );
-                            },
-                            listBuilder: (list) {
-                              return Stack(
-                                children: [
-                                  list,
-                                  pullToRefreshWidget,
-                                ],
-                              );
-                            },
-                          ),
-                  ),
                 ),
+                textField: CustomTextField(
+                  textFieldController: libraryTab.textSearchControllerUI,
+                  textFieldHintText: lang.filterTracks,
+                  onTextFieldValueChanged: (value) => SearchSortController.inst.searchMedia(value, MediaType.track),
+                ),
+              );
+            },
+          ),
+          page: AnimationLimiter(
+            child: TrackTilePropertiesProvider(
+              configs: const TrackTilePropertiesConfigs(
+                queueSource: QueueSource.allTracks,
+              ),
+              builder: (properties) => ObxO(
+                rx: SearchSortController.inst.trackSearchList,
+                builder: (context, trackSearchList) => trackSearchList.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              lang.noTracksFound,
+                              style: context.textTheme.displayLarge,
+                            ),
+                            const SizedBox(height: 8.0),
+                            NamidaInkWell(
+                              borderRadius: 8.0,
+                              bgColor: context.theme.cardColor,
+                              padding: const EdgeInsetsGeometry.symmetric(horizontal: 12.0, vertical: 6.0),
+                              onTap: () {
+                                SettingsSearchController.inst
+                                    .onResultTap(
+                                      settingPage: SettingSubpageEnum.indexer,
+                                      key: IndexerSettingsKeysGlobal.foldersToScan,
+                                      context: context,
+                                    )
+                                    .ignoreError();
+                              },
+                              child: Text(
+                                lang.addFolder,
+                                style: context.textTheme.displayLarge,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : NamidaListView(
+                        itemExtent: Dimensions.inst.trackTileItemExtent,
+                        itemCount: trackSearchList.length,
+                        scrollController: libraryTab.scrollController,
+                        scrollStep: Dimensions.inst.trackTileItemExtent,
+                        header: listHeader,
+                        itemBuilder: (context, i) {
+                          final track = trackSearchList[i];
+                          return AnimatingTile(
+                            key: Key("$i${track.path}"),
+                            position: i,
+                            shouldAnimate: _shouldAnimate,
+                            child: TrackTile(
+                              properties: properties,
+                              index: i,
+                              trackOrTwd: track,
+                              tracks: trackSearchList,
+                            ),
+                          );
+                        },
+                        listBuilder: (list) {
+                          return Stack(
+                            children: [
+                              list,
+                              pullToRefreshWidget,
+                            ],
+                          );
+                        },
+                      ),
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

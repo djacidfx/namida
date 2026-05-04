@@ -27,21 +27,21 @@ class ScrollSearchController {
 
   final isGlobalSearchMenuShown = false.obs;
   final latestSubmittedYTSearch = ''.obs;
-  final TextEditingController searchTextEditingController = TextEditingController();
+  final searchTextEditingController = TextEditingController();
 
-  final Map<LibraryTab, Rx<bool>> isBarVisibleMap = <LibraryTab, Rx<bool>>{};
+  final isBarVisibleMap = <LibraryTab, Rx<bool>>{};
 
   var scrollController = NamidaScrollController.create();
-  final Map<LibraryTab, double> scrollPositionsMap = {};
+  final scrollPositionsMap = <LibraryTab, double>{};
 
   final _textSearchControllers = <LibraryTab, TextEditingController>{}.obs;
 
-  final FocusNode focusNode = FocusNode();
+  final focusNode = FocusNode();
 
   final searchBarKey = GlobalKey<SearchBarAnimationState>();
   final tabViewKey = GlobalKey<NamidaTabViewState>();
 
-  late final NamidaSearchBar searchBarWidget = NamidaSearchBar(searchBarKey: searchBarKey);
+  late final searchBarWidget = NamidaSearchBar(searchBarKey: searchBarKey);
 
   void toggleSearch({bool forceOpen = false, bool instant = false}) async {
     MiniPlayerController.inst.snapToMini();
@@ -107,10 +107,14 @@ class ScrollSearchController {
 
     final rx = isBarVisibleMap[tab] ??= true.obs;
     rx.value = true;
+
     scrollController.addListener(() {
-      final direction = scrollController.positions.lastOrNull?.userScrollDirection;
+      final position = scrollController.positions.lastOrNull;
+      final direction = position?.userScrollDirection;
       if (direction != ScrollDirection.idle) {
-        isBarVisibleMap[tab]?.value = direction != ScrollDirection.reverse;
+        var newIsVisible = direction != ScrollDirection.reverse;
+        if (!newIsVisible && (position?.pixels ?? 0) < kExpandableBoxHeight) newIsVisible = true;
+        isBarVisibleMap[tab]?.value = newIsVisible;
       }
     });
   }

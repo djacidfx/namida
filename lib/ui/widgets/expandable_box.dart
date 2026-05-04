@@ -184,7 +184,7 @@ class _ExpandableBoxState extends State<ExpandableBox> with SingleTickerProvider
                   duration: const Duration(milliseconds: 250),
                   show: canShowSearchBox,
                   child: Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: textFieldRow,
                   ),
                 ),
@@ -358,6 +358,48 @@ class ChangeGridCountWidget extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class ExpandableBoxColumn extends StatelessWidget {
+  final LibraryTab tab;
+  final Widget header;
+  final Widget page;
+
+  const ExpandableBoxColumn({
+    super.key,
+    required this.tab,
+    required this.header,
+    required this.page,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        header,
+        Expanded(
+          child: page,
+        ),
+      ],
+    );
+  }
+}
+
+class ExpandableBoxEmptyAnimatedPadding extends StatelessWidget {
+  final LibraryTab tab;
+  const ExpandableBoxEmptyAnimatedPadding({super.key, required this.tab});
+
+  @override
+  Widget build(BuildContext context) {
+    return ObxO(
+      rx: tab.isBarVisible,
+      builder: (context, visible) => AnimatedShow(
+        show: !visible,
+        duration: const Duration(milliseconds: 400),
+        child: const SizedBox(height: kExpandableBoxHeight),
+      ),
     );
   }
 }

@@ -93,7 +93,7 @@ class Dimensions {
     return globalBottomPaddingFABR + globalBottomPaddingEffectiveR;
   }
 
-  static const globalBottomPaddingTotal = kFABSize + _kMiniplayerBottomPadding + 12.0;
+  static const globalBottomPaddingTotal = kFABSize + _kMiniplayerBottomPadding + 12.0 + 8.0;
 
   bool shouldAlbumBeSquared(BuildContext context) {
     final countPerRow = settings.mediaGridCounts.value.get(LibraryTab.albums);

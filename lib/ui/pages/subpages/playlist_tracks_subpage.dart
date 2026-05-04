@@ -572,7 +572,7 @@ class _NormalPlaylistTracksPageState extends State<NormalPlaylistTracksPage>
                 onReorderStart: (index) => super.enablePullToRefresh = false,
                 onReorderEnd: (index) => super.enablePullToRefresh = true,
                 onReorder: isSearching ? null : (oldIndex, newIndex) => PlaylistController.inst.reorderTrack(playlist, oldIndex, newIndex),
-                header: TracksSearchWidgetBoxBase(
+                stickyHeader: TracksSearchWidgetBoxBase(
                   state: this,
                   leftText: [
                     tracksWithDate.displayTrackKeyword,

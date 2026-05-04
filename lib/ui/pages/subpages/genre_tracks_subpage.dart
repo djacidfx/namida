@@ -56,7 +56,7 @@ class _GenreTracksPageState extends State<GenreTracksPage> with PortsProvider<Ma
             (context) {
               Indexer.inst.mainMapGenres.valueR; // to update after sorting
               return NamidaListView(
-                header: TracksSearchWidgetBox(
+                stickyHeader: TracksSearchWidgetBox(
                   state: this,
                   leftText: [
                     tracks.displayTrackKeyword,

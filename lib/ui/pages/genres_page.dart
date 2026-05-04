@@ -42,8 +42,11 @@ class GenresPage extends StatelessWidget with NamidaRouteWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = context.textTheme;
-    final scrollController = LibraryTab.genres.scrollController;
+    const libraryTab = LibraryTab.genres;
+    final scrollController = libraryTab.scrollController;
     final countPerRowResolved = countPerRow.resolve(context);
+
+    const listHeader = ExpandableBoxEmptyAnimatedPadding(tab: libraryTab);
 
     return BackgroundWrapper(
       child: NamidaScrollbar(
@@ -61,43 +64,44 @@ class GenresPage extends StatelessWidget with NamidaRouteWidget {
               final totalGenresLength = Indexer.inst.mainMapGenres.valueR.length;
               String leftText = finalGenresLength != totalGenresLength ? '$finalGenresLength/${totalGenresLength.displayGenreKeyword}' : finalGenresLength.displayGenreKeyword;
 
-              return Column(
-                children: [
-                  ExpandableBox(
-                    enableHero: enableHero,
-                    gridWidget: const ChangeGridCountWidget(
-                      tab: LibraryTab.genres,
-                    ),
-                    isBarVisible: LibraryTab.genres.isBarVisible.valueR,
-                    leftText: leftText,
-                    onSearchBoxVisibilityChange: (newShow) => ScrollSearchController.inst.onSearchBoxVisibiltyChange(LibraryTab.genres, newShow),
-                    onCloseButtonPressed: () => ScrollSearchController.inst.clearSearchTextField(LibraryTab.genres),
-                    sortByMenuWidget: SortByMenu(
-                      title: sort.toText(),
-                      popupMenuChild: const SortByMenuGenres(),
-                      isCurrentlyReversed: sortReverse,
-                      onReverseIconTap: () => SearchSortController.inst.sortMedia(MediaType.genre, reverse: !settings.genreSortReversed.value),
-                    ),
-                    textField: CustomTextField(
-                      textFieldController: LibraryTab.genres.textSearchControllerUI,
-                      textFieldHintText: lang.filterGenres,
-                      onTextFieldValueChanged: (value) => SearchSortController.inst.searchMedia(value, MediaType.genre),
-                    ),
+              return ExpandableBoxColumn(
+                tab: libraryTab,
+                header: ExpandableBox(
+                  enableHero: enableHero,
+                  gridWidget: const ChangeGridCountWidget(
+                    tab: libraryTab,
                   ),
-                  Expanded(
-                    child: ObxPrefer(
+                  isBarVisible: libraryTab.isBarVisible.valueR,
+                  leftText: leftText,
+                  onSearchBoxVisibilityChange: (newShow) => ScrollSearchController.inst.onSearchBoxVisibiltyChange(libraryTab, newShow),
+                  onCloseButtonPressed: () => ScrollSearchController.inst.clearSearchTextField(libraryTab),
+                  sortByMenuWidget: SortByMenu(
+                    title: sort.toText(),
+                    popupMenuChild: const SortByMenuGenres(),
+                    isCurrentlyReversed: sortReverse,
+                    onReverseIconTap: () => SearchSortController.inst.sortMedia(MediaType.genre, reverse: !settings.genreSortReversed.value),
+                  ),
+                  textField: CustomTextField(
+                    textFieldController: libraryTab.textSearchControllerUI,
+                    textFieldHintText: lang.filterGenres,
+                    onTextFieldValueChanged: (value) => SearchSortController.inst.searchMedia(value, MediaType.genre),
+                  ),
+                ),
+                page: SmoothCustomScrollView(
+                  controller: scrollController,
+                  slivers: [
+                    SliverToBoxAdapter(child: listHeader),
+                    ObxPrefer(
                       enabled: sort.requiresHistory,
                       rx: HistoryController.inst.topTracksMapListens,
-                      builder: (context, _) => SmoothGridView.builder(
+                      builder: (context, _) => SliverGrid.builder(
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: countPerRowResolved,
                           childAspectRatio: 0.8,
                           mainAxisSpacing: 8.0,
                         ),
-                        controller: scrollController,
                         itemCount: SearchSortController.inst.genreSearchList.length,
-                        padding: kBottomPaddingInsets,
-                        itemBuilder: (BuildContext context, int i) {
+                        itemBuilder: (context, i) {
                           final genre = SearchSortController.inst.genreSearchList[i];
                           final tracks = genre.getGenresTracks();
                           final topRightText = extraTextResolver?.call(tracks);
@@ -136,8 +140,9 @@ class GenresPage extends StatelessWidget with NamidaRouteWidget {
                         },
                       ),
                     ),
-                  ),
-                ],
+                    kBottomPaddingWidgetSliver,
+                  ],
+                ),
               );
             },
           ),

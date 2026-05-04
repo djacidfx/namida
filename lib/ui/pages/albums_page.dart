@@ -48,10 +48,13 @@ class AlbumsPage extends StatelessWidget with NamidaRouteWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = context.textTheme;
-    final scrollController = LibraryTab.albums.scrollController;
+    const libraryTab = LibraryTab.albums;
+    final scrollController = libraryTab.scrollController;
     final countPerRowResolved = countPerRow.resolve(context);
     final artistTypeColor = context.theme.colorScheme.onSecondaryContainer.withOpacityExt(0.8);
     final isCustomList = albumIdentifiers != null;
+
+    const listHeader = ExpandableBoxEmptyAnimatedPadding(tab: libraryTab);
 
     return BackgroundWrapper(
       child: NamidaScrollbar(
@@ -59,93 +62,92 @@ class AlbumsPage extends StatelessWidget with NamidaRouteWidget {
         child: AnimationLimiter(
           child: ObxO(
             rx: albumIdentifiers ?? SearchSortController.inst.albumSearchList,
-            builder: (context, finalAlbums) => Column(
-              children: [
-                Obx(
-                  (context) {
-                    final sort = settings.albumSort.valueR;
-                    final sortReverse = settings.albumSortReversed.valueR;
+            builder: (context, finalAlbums) => ExpandableBoxColumn(
+              tab: libraryTab,
+              header: Obx(
+                (context) {
+                  final sort = settings.albumSort.valueR;
+                  final sortReverse = settings.albumSortReversed.valueR;
 
-                    final finalAlbumsLength = finalAlbums.length;
-                    final totalAlbumsLength = Indexer.inst.mainMapAlbums.valueR.length;
-                    String leftText = finalAlbumsLength != totalAlbumsLength
-                        ? '$finalAlbumsLength/${totalAlbumsLength.displayAlbumKeyword}'
-                        : finalAlbumsLength.displayAlbumKeyword;
+                  final finalAlbumsLength = finalAlbums.length;
+                  final totalAlbumsLength = Indexer.inst.mainMapAlbums.valueR.length;
+                  String leftText = finalAlbumsLength != totalAlbumsLength ? '$finalAlbumsLength/${totalAlbumsLength.displayAlbumKeyword}' : finalAlbumsLength.displayAlbumKeyword;
 
-                    return ExpandableBox(
-                      enableHero: enableHero,
-                      gridWidget: enableGridIconButton
-                          ? ChangeGridCountWidget(
-                              tab: LibraryTab.albums,
-                              forStaggered: settings.useAlbumStaggeredGridView.valueR,
-                            )
-                          : null,
-                      isBarVisible: LibraryTab.albums.isBarVisible.valueR,
-                      leftText: '',
-                      leftWidgets: [
-                        NamidaPopupWrapper(
-                          children: _getSinglesAndAlbumsToggles,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Broken.arrange_circle,
-                                size: 14.0,
+                  return ExpandableBox(
+                    enableHero: enableHero,
+                    gridWidget: enableGridIconButton
+                        ? ChangeGridCountWidget(
+                            tab: libraryTab,
+                            forStaggered: settings.useAlbumStaggeredGridView.valueR,
+                          )
+                        : null,
+                    isBarVisible: libraryTab.isBarVisible.valueR,
+                    leftText: '',
+                    leftWidgets: [
+                      NamidaPopupWrapper(
+                        children: _getSinglesAndAlbumsToggles,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Broken.arrange_circle,
+                              size: 14.0,
+                              color: artistTypeColor,
+                            ),
+                            const SizedBox(width: 4.0),
+                            Text(
+                              leftText,
+                              style: textTheme.displayMedium?.copyWith(
                                 color: artistTypeColor,
                               ),
-                              const SizedBox(width: 4.0),
-                              Text(
-                                leftText,
-                                style: textTheme.displayMedium?.copyWith(
-                                  color: artistTypeColor,
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
-                      onSearchBoxVisibilityChange: (newShow) => ScrollSearchController.inst.onSearchBoxVisibiltyChange(LibraryTab.albums, newShow),
-                      onCloseButtonPressed: () => ScrollSearchController.inst.clearSearchTextField(LibraryTab.albums),
-                      disableSorting: isCustomList,
-                      sortByMenuWidget: SortByMenu(
-                        title: sort.toText(),
-                        popupMenuChild: const SortByMenuAlbums(),
-                        isCurrentlyReversed: sortReverse,
-                        onReverseIconTap: () => SearchSortController.inst.sortMedia(MediaType.album, reverse: !settings.albumSortReversed.value),
                       ),
-                      textField: CustomTextField(
-                        textFieldController: LibraryTab.albums.textSearchControllerUI,
-                        textFieldHintText: lang.filterAlbums,
-                        onTextFieldValueChanged: (value) => SearchSortController.inst.searchMedia(value, MediaType.album),
-                      ),
-                    );
-                  },
-                ),
-                Obx(
-                  (context) {
-                    settings.albumListTileHeight.valueR;
+                    ],
+                    onSearchBoxVisibilityChange: (newShow) => ScrollSearchController.inst.onSearchBoxVisibiltyChange(libraryTab, newShow),
+                    onCloseButtonPressed: () => ScrollSearchController.inst.clearSearchTextField(libraryTab),
+                    disableSorting: isCustomList,
+                    sortByMenuWidget: SortByMenu(
+                      title: sort.toText(),
+                      popupMenuChild: const SortByMenuAlbums(),
+                      isCurrentlyReversed: sortReverse,
+                      onReverseIconTap: () => SearchSortController.inst.sortMedia(MediaType.album, reverse: !settings.albumSortReversed.value),
+                    ),
+                    textField: CustomTextField(
+                      textFieldController: libraryTab.textSearchControllerUI,
+                      textFieldHintText: lang.filterAlbums,
+                      onTextFieldValueChanged: (value) => SearchSortController.inst.searchMedia(value, MediaType.album),
+                    ),
+                  );
+                },
+              ),
+              page: SmoothCustomScrollView(
+                controller: scrollController,
+                slivers: [
+                  SliverToBoxAdapter(child: listHeader),
+                  Obx(
+                    (context) {
+                      settings.albumListTileHeight.valueR;
 
-                    final sort = settings.albumSort.valueR;
-                    final sortTextIsUseless =
-                        sort == GroupSortType.album ||
-                        sort == GroupSortType.year ||
-                        sort == GroupSortType.albumArtist ||
-                        sort == GroupSortType.numberOfTracks ||
-                        sort == GroupSortType.duration;
+                      final sort = settings.albumSort.valueR;
+                      final sortTextIsUseless =
+                          sort == GroupSortType.album ||
+                          sort == GroupSortType.year ||
+                          sort == GroupSortType.albumArtist ||
+                          sort == GroupSortType.numberOfTracks ||
+                          sort == GroupSortType.duration;
 
-                    final extraTextResolver = sortTextIsUseless ? null : SearchSortController.inst.getGroupSortExtraTextResolver(sort);
+                      final extraTextResolver = sortTextIsUseless ? null : SearchSortController.inst.getGroupSortExtraTextResolver(sort);
 
-                    return ObxPrefer(
-                      enabled: sort.requiresHistory,
-                      rx: HistoryController.inst.topTracksMapListens,
-                      builder: (context, _) => countPerRowResolved == 1
-                          ? Expanded(
-                              child: SuperSmoothListView.builder(
-                                controller: scrollController,
+                      return ObxPrefer(
+                        enabled: sort.requiresHistory,
+                        rx: HistoryController.inst.topTracksMapListens,
+                        builder: (context, _) => countPerRowResolved == 1
+                            ? SliverFixedExtentList.builder(
                                 itemCount: finalAlbums.length,
                                 itemExtent: settings.albumListTileHeight.valueR + 4.0 * 5,
-                                padding: kBottomPaddingInsets,
-                                itemBuilder: (BuildContext context, int i) {
+                                itemBuilder: (context, i) {
                                   final albumId = finalAlbums[i];
                                   final tracks = albumId.getAlbumTracks();
                                   return AnimatingTile(
@@ -159,18 +161,12 @@ class AlbumsPage extends StatelessWidget with NamidaRouteWidget {
                                     ),
                                   );
                                 },
-                              ),
-                            )
-                          : settings.useAlbumStaggeredGridView.valueR
-                          ? Expanded(
-                              child: SmoothMasonryGridView.builder(
-                                controller: scrollController,
-                                padding: kBottomPaddingInsets,
-                                itemCount: finalAlbums.length,
+                              )
+                            : settings.useAlbumStaggeredGridView.valueR
+                            ? SliverMasonryGrid.count(
+                                crossAxisCount: countPerRowResolved,
+                                childCount: finalAlbums.length,
                                 mainAxisSpacing: 8.0,
-                                gridDelegate: SliverSimpleGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: countPerRowResolved,
-                                ),
                                 itemBuilder: (context, i) {
                                   final albumId = finalAlbums[i];
                                   final tracks = albumId.getAlbumTracks();
@@ -187,19 +183,15 @@ class AlbumsPage extends StatelessWidget with NamidaRouteWidget {
                                     ),
                                   );
                                 },
-                              ),
-                            )
-                          : Expanded(
-                              child: SmoothGridView.builder(
+                              )
+                            : SliverGrid.builder(
                                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: countPerRowResolved,
                                   childAspectRatio: 0.75,
                                   mainAxisSpacing: 8.0,
                                 ),
-                                controller: scrollController,
                                 itemCount: finalAlbums.length,
-                                padding: kBottomPaddingInsets,
-                                itemBuilder: (BuildContext context, int i) {
+                                itemBuilder: (context, i) {
                                   final albumId = finalAlbums[i];
                                   final tracks = albumId.getAlbumTracks();
                                   return AnimatingGrid(
@@ -215,11 +207,12 @@ class AlbumsPage extends StatelessWidget with NamidaRouteWidget {
                                   );
                                 },
                               ),
-                            ),
-                    );
-                  },
-                ),
-              ],
+                      );
+                    },
+                  ),
+                  kBottomPaddingWidgetSliver,
+                ],
+              ),
             ),
           ),
         ),

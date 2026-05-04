@@ -121,15 +121,15 @@ class _ArtistTracksPageState extends State<ArtistTracksPage> with PortsProvider<
                       ),
                     ],
                     const SizedBox(height: 4.0),
-                    TracksSearchWidgetBox(
-                      state: this,
-                      leftText: [
-                        tracks.displayTrackKeyword,
-                        tracks.totalDurationFormatted,
-                      ].join(' - '),
-                      type: type,
-                    ),
                   ],
+                ),
+                stickyHeader: TracksSearchWidgetBox(
+                  state: this,
+                  leftText: [
+                    tracks.displayTrackKeyword,
+                    tracks.totalDurationFormatted,
+                  ].join(' - '),
+                  type: type,
                 ),
                 infoBox: (maxWidth) => SubpageInfoContainer(
                   maxWidth: maxWidth,

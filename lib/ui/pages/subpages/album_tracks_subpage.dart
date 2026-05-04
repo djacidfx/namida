@@ -150,7 +150,7 @@ class _AlbumTracksPageState extends State<AlbumTracksPage> with PortsProvider<Ma
                             },
                             tracksFn: () => tracks,
                           ),
-                          header: TracksSearchWidgetBox(
+                          stickyHeader: TracksSearchWidgetBox(
                             state: this,
                             leftText: [
                               tracks.displayTrackKeyword,
