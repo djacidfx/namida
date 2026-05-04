@@ -45,14 +45,13 @@ class BenchmarkExecutionTime {
     final total = timesLookup.values.reduce((value, element) => value + element);
     final total2 = _end - _initial;
     final entriesText = timesLookup.entries
-        .where((e) => e.value / 1000 > 5)
         .map(
           // (e) => "${e.value ~/ 1000}ms | ${e.value / total}% | ${e.key}",
-          (e) => "${e.value ~/ 1000}ms | ${e.key}",
+          (e) => "${e.value}us | ${e.value ~/ 1000}ms | ${e.key}",
         )
         .join('\n');
-    final totalText = 'TOTAL: ${total / 1000}ms | ${total / 1000 / 1000} seconds';
-    final totalText2 = 'TOTAL2: ${total2 / 1000}ms | ${total2 / 1000 / 1000} seconds';
+    final totalText = 'TOTAL: ${total}us | ${total / 1000}ms | ${total / 1000 / 1000} seconds';
+    final totalText2 = 'TOTAL2: ${total2}us |  ${total2 / 1000}ms | ${total2 / 1000 / 1000} seconds';
     final totalTextAll = totalText2 == totalText ? totalText : '$totalText\n$totalText2';
     return '$entriesText\n$totalTextAll';
   }

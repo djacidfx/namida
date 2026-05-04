@@ -19,6 +19,8 @@ class _SubsonicWebServer extends MusicWebServer {
         );
       },
       baseUrl: authDetails.dir.sourceRaw,
+      clientId: 'com.msob7y.namida',
+      version: VersionWrapper.current?.name ?? '1.0.0',
       auth: authDetails.auth.toSubsonicAuthModel(),
     );
     _serverUri = Uri.parse(authDetails.dir.sourceRaw);

@@ -599,7 +599,7 @@ class _NamidaColorPickerDialogState extends State<NamidaColorPickerDialog> {
         showColorCode: true,
         colorCodeHasColor: true,
         focusedEditHasNoColor: true,
-        showEditIconButton: true,
+        showEditIconButton: false,
         editIcon: Broken.edit_2,
         wheelSquarePadding: 12.0,
         wheelDiameter: 224.0,

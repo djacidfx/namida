@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:basic_audio_handler/basic_audio_handler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_udid/flutter_udid.dart';
 import 'package:intl/intl.dart';
@@ -1083,8 +1084,8 @@ class NamidaFeaturesVisibility {
   static final onAudioQueryAvailable = _isAndroid;
   static final recieveSharingIntents = _isAndroid;
   static final changeApplicationBrightness = _isAndroid;
-  static final equalizerAvailable = _isAndroid;
-  static final loudnessEnhancerAvailable = _isAndroid;
+  static final equalizerAvailable = PlayerConfig.isEqualizerSupported;
+  static final loudnessEnhancerAvailable = PlayerConfig.isLoudnessEnhancerSupported;
 
   static final showDownloadNotifications = _isWindows || _isLinux;
   static final showVideoControlsOnHover = _isWindows || _isLinux;

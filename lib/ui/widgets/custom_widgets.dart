@@ -4973,8 +4973,9 @@ class _LazyLoadListViewState extends State<LazyLoadListView> {
   void _scrollListener() async {
     if (_isExecuting) return;
 
-    if (controller.offset >= controller.position.maxScrollExtent - widget.extend) {
-      if (!controller.position.outOfRange) {
+    final position = controller.positions.firstOrNull;
+    if (position != null && position.pixels >= position.maxScrollExtent - widget.extend) {
+      if (!position.outOfRange) {
         if (_lastWasSuccess == false && _isInExtendRange) return;
         _isInExtendRange = true;
         if (widget.requiresNetwork && !ConnectivityController.inst.hasConnection) return;
