@@ -113,19 +113,12 @@ class Indexer<T extends Track> {
   late final _audioQuery = OnAudioQuery();
 
   List<T> recentlyAddedTracksSorted() {
-    final alltracks = <T>[];
-    tracksInfoList.value.loop(
-      (item) {
-        alltracks.insertWithOrder(
-          item,
-          (a, b) {
-            var result = b.dateModified.compareTo(a.dateModified);
-            if (result == 0) result = b.dateAdded.compareTo(a.dateAdded);
-            return result;
-          },
-        );
-      },
-    );
+    final alltracks = List<T>.from(tracksInfoList.value);
+    alltracks.sort((a, b) {
+      var result = b.dateModified.compareTo(a.dateModified);
+      if (result == 0) result = b.dateAdded.compareTo(a.dateAdded);
+      return result;
+    });
     return alltracks;
   }
 
@@ -1974,29 +1967,6 @@ class Indexer<T extends Track> {
     imageCache.clear();
     imageCache.clearLiveImages();
     if (Platform.isAndroid) AudioService.evictArtworkCache();
-  }
-}
-
-extension _OrderedInsert<T> on List<T> {
-  void insertWithOrder(T item, int Function(T a, T b) compare) {
-    int left = 0;
-    int right = length - 1;
-
-    while (left <= right) {
-      int mid = (left + right) ~/ 2;
-      var midItem = this[mid];
-      if (midItem == item) {
-        // -- If the string is already in the list, dont do anything
-        return;
-      } else if (compare(midItem, item) < 0) {
-        left = mid + 1;
-      } else {
-        right = mid - 1;
-      }
-    }
-
-    // If the string is not in the list, insert it at the appropriate position
-    insert(left, item);
   }
 }
 
