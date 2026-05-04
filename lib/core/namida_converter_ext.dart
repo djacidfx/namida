@@ -2274,6 +2274,7 @@ extension TrackSearchFilterL10n on TrackSearchFilter {
     TrackSearchFilter.genre => lang.genre,
     TrackSearchFilter.composer => lang.composer,
     TrackSearchFilter.comment => lang.comment,
+    TrackSearchFilter.description => lang.description,
     TrackSearchFilter.year => lang.year,
     TrackSearchFilter.moods => lang.moods,
     TrackSearchFilter.tags => lang.tags,

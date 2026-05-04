@@ -378,24 +378,28 @@ class ExtrasSettings extends SettingSubpageProvider {
                           additional: refreshNecessary,
                         ),
                       ],
-                      child: SmoothSingleChildScrollView(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            ...TrackSearchFilter.values.map(
-                              (e) => Padding(
-                                padding: const EdgeInsets.all(3.0),
-                                child: Obx(
-                                  (context) => ListTileWithCheckMark(
-                                    title: e.toText(),
-                                    subtitle: e == TrackSearchFilter.lyrics ? lang.performanceNote : '',
-                                    onTap: () => _trackFilterOnTap(e),
-                                    active: settings.trackSearchFilter.contains(e),
+                      child: SizedBox(
+                        width: context.width,
+                        height: context.height * 0.6,
+                        child: SmoothSingleChildScrollView(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ...TrackSearchFilter.values.map(
+                                (e) => Padding(
+                                  padding: const EdgeInsets.all(3.0),
+                                  child: Obx(
+                                    (context) => ListTileWithCheckMark(
+                                      title: e.toText(),
+                                      subtitle: e.canAffectPerformance ? lang.performanceNote : '',
+                                      onTap: () => _trackFilterOnTap(e),
+                                      active: settings.trackSearchFilter.contains(e),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -419,6 +423,7 @@ class ExtrasSettings extends SettingSubpageProvider {
 
                   final list = List<TrackSearchFilter>.from(TrackSearchFilter.values);
                   list.remove(TrackSearchFilter.comment);
+                  list.remove(TrackSearchFilter.description);
                   list.remove(TrackSearchFilter.year);
                   list.remove(TrackSearchFilter.moods);
                   list.remove(TrackSearchFilter.tags);

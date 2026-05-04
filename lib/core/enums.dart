@@ -254,10 +254,16 @@ enum TrackSearchFilter {
   genre,
   composer,
   comment,
+  description(canAffectPerformance: true),
   year,
   moods,
   tags,
-  lyrics,
+  lyrics(canAffectPerformance: true),
+  ;
+
+  final bool canAffectPerformance;
+
+  const TrackSearchFilter({this.canAffectPerformance = false});
 }
 
 enum LibraryTab {
