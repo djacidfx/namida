@@ -847,6 +847,8 @@ enum TrackExecuteActions {
   editTags,
   setRating,
   openListens,
+  focus,
+  goToTrack,
   goToAlbum,
   goToArtist,
   goToFolder,

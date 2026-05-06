@@ -60,6 +60,7 @@ import 'package:namida/ui/pages/artists_page.dart';
 import 'package:namida/ui/pages/folders_page.dart';
 import 'package:namida/ui/pages/genres_page.dart';
 import 'package:namida/ui/pages/home_page.dart';
+import 'package:namida/ui/pages/main_page.dart';
 import 'package:namida/ui/pages/moods_tags_page.dart';
 import 'package:namida/ui/pages/playlists_page.dart';
 import 'package:namida/ui/pages/queues_page.dart';
@@ -560,6 +561,8 @@ extension TrackExecuteActionsUtils on TrackExecuteActions {
     TrackExecuteActions.editTags => lang.editTags,
     TrackExecuteActions.setRating => lang.setRating,
     TrackExecuteActions.openListens => lang.totalListens,
+    TrackExecuteActions.focus => lang.focus,
+    TrackExecuteActions.goToTrack => lang.goToTrack,
     TrackExecuteActions.goToAlbum => lang.goToAlbum,
     TrackExecuteActions.goToArtist => lang.goToArtist,
     TrackExecuteActions.goToFolder => lang.goToFolder,
@@ -573,7 +576,7 @@ extension TrackExecuteActionsUtils on TrackExecuteActions {
 
   IconData toIcon() {
     return switch (this) {
-      TrackExecuteActions.none => Broken.cd,
+      TrackExecuteActions.none => Broken.minus_cirlce,
       TrackExecuteActions.playnext => Broken.next,
       TrackExecuteActions.playlast => Broken.play_cricle,
       TrackExecuteActions.playafter => Broken.hierarchy_square,
@@ -585,6 +588,8 @@ extension TrackExecuteActionsUtils on TrackExecuteActions {
       TrackExecuteActions.editTags => Broken.edit,
       TrackExecuteActions.setRating => Broken.grammerly,
       TrackExecuteActions.openListens => Broken.math,
+      TrackExecuteActions.focus => Broken.cd,
+      TrackExecuteActions.goToTrack => Broken.music_square,
       TrackExecuteActions.goToAlbum => Broken.music_dashboard,
       TrackExecuteActions.goToArtist => Broken.profile_2user,
       TrackExecuteActions.goToFolder => Broken.folder,
@@ -739,6 +744,22 @@ extension TrackExecuteActionsUtils on TrackExecuteActions {
           youtubeID: (finalItem) {
             showVideoListensDialog(finalItem.id);
           },
+        );
+
+      case TrackExecuteActions.focus:
+        item.execute(
+          selectable: (finalItem) {
+            MainPageFABResumeButton.jumpToTrackInCurrentRoute(finalItem, fallbackToOpenTracksPage: true);
+          },
+          youtubeID: (finalItem) {},
+        );
+
+      case TrackExecuteActions.goToTrack:
+        item.execute(
+          selectable: (finalItem) {
+            MainPageFABResumeButton.jumpToTrackInTracksPage(finalItem);
+          },
+          youtubeID: (finalItem) {},
         );
 
       case TrackExecuteActions.goToAlbum:

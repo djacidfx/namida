@@ -58,7 +58,7 @@ class ScrollSearchController {
     }
   }
 
-  void animatePageController(LibraryTab tab) async {
+  void animatePageController(LibraryTab tab, {bool jumpToTopIfSamePage = true}) async {
     if (tab == LibraryTab.search) {
       toggleSearch();
 
@@ -71,7 +71,7 @@ class ScrollSearchController {
     if (NamidaNavigator.inst.currentRoute?.isSameRouteAs(w) == true) {
       if (scrollController.hasClients) {
         MiniPlayerController.inst.snapToMini();
-        scrollController.animateToEff(0.0, duration: const Duration(milliseconds: 400), curve: Curves.easeInOutQuart);
+        if (jumpToTopIfSamePage) scrollController.animateToEff(0.0, duration: const Duration(milliseconds: 400), curve: Curves.easeInOutQuart);
       }
       return;
     }

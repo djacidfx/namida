@@ -354,6 +354,7 @@ class CustomizationSettings extends SettingSubpageProvider {
     required _CustomizationSettingsKeys key,
     bool excludePlayerActions = false,
     bool excludeDelete = true,
+    bool excludeFocus = false,
     required String title,
     required IconData icon,
     required Rx<TrackExecuteActions> rx,
@@ -361,7 +362,7 @@ class CustomizationSettings extends SettingSubpageProvider {
   }) {
     List<Widget> getChildren() {
       var values = TrackExecuteActions.values;
-      if (excludePlayerActions || excludeDelete) {
+      if (excludePlayerActions || excludeDelete || excludeFocus) {
         final valuesToExclude = <TrackExecuteActions>[
           if (excludePlayerActions) ...[
             TrackExecuteActions.playnext,
@@ -370,6 +371,9 @@ class CustomizationSettings extends SettingSubpageProvider {
           ],
           if (excludeDelete) ...[
             TrackExecuteActions.delete,
+          ],
+          if (excludeFocus) ...[
+            TrackExecuteActions.focus,
           ],
         ];
         values = TrackExecuteActions.values.where((element) => !valuesToExclude.remove(element)).toList();
@@ -711,6 +715,7 @@ class CustomizationSettings extends SettingSubpageProvider {
                   context: context,
                   key: _CustomizationSettingsKeys.swipeLeftAction,
                   excludeDelete: false,
+                  excludeFocus: true,
                   title: lang.leftAction,
                   icon: Broken.arrow_left_1,
                   rx: settings.onTrackSwipeLeft,
@@ -720,6 +725,7 @@ class CustomizationSettings extends SettingSubpageProvider {
                   context: context,
                   key: _CustomizationSettingsKeys.swipeRightAction,
                   excludeDelete: false,
+                  excludeFocus: true,
                   title: lang.rightAction,
                   icon: Broken.arrow_right,
                   rx: settings.onTrackSwipeRight,

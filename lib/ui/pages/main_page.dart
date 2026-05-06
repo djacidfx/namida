@@ -160,7 +160,7 @@ class MainPage extends StatelessWidget {
                       if (!shouldHide) {
                         // -- only update shouldPlay when fab is showing
                         // -- to prevent switching buttons while hiding
-                        _MainPageFABResumeButton._latestShouldPlay = shouldPlay;
+                        MainPageFABResumeButton._latestShouldPlay = shouldPlay;
                       }
 
                       return AnimatedPositioned(
@@ -173,13 +173,13 @@ class MainPage extends StatelessWidget {
                           isHorizontal: true,
                           show: !shouldHide,
                           duration: const Duration(milliseconds: 400),
-                          child: _MainPageFABResumeButton._latestShouldPlay
-                              ? _MainPageFABResumeButton(
+                          child: MainPageFABResumeButton._latestShouldPlay
+                              ? MainPageFABResumeButton(
                                   key: const ValueKey('shouldPlay_true'),
                                   shouldPlay: true,
                                   getInfo: () => (currentRoute: currentRoute, currentQueueSource: currentQueueSource),
                                 )
-                              : _MainPageFABResumeButton(
+                              : MainPageFABResumeButton(
                                   key: const ValueKey('shouldPlay_false'),
                                   shouldPlay: false,
                                   getInfo: () => (currentRoute: currentRoute, currentQueueSource: currentQueueSource),
@@ -438,11 +438,11 @@ class __MainPageFABButtonState extends State<_MainPageFABButton> {
   }
 }
 
-class _MainPageFABResumeButton extends StatelessWidget {
+class MainPageFABResumeButton extends StatelessWidget {
   final bool shouldPlay;
   final ({NamidaRoute currentRoute, QueueSourceBase currentQueueSource}) Function() getInfo;
 
-  const _MainPageFABResumeButton({
+  const MainPageFABResumeButton({
     super.key,
     required this.shouldPlay,
     required this.getInfo,
@@ -450,7 +450,53 @@ class _MainPageFABResumeButton extends StatelessWidget {
 
   static bool _latestShouldPlay = false;
 
-  T? _resumeFABResolver<T>(
+  static void jumpToTrackInCurrentRoute(Selectable item, {bool fallbackToOpenTracksPage = true}) {
+    if (_jumpToTrack(item, false)) return;
+    if (fallbackToOpenTracksPage) _jumpToTrack(item, true);
+  }
+
+  static void jumpToTrackInTracksPage(Selectable item) {
+    _jumpToTrack(item, true);
+  }
+
+  static bool _jumpToTrack(Selectable item, bool openTracksPage) {
+    RouteType? routeType;
+    List<Selectable<Object>>? tracks;
+    if (openTracksPage) {
+      routeType = RouteType.PAGE_allTracks;
+      tracks = SearchSortController.inst.trackSearchList.value;
+    } else {
+      final currentRoute = NamidaNavigator.inst.currentRoute;
+      routeType = currentRoute?.route;
+      tracks = currentRoute?.tracksListInside();
+    }
+
+    if (routeType == null) return false;
+    if (tracks == null || tracks.isEmpty) return false;
+
+    var index = tracks.indexWhere((e) => e == item);
+    if (index < 0) index = tracks.indexWhere((e) => e.track == item.track);
+    if (index < 0) return false;
+
+    NamidaNavigator.inst.hideStuff();
+
+    if (openTracksPage) {
+      ScrollSearchController.inst.animatePageController(LibraryTab.tracks, jumpToTopIfSamePage: false);
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) {
+        MainPageFABResumeButton.jumpToItem(
+          index,
+          Dimensions.inst.trackTileItemExtent,
+          routeType!,
+        );
+      },
+    );
+    return true;
+  }
+
+  static T? _resumeFABResolver<T>(
     NamidaRoute currentRoute,
     QueueSourceBase currentQueueSource, {
     required T Function(int index, List<Playable> items, NamidaRoute currentRoute) callback,
@@ -474,28 +520,35 @@ class _MainPageFABResumeButton extends StatelessWidget {
     );
   }
 
-  void _resumeFABJumpToItem(int index, List<Playable> items, NamidaRoute currentRoute) {
+  static void jumpToItem(int index, double itemExtent, RouteType routeType) async {
     try {
       final topOffset = Dimensions.inst.showSubpageInfoAtSide
           ? 0.0
-          : switch (currentRoute.route) {
+          : switch (routeType) {
               RouteType.PAGE_allTracks => 0.0,
+              RouteType.PAGE_folders => 0.0,
+              RouteType.PAGE_folders_music => 0.0,
+              RouteType.PAGE_folders_videos => 0.0,
               _ => 224.0, // most pages have top info container
             };
-      final itemExtent = items.firstOrNull is YoutubeID ? Dimensions.youtubeCardItemExtent : Dimensions.inst.trackTileItemExtent;
-      final offset = topOffset + ((index - 2) * itemExtent);
+      var offset = topOffset + ((index - 2) * itemExtent);
 
       final controllerPosition = NamidaScrollController.latestAddedScrollController?.positions.lastOrNull;
       final maxOffset = controllerPosition?.maxScrollExtent;
       if (maxOffset != null && offset > maxOffset) {
-        return;
+        offset = maxOffset + 32.0;
       }
-      controllerPosition?.animateToEff(
+      await controllerPosition?.animateToEff(
         offset,
         duration: const Duration(milliseconds: 400),
         curve: Curves.fastLinearToSlowEaseIn,
       );
     } catch (_) {}
+  }
+
+  static void _resumeFABJumpToItem(int index, List<Playable> items, NamidaRoute currentRoute) {
+    final itemExtent = items.firstOrNull is YoutubeID ? Dimensions.youtubeCardItemExtent : Dimensions.inst.trackTileItemExtent;
+    return jumpToItem(index, itemExtent, currentRoute.route);
   }
 
   void _onTap() {
