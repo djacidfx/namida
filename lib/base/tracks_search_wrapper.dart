@@ -67,23 +67,22 @@ class TracksSearchWrapper {
     final cleanup = params['cleanup'] as bool;
     final lyricsCacheDirectory = params['lyricsCacheDirectory'] as String;
 
-    final tsfMap = <TrackSearchFilter, bool>{};
-    tsf.loop((f) => tsfMap[f] = true);
+    var stitle = tsf.contains(TrackSearchFilter.title);
+    final sfilename = tsf.contains(TrackSearchFilter.filename);
+    final sfolder = tsf.contains(TrackSearchFilter.folder);
+    final salbum = tsf.contains(TrackSearchFilter.album);
+    final salbumartist = tsf.contains(TrackSearchFilter.albumartist);
+    final sartist = tsf.contains(TrackSearchFilter.artist);
+    final sgenre = tsf.contains(TrackSearchFilter.genre);
+    final scomposer = tsf.contains(TrackSearchFilter.composer);
+    final scomment = tsf.contains(TrackSearchFilter.comment);
+    final sdescription = tsf.contains(TrackSearchFilter.description);
+    final syear = tsf.contains(TrackSearchFilter.year);
+    final smoods = tsf.contains(TrackSearchFilter.moods);
+    final stags = tsf.contains(TrackSearchFilter.tags);
+    final slyrics = tsf.contains(TrackSearchFilter.lyrics);
 
-    final stitle = tsfMap[TrackSearchFilter.title] ?? true;
-    final sfilename = tsfMap[TrackSearchFilter.filename] ?? true;
-    final sfolder = tsfMap[TrackSearchFilter.folder] ?? false;
-    final salbum = tsfMap[TrackSearchFilter.album] ?? true;
-    final salbumartist = tsfMap[TrackSearchFilter.albumartist] ?? false;
-    final sartist = tsfMap[TrackSearchFilter.artist] ?? true;
-    final sgenre = tsfMap[TrackSearchFilter.genre] ?? false;
-    final scomposer = tsfMap[TrackSearchFilter.composer] ?? false;
-    final scomment = tsfMap[TrackSearchFilter.comment] ?? false;
-    final sdescription = tsfMap[TrackSearchFilter.description] ?? false;
-    final syear = tsfMap[TrackSearchFilter.year] ?? false;
-    final smoods = tsfMap[TrackSearchFilter.moods] ?? false;
-    final stags = tsfMap[TrackSearchFilter.tags] ?? false;
-    final slyrics = tsfMap[TrackSearchFilter.lyrics] ?? false;
+    if (tsf.isEmpty) stitle = true;
 
     final textCleanedForSearch = _functionOfCleanup(cleanup);
     final textNonCleanedForSearch = cleanup ? _functionOfCleanup(false) : null;
@@ -145,7 +144,7 @@ class TracksSearchWrapper {
               : null,
           splitComposer: splitThis(trMap['composer'], scomposer),
           splitComment: splitThis(trMap['comment'], scomment),
-          splitDescription: splitThis(trMap['description'], sdescription),
+          description: !sdescription ? null : trMap['description'],
           splitMoods: smoods ? _Property.fromListNull(trMap['moods'] as List<String>?) : null,
           splitTags: stags ? _Property.fromListNull(trMap['tags'] as List<String>?) : null,
           year: !syear
@@ -155,13 +154,13 @@ class TracksSearchWrapper {
                   textCleanedForSearch,
                   textNonCleanedForSearch,
                 ),
-          lyrics: slyrics
-              ? _fillAllAvailableLyrics(
+          lyrics: !slyrics
+              ? null
+              : _fillAllAvailableLyrics(
                   track,
                   trMap['lyrics'] as String? ?? '',
                   lyricsCacheDirectory,
-                )
-              : null,
+                ),
         ),
       );
     }
@@ -173,8 +172,8 @@ class TracksSearchWrapper {
     );
   }
 
-  static _Property? _fillAllAvailableLyrics(Track track, String embedded, String lyricsCacheDirectory) {
-    final lyrics = <String>[];
+  static String? _fillAllAvailableLyrics(Track track, String embedded, String lyricsCacheDirectory) {
+    final lyricsBuffer = StringBuffer();
 
     final lrcUtils = LrcSearchUtilsSelectableIsolate(
       mainLyricsCacheDirectory: lyricsCacheDirectory,
@@ -209,16 +208,16 @@ class TracksSearchWrapper {
       final lrc = lrcContent.parseLRC();
       if (lrc != null && lrc.lyrics.isNotEmpty) {
         for (final line in lrc.lyrics) {
-          lyrics.add(line.readableText);
+          lyricsBuffer.writeln(line.readableText);
         }
       } else {
         final split = LineSplitter().convert(lrcContent);
         for (final line in split) {
-          lyrics.add(line);
+          lyricsBuffer.writeln(line);
         }
       }
     }
-    return _Property.fromList(lyrics);
+    return lyricsBuffer.toString();
   }
 
   static _Property? _splitTextCleanedAndNonCleaned(String text, String Function(String) textCleanedForSearch, String Function(String)? textNonCleanedForSearch) {
@@ -268,6 +267,14 @@ class TracksSearchWrapper {
     int matchScore(_CustomTrackExtended trExt) {
       int score = 0;
 
+      void scorePropertySimple(String? propertyString, {int multiplier = 1}) {
+        if (propertyString == null) return;
+
+        if (propertyString.contains(lctext)) {
+          score += 20 * multiplier;
+        }
+      }
+
       void scoreProperty(_Property? property, {int multiplier = 1}) {
         if (property == null) return;
 
@@ -313,11 +320,11 @@ class TracksSearchWrapper {
       scoreProperty(trExt.splitGenre);
       scoreProperty(trExt.splitComposer);
       scoreProperty(trExt.splitComment);
-      scoreProperty(trExt.splitDescription);
+      scorePropertySimple(trExt.description);
       scoreProperty(trExt.splitMoods);
       scoreProperty(trExt.splitTags);
       scoreProperty(trExt.year);
-      scoreProperty(trExt.lyrics);
+      scorePropertySimple(trExt.lyrics);
 
       return score;
     }
@@ -355,11 +362,11 @@ class _CustomTrackExtended {
   final _Property? splitGenre;
   final _Property? splitComposer;
   final _Property? splitComment;
-  final _Property? splitDescription;
+  final String? description;
   final _Property? splitMoods;
   final _Property? splitTags;
   final _Property? year;
-  final _Property? lyrics;
+  final String? lyrics;
 
   const _CustomTrackExtended({
     required this.track,
@@ -372,7 +379,7 @@ class _CustomTrackExtended {
     required this.splitGenre,
     required this.splitComposer,
     required this.splitComment,
-    required this.splitDescription,
+    required this.description,
     required this.splitMoods,
     required this.splitTags,
     required this.year,
