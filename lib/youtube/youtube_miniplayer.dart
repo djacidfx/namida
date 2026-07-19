@@ -312,7 +312,7 @@ class YoutubeMiniPlayerState extends State<YoutubeMiniPlayer> {
                               accurateDate = false;
                             }
                             if (parsedDate != null) {
-                              if (accurateDate) uploadDate = parsedDate.millisecondsSinceEpoch.dateFormattedOriginal;
+                              if (accurateDate) uploadDate = parsedDate.dateFormattedOriginal;
                               uploadDateAgo = TimeAgoController.dateFromNow(parsedDate);
                             } else {
                               // uploadDateAgo = videoInfo?.publishedFromText; // warcrime
@@ -930,12 +930,12 @@ class _YTPlayerInnerPage extends StatelessWidget {
                         title: ObxO(
                           rx: _isTitleExpanded,
                           builder: (context, isTitleExpanded) {
-                            String? dateToShow;
-                            if (isTitleExpanded) {
-                              dateToShow = uploadDate ?? uploadDateAgo;
-                            } else {
-                              dateToShow = uploadDateAgo ?? uploadDate;
-                            }
+                            // String? dateToShow;
+                            // if (isTitleExpanded) {
+                            //   dateToShow = uploadDate ?? uploadDateAgo;
+                            // } else {
+                            //   dateToShow = uploadDateAgo ?? uploadDate;
+                            // }
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -951,17 +951,55 @@ class _YTPlayerInnerPage extends StatelessWidget {
                                     style: mainTextTheme.displayLarge,
                                   ),
                                 ),
-                                const SizedBox(height: 4.0),
+                                const SizedBox(height: 6.0),
                                 NamidaDummyContainer(
                                   width: maxWidth * 0.4,
                                   height: 12.0,
-                                  shimmerEnabled: shimmerEnabledDummyContainer && dateToShow == null,
-                                  child: Text(
-                                    [
-                                      if (videoViewCount != null) isTitleExpanded ? videoViewCount.displayViewsKeyword : videoViewCount.displayViewsKeywordShort,
-                                      ?dateToShow,
-                                    ].join(' • '),
-                                    style: mainTextTheme.displaySmall?.copyWith(fontWeight: FontWeight.w500),
+                                  shimmerEnabled: shimmerEnabledDummyContainer && videoViewCount == null && uploadDateAgo == null && uploadDate == null,
+                                  child: IgnorePointer(
+                                    child: Row(
+                                      mainAxisSize: .min,
+                                      children:
+                                          [
+                                                if (videoViewCount != null) (videoViewCount.formatDecimalShort(), Broken.eye),
+                                                if (uploadDate != null) (uploadDate!, Broken.calendar),
+                                                if (uploadDateAgo != null) (uploadDateAgo!, Broken.clock),
+                                              ]
+                                              .map(
+                                                (info) => Flexible(
+                                                  child: FittedBox(
+                                                    fit: .scaleDown,
+                                                    child: NamidaInkWell(
+                                                      borderRadius: 6.0,
+                                                      bgColor: context.theme.cardColor.withOpacityExt(0.5),
+                                                      padding: const EdgeInsetsGeometry.symmetric(horizontal: 6.0, vertical: 4.0),
+                                                      onTap: null,
+                                                      child: Row(
+                                                        mainAxisSize: .min,
+                                                        children: [
+                                                          Icon(
+                                                            info.$2,
+                                                            size: 12.0,
+                                                            color: mainTextTheme.displaySmall?.color,
+                                                          ),
+                                                          const SizedBox(width: 4.0),
+                                                          Text(
+                                                            info.$1,
+                                                            style: mainTextTheme.displaySmall?.copyWith(
+                                                              fontWeight: FontWeight.w500,
+                                                              fontSize: 12.0,
+                                                            ),
+                                                            softWrap: false,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              )
+                                              .addSeparators(separator: const SizedBox(width: 4.0), skipFirst: 1)
+                                              .toFixedList(),
+                                    ),
                                   ),
                                 ),
                               ],
