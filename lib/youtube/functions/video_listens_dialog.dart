@@ -14,7 +14,7 @@ import 'package:namida/youtube/yt_utils.dart';
 
 void showVideoListensDialog(String videoId, {List<int> datesOfListen = const [], Color? colorScheme}) async {
   final releaseDate = await YoutubeInfoController.utils.getVideoReleaseDate(videoId);
-  final subtitle = releaseDate?.millisecondsSinceEpoch.dateAndClockFormattedOriginal;
+  final subtitle = releaseDate?.dateAndClockFormattedOriginal;
   showListensDialog(
     datesOfListen: datesOfListen.isNotEmpty ? datesOfListen : YoutubeHistoryController.inst.topTracksMapListens.value[videoId] ?? [],
     subtitle: subtitle,

@@ -67,9 +67,7 @@ class JsonToHistoryParser {
     }
 
     _isShowingParsingMenu = true;
-    final dateText = _currentNewestDate.value != null
-        ? "(${_currentOldestDate.value!.millisecondsSinceEpoch.dateFormattedOriginal} → ${_currentNewestDate.value!.millisecondsSinceEpoch.dateFormattedOriginal})"
-        : '';
+    final dateText = _currentNewestDate.value != null ? "(${_currentOldestDate.value!.dateFormattedOriginal} → ${_currentNewestDate.value!.dateFormattedOriginal})" : '';
 
     NamidaNavigator.inst.navigateDialog(
       onDismissing: _hideParsingDialog,

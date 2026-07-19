@@ -1434,7 +1434,7 @@ class _NamidaFileBrowserState<T extends FileSystemEntity> extends State<_NamidaF
                                           icon: image == null ? _fileToIcon(file) : null,
                                           leading: image != null ? _getFileImage(file) : null,
                                           title: _pathToName(file.path),
-                                          subtitle: info == null ? '' : "${info.size.fileSizeFormatted} | ${info.modified.millisecondsSinceEpoch.dateAndClockFormattedOriginal}",
+                                          subtitle: info == null ? '' : "${info.size.fileSizeFormatted} | ${info.modified.dateAndClockFormattedOriginal}",
                                         );
                                       },
                                     ),

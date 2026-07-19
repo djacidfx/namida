@@ -340,7 +340,7 @@ class _YoutubeChannelsPageState extends YoutubeChannelController<YoutubeChannels
                               (context) {
                                 final oldestDate = allChannelFetchOldestDate.valueR;
                                 return Text(
-                                  "${oldestDate.millisecondsSinceEpoch.dateFormattedOriginal} - ${TimeAgoController.dateFromNow(oldestDate)}",
+                                  "${oldestDate.dateFormattedOriginal} - ${TimeAgoController.dateFromNow(oldestDate)}",
                                   style: textTheme.displayMedium,
                                 );
                               },

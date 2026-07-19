@@ -303,6 +303,7 @@ class MostPlayedTracksPage extends StatelessWidget with NamidaRouteWidget {
             builder: (context, listensMap) {
               final tracks = listensMap.keysSortedByValue.toList();
               return MostPlayedItemsPage(
+                isInFullPage: true,
                 itemExtent: Dimensions.inst.trackTileItemExtent,
                 historyController: HistoryController.inst,
                 onSavingTimeRange: ({dateCustom, isStartOfDay, mptr}) {

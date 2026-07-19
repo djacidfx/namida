@@ -4750,7 +4750,7 @@ class _BetweenDatesTextButtonState extends State<BetweenDatesTextButton> {
                   ],
                 ),
                 NamidaButtonText(
-                  "${oldestDate?.millisecondsSinceEpoch.dateFormattedOriginal} → ${newestDate?.millisecondsSinceEpoch.dateFormattedOriginal}",
+                  "${oldestDate?.dateFormattedOriginal} → ${newestDate?.dateFormattedOriginal}",
                   style: textTheme.displaySmall,
                 ),
               ],

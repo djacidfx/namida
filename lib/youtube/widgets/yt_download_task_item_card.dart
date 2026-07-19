@@ -171,7 +171,7 @@ class _YTDownloadTaskItemCardState extends State<YTDownloadTaskItemCard> {
           icon: Broken.document_code,
           texts: [
             file.fileSizeFormatted() ?? '',
-            (item.fileDate ?? (await file.stat()).creationDate).millisecondsSinceEpoch.dateAndClockFormattedOriginal,
+            (item.fileDate ?? (await file.stat()).creationDate).dateAndClockFormattedOriginal,
           ],
         ),
       ],

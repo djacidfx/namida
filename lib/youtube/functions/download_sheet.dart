@@ -489,7 +489,7 @@ Future<void> showDownloadVideoBottomSheet({
                                               child: () {
                                                 final date =
                                                     streamResultRx.value?.info?.uploadDate.date ?? streamResultRx.value?.info?.publishDate.date ?? videoInfo?.publishedAt.date;
-                                                final dateFormatted = date?.millisecondsSinceEpoch.dateFormattedOriginal;
+                                                final dateFormatted = date?.dateFormattedOriginal;
                                                 return Text(
                                                   [
                                                     videoInfo?.durSeconds?.secondsLabel ?? "00:00",

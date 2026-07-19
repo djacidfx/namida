@@ -928,7 +928,7 @@ extension OnYoutubeLinkOpenActionUtils on OnYoutubeLinkOpenAction {
         if (ids.length == 1) {
           showDownloadVideoBottomSheet(videoId: ids.first, originalIndex: null, totalLength: null, playlistId: null, streamInfoItem: null);
         } else {
-          final ptitle = 'External - ${DateTime.now().millisecondsSinceEpoch.dateAndClockFormattedOriginal}';
+          final ptitle = 'External - ${DateTime.now().dateAndClockFormattedOriginal}';
           YTPlaylistDownloadPage(
             ids: ids.map((e) => YoutubeID(id: e, playlistID: null)).toList(),
             playlistName: ptitle,

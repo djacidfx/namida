@@ -49,7 +49,8 @@ class YTMostPlayedVideosPage extends StatelessWidget with NamidaRouteWidget {
   const YTMostPlayedVideosPage({super.key});
 
   static Widget getChipRow(BuildContext context) {
-    final config = MostPlayedItemsPage(
+    return MostPlayedItemsPage(
+      isInFullPage: false,
       itemExtent: Dimensions.youtubeCardItemExtent,
       historyController: YoutubeHistoryController.inst,
       onSavingTimeRange: ({dateCustom, isStartOfDay, mptr}) {
@@ -64,7 +65,6 @@ class YTMostPlayedVideosPage extends StatelessWidget with NamidaRouteWidget {
       itemsCount: 0,
       itemBuilder: (context, i) => const SizedBox(),
     );
-    return config.getChipsRow(context);
   }
 
   @override
@@ -100,6 +100,7 @@ class YTMostPlayedVideosPage extends StatelessWidget with NamidaRouteWidget {
             }
 
             return MostPlayedItemsPage(
+              isInFullPage: true,
               itemExtent: Dimensions.youtubeCardItemExtent,
               historyController: YoutubeHistoryController.inst,
               onSavingTimeRange: ({dateCustom, isStartOfDay, mptr}) {

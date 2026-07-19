@@ -47,15 +47,16 @@ class AppThemes {
     );
 
     final brightness = light ? Brightness.light : Brightness.dark;
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: color,
+      brightness: brightness,
+      contrastLevel: 0.05,
+      dynamicSchemeVariant: DynamicSchemeVariant.fidelity, // ensure monochrome colors are not modified
+    );
     return ThemeData(
       brightness: brightness,
       useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: color,
-        brightness: brightness,
-        contrastLevel: 0.05,
-        dynamicSchemeVariant: DynamicSchemeVariant.fidelity, // ensure monochrome colors are not modified
-      ),
+      colorScheme: colorScheme,
       fontFamily: fontFamily,
       fontFamilyFallback: fontFamilyFallback,
       scaffoldBackgroundColor: pitchBlack ?? (light ? Color.alphaBlend(color.withAlpha(60), Colors.white) : null),
@@ -95,6 +96,37 @@ class AppThemes {
         thickness: 4,
         indent: 0.0,
         endIndent: 0.0,
+      ),
+      sliderTheme: SliderThemeData(
+        trackHeight: 6.0,
+        trackGap: 4.0,
+        tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 1.5),
+        overlayShape: const RoundSliderOverlayShape(overlayRadius: 21.0),
+        valueIndicatorColor: Color.alphaBlend(
+          light ? const Color.fromARGB(255, 255, 255, 255) : pitchGrey,
+          cardColor,
+        ),
+        valueIndicatorTextStyle: TextStyle(
+          fontSize: 14.0,
+          fontWeight: FontWeight.normal,
+          color: light ? Colors.black.withAlpha(160) : Colors.white.withAlpha(210),
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+        ),
+        activeTrackColor: colorScheme.primary.withOpacityExt(0.85),
+        secondaryActiveTrackColor: colorScheme.primary.withOpacityExt(0.4),
+        inactiveTrackColor: colorScheme.secondary.withOpacityExt(0.2),
+        thumbColor: colorScheme.primary.withOpacityExt(0.85),
+        thumbSize: WidgetStatePropertyAll(const Size(5.0, 24.0)),
+        // thumbSize: WidgetStateProperty.resolveWith((states) {
+        //   if (states.contains(WidgetState.focused) || states.contains(WidgetState.pressed)) {
+        //     return const Size(3.0, 24.0);
+        //   }
+        //   return const Size(4.0, 22.0);
+        // }),
+        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+        // ignore: deprecated_member_use
+        year2023: false,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ButtonStyle(

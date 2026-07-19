@@ -105,7 +105,7 @@ class _YTChannelVideosTabState extends YoutubeChannelController<YTChannelVideosT
     String? peakDatesText;
     if (streamsPeakDates != null) {
       videosCountVSTotalText += ' | ';
-      peakDatesText = "${streamsPeakDates!.oldest.millisecondsSinceEpoch.dateFormattedOriginal} (${TimeAgoController.dateFromNow(streamsPeakDates!.oldest)})";
+      peakDatesText = "${streamsPeakDates!.oldest.dateFormattedOriginal} (${TimeAgoController.dateFromNow(streamsPeakDates!.oldest)})";
     }
     final hasMoreStreamsLeft = channelVideoTab?.canFetchNext == true;
 
