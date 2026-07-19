@@ -23,7 +23,6 @@ import 'package:namida/core/icon_fonts/broken_icons.dart';
 import 'package:namida/core/namida_converter_ext.dart';
 import 'package:namida/core/utils.dart';
 import 'package:namida/ui/widgets/artwork.dart';
-import 'package:namida/ui/widgets/custom_widgets.dart';
 import 'package:namida/youtube/class/download_task_base.dart';
 
 class CustomArtworkManager {
@@ -350,57 +349,6 @@ class _NetworkArtworkState extends State<NetworkArtwork> with LoadingItemsDelayM
         fit: widget.fit,
         alignment: widget.alignment,
         extractInternally: false,
-      ),
-    );
-  }
-}
-
-class YtThumbnailOverlayBox extends StatelessWidget {
-  final String? text;
-  final IconData? icon;
-
-  const YtThumbnailOverlayBox({
-    super.key,
-    required this.text,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = context.textTheme;
-    return Padding(
-      padding: const EdgeInsets.all(2.0),
-      child: NamidaBgBlurClipped(
-        blur: 2.0,
-        enabled: settings.enableBlurEffect.value,
-        clipBehavior: Clip.hardEdge,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(5.0.multipliedRadius),
-          color: Colors.black.withOpacityExt(0.3),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 3.0, vertical: 1.0),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (icon != null)
-                Icon(
-                  icon,
-                  size: 15.0,
-                  color: Colors.white.withOpacityExt(0.8),
-                ),
-              if (text != null && icon != null) const SizedBox(width: 2.0),
-              if (text != null)
-                Text(
-                  text!,
-                  style: textTheme.displaySmall?.copyWith(
-                    color: Colors.white.withOpacityExt(0.8),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-            ],
-          ),
-        ),
       ),
     );
   }

@@ -80,8 +80,8 @@ class WaveformComponentState extends State<WaveformComponent> with SingleTickerP
       ),
     );
     final colors = [
-      Color.alphaBlend(CurrentColor.inst.miniplayerColor.withAlpha(220), theme.colorScheme.onSurface),
       Color.alphaBlend(CurrentColor.inst.miniplayerColor.withAlpha(180), theme.colorScheme.onSurface),
+      Color.alphaBlend(CurrentColor.inst.miniplayerColor.withAlpha(140), theme.colorScheme.onSurface),
       Colors.transparent,
       Colors.transparent,
     ];

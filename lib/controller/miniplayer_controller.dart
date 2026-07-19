@@ -229,7 +229,7 @@ class MiniPlayerController {
 
   void animateQueueToCurrentTrack({bool jump = false, bool minZero = false}) {
     if (queueScrollController.hasClients) {
-      final trackTileItemScrollOffsetInQueue = _currentItemExtent * Player.inst.currentIndex.value - screenSize.height * 0.3;
+      final trackTileItemScrollOffsetInQueue = _currentItemExtent * Player.inst.currentIndex.value - screenSize.height * 0.2;
       if (queueScrollController.positions.lastOrNull?.pixels == trackTileItemScrollOffsetInQueue) {
         return;
       }

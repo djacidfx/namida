@@ -14,6 +14,7 @@ class ReplayGainData {
 
   static const double kDefaultFallbackVolume = 1.0;
   static final double kMaxPlatformVolume = Platform.isAndroid || Platform.isIOS ? 1.0 : 1.3; // mpv is up to 130% (without distortion i think).
+  static final RegExp _dBRegex = RegExp(r'[^\d.-]', caseSensitive: false);
 
   double? get gainToUse => trackGain ?? albumGain;
 
@@ -75,7 +76,7 @@ extension on String? {
 
   double? _parseGainValue() {
     var text = this;
-    return text == null ? null : double.tryParse(text.replaceFirst(RegExp(r'[^\d.-]'), '')) ?? double.tryParse(text.split(' ').first);
+    return text == null ? null : double.tryParse(text.replaceFirst(ReplayGainData._dBRegex, '')) ?? double.tryParse(text.split(' ').first);
   }
 
   double? _parsePeakValue() {

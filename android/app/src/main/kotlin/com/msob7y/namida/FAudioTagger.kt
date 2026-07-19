@@ -275,6 +275,8 @@ public class FAudioTagger : FlutterPlugin, MethodCallHandler {
       try {
         val audioHeader: AudioHeader? = audioFile.getAudioHeader()
         if (audioHeader != null) {
+          val rawFormat = audioHeader.getFormat()
+          val cleanFormat = if (rawFormat.length > 4) rawFormat.substringBefore(" ") else rawFormat
           metadata["isVariableBitRate"] = audioHeader.isVariableBitRate()
           metadata["isLossless"] = audioHeader.isLossless()
           metadata["encodingType"] = audioHeader.getEncodingType()
@@ -282,7 +284,7 @@ public class FAudioTagger : FlutterPlugin, MethodCallHandler {
           metadata["bitRate"] = audioHeader.getBitRateAsNumber()
           metadata["sampleRate"] = audioHeader.getSampleRateAsNumber()
           metadata["bits"] = audioHeader.getBitsPerSample()
-          metadata["format"] = audioHeader.getFormat()
+          metadata["format"] = cleanFormat
           metadata["durationMS"] = Math.round(audioHeader.getPreciseTrackLength() * 1000)
         }
       } catch (e: Exception) {

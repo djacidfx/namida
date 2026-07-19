@@ -848,7 +848,7 @@ class NamidaAudioVideoHandler<Q extends Playable> extends BasicAudioHandler<Q> {
         },
       );
     }
-    Lyrics.inst.updateLyrics(tr).ignoreError();
+    Lyrics.inst.updateLyrics(pi).ignoreError();
 
     Duration? duration = tr.durationMS.milliseconds;
     bool checkInterrupted() {
@@ -1681,7 +1681,7 @@ class NamidaAudioVideoHandler<Q extends Playable> extends BasicAudioHandler<Q> {
 
       final mixPlaylist = await YoutubeInfoController.playlist.getMixPlaylist(
         videoId: videoId,
-        includeFirstVideo: true,
+        includeFirstVideo: false,
         userPersonalized: settings.youtube.personalizedMixPlaylists.valueF,
         details: ExecuteDetails.kForceRequest,
       );
@@ -1839,7 +1839,7 @@ class NamidaAudioVideoHandler<Q extends Playable> extends BasicAudioHandler<Q> {
       }
     }
 
-    Lyrics.inst.updateLyrics(item).ignoreError();
+    Lyrics.inst.updateLyrics(pi).ignoreError();
     generateWaveform();
 
     Future<void> fetchFullVideoPage() async {

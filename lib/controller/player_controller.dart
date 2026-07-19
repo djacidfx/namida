@@ -725,6 +725,13 @@ class Player {
     bool gentlePlay = false,
   }) async {
     if (gentlePlay) {
+      if (index == 0 && queue.hasSingleItem()) {
+        final isSameAsCurrent = queue.elementAt(index) == Player.inst.currentItem.value;
+        if (isSameAsCurrent) {
+          Player.inst.togglePlayPause();
+          return;
+        }
+      }
       _audioHandler.setPlayWhenReady(startPlaying);
       await addToQueue(
         queue,

@@ -60,8 +60,6 @@ class YTMiniplayerQueueChipState extends State<YTMiniplayerQueueChip> with Ticke
   late final _canScrollQueue = true.obs;
   late final _arrowIcon = Broken.cd.obs;
 
-  double _screenHeight = 0;
-
   bool get isOpened => _smallBoxAnimation.value == 1 && _bigBoxAnimation.value == 0;
   void toggleSheet() => isOpened ? dismissSheet() : openSheet();
   void openSheet() => _animateSmallToBig();
@@ -84,7 +82,6 @@ class YTMiniplayerQueueChipState extends State<YTMiniplayerQueueChip> with Ticke
     _queueScrollController.addListener(_updateScrollControllerThingys);
     if (widget.onExpandedStateChange != null) _bigBoxAnimation.addListener(_updateIsFullyOpened);
     Timer(Duration.zero, () {
-      _screenHeight = context.height;
       _updateIsFullyOpened();
     });
     super.initState();
@@ -158,7 +155,7 @@ class YTMiniplayerQueueChipState extends State<YTMiniplayerQueueChip> with Ticke
     NamidaNavigator.inst.isQueueSheetOpen = false;
   }
 
-  double get _itemScrollOffsetInQueue => Dimensions.youtubeCardItemExtent * Player.inst.currentIndex.value - _screenHeight * 0.3;
+  double get _itemScrollOffsetInQueue => Dimensions.youtubeCardItemExtent * Player.inst.currentIndex.value - MiniPlayerController.inst.screenSize.height * 0.2;
 
   void _animateQueueToCurrentTrack({bool jump = false, bool minZero = false}) {
     if (_queueScrollController.hasClients) {

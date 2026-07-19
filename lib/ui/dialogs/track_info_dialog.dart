@@ -408,17 +408,17 @@ Future<void> showTrackInfoDialog(
                                 ),
 
                               ///
-                              if (shouldShowTheField(trackExt.discNo == 0))
-                                TrackInfoListTile(
-                                  title: lang.discNumber,
-                                  value: trackExt.discNo.toString(),
-                                  icon: Broken.hashtag,
-                                ),
-
                               if (shouldShowTheField(trackExt.trackNo == 0))
                                 TrackInfoListTile(
                                   title: lang.trackNumber,
-                                  value: trackExt.trackNo.toString(),
+                                  value: "${trackExt.trackNo}${trackExt.trackTo > 0 ? ' / ${trackExt.trackTo}' : ''}",
+                                  icon: Broken.hashtag,
+                                ),
+
+                              if (shouldShowTheField(trackExt.discNo == 0))
+                                TrackInfoListTile(
+                                  title: lang.discNumber,
+                                  value: "${trackExt.discNo}${trackExt.discTo > 0 ? ' / ${trackExt.discTo}' : ''}",
                                   icon: Broken.hashtag,
                                 ),
 

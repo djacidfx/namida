@@ -17,6 +17,7 @@ import 'package:namida/class/track.dart';
 import 'package:namida/controller/lyrics_search_utils/lrc_search_details.dart';
 import 'package:namida/controller/lyrics_search_utils/lrc_search_utils_base.dart';
 import 'package:namida/controller/navigator_controller.dart';
+import 'package:namida/controller/player_controller.dart';
 import 'package:namida/controller/settings_controller.dart';
 import 'package:namida/controller/wakelock_controller.dart';
 import 'package:namida/core/enums.dart';
@@ -41,8 +42,6 @@ class Lyrics {
   final currentLyricsLRC = Rxn<Lrc>();
   final lyricsCanBeAvailable = true.obs;
 
-  Playable? _currentItem;
-
   bool get _lyricsEnabled => settings.enableLyrics.value;
   bool get _lyricsPrioritizeEmbedded => settings.prioritizeEmbeddedLyrics.value;
   LyricsSource get _lyricsSource => settings.lyricsSource.value;
@@ -56,7 +55,6 @@ class Lyrics {
   }
 
   void resetLyrics() {
-    _currentItem = null;
     currentLyricsText.value = LrcText.empty;
     currentLyricsLRC.value = null;
     WakelockController.inst.updateLRCStatus(false);
@@ -88,8 +86,7 @@ class Lyrics {
 
   Future<void> _updateLyrics(Playable item) async {
     resetLyrics();
-    _currentItem = item;
-    bool checkInterrupted() => _currentItem != item;
+    bool checkInterrupted() => Player.inst.currentItem.value != item;
 
     try {
       textScrollController.jumpTo(0);

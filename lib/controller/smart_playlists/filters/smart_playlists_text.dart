@@ -124,8 +124,8 @@ final class SmartPlaylistRuleText extends SmartPlaylistRuleBase<List<SmartPlayli
     };
 
     bool textListFnRaw(Iterable<String> list) => switch (filter) {
-      SmartPlaylistRuleFilterText.isSame => list.every((e) => e == dataOrCleaned),
-      SmartPlaylistRuleFilterText.isNotSame => list.every((e) => e != dataOrCleaned),
+      SmartPlaylistRuleFilterText.isSame => list.any((e) => e == dataOrCleaned),
+      SmartPlaylistRuleFilterText.isNotSame => !list.any((e) => e == dataOrCleaned),
       SmartPlaylistRuleFilterText.contains => dataOrCleaned != null && list.any((e) => e.contains(dataOrCleaned)),
       SmartPlaylistRuleFilterText.notContains => dataOrCleaned != null && !list.any((e) => e.contains(dataOrCleaned)),
       SmartPlaylistRuleFilterText.startsWith => dataOrCleaned != null && list.any((e) => e.startsWith(dataOrCleaned)),

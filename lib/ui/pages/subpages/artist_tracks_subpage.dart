@@ -95,21 +95,25 @@ class _ArtistTracksPageState extends State<ArtistTracksPage> with PortsProvider<
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const SizedBox(height: 4.0),
-                    _AlbumsRow(
-                      title: lang.albums,
-                      icon: Broken.music_dashboard,
-                      identifiers: widget.albumIdentifiers,
-                      initiallyExpanded: albumsInitiallyExpanded,
-                      onExpansionChanged: (value) => settings.extra.save(artistAlbumsExpanded: value),
-                    ),
-                    const SizedBox(height: 6.0),
-                    _AlbumsRow(
-                      title: lang.singles,
-                      icon: Broken.music_square,
-                      identifiers: widget.singlesIdentifiers,
-                      initiallyExpanded: singlesInitiallyExpanded,
-                      onExpansionChanged: (value) => settings.extra.save(artistSinglesExpanded: value),
-                    ),
+                    if (widget.albumIdentifiers.isNotEmpty) ...[
+                      _AlbumsRow(
+                        title: lang.albums,
+                        icon: Broken.music_dashboard,
+                        identifiers: widget.albumIdentifiers,
+                        initiallyExpanded: albumsInitiallyExpanded,
+                        onExpansionChanged: (value) => settings.extra.save(artistAlbumsExpanded: value),
+                      ),
+                    ],
+                    if (widget.singlesIdentifiers.isNotEmpty) ...[
+                      const SizedBox(height: 6.0),
+                      _AlbumsRow(
+                        title: lang.singles,
+                        icon: Broken.music_square,
+                        identifiers: widget.singlesIdentifiers,
+                        initiallyExpanded: singlesInitiallyExpanded,
+                        onExpansionChanged: (value) => settings.extra.save(artistSinglesExpanded: value),
+                      ),
+                    ],
                     if (widget.extrasIdentifiers.isNotEmpty) ...[
                       const SizedBox(height: 6.0),
                       _AlbumsRow(

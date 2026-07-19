@@ -193,6 +193,10 @@ class TracksSearchWrapper {
         ),
       );
     }
+
+    // -- sort here once instead of sorting each inner list after matching
+    tracksExtended.sortByReverse((e) => e.listensCount ?? 0);
+
     return TracksSearchWrapper._(
       cleanup,
       tracksExtended,
@@ -295,6 +299,7 @@ class TracksSearchWrapper {
     int? cleanedMinorCutAtIndex;
 
     int index = 0;
+    int charOffset = 0;
     for (final item in splitted) {
       var cleaned = textCleanedForSearch(item);
       if (cleaned.isNotEmpty) {
@@ -310,7 +315,7 @@ class TracksSearchWrapper {
 
       if (tryCutBeforeBrackets && cleanedCutAtIndex == null /* && cleanedMinorCutAtIndex == null */ ) {
         // ignore first (0-1) chars
-        if (index > 1) {
+        if (charOffset > 1) {
           if (item.startsWith('(') || item.startsWith('[')) {
             cleanedCutAtIndex = index;
             cleanedMinorCutAtIndex = index;
@@ -319,6 +324,7 @@ class TracksSearchWrapper {
       }
 
       index++;
+      charOffset += item.length;
     }
 
     String joinedCleaned;
@@ -401,10 +407,8 @@ class TracksSearchWrapper {
     }
 
     final sortedKeys = scored.keys.toFixedList()..sort((a, b) => b.compareTo(a));
-    final sortForScoreAbove = sortedKeys.length < 5 ? 0 : 100;
     for (final scoreKey in sortedKeys) {
       final innerList = scored[scoreKey]!;
-      if (innerList.length > 1 && scoreKey > sortForScoreAbove) innerList.sortByReverse((e) => e.$1.listensCount ?? 0);
       for (final e in innerList) {
         onMatch(e.$1, e.$2);
       }
