@@ -213,6 +213,7 @@ class _SettingsController with SettingsFileWriter {
 
   final customEQPackage = Rxn<String?>();
   final stretchLyricsDuration = true.obs;
+  final timeCapsuleYears = Rxn<int>();
 
   final playlistAddTracksAtBeginning = false.obs;
   final playlistAddTracksAtBeginningYT = false.obs;
@@ -650,6 +651,7 @@ class _SettingsController with SettingsFileWriter {
 
       customEQPackage.value = json['customEQPackage'] ?? customEQPackage.value;
       stretchLyricsDuration.value = json['stretchLyricsDuration'] ?? stretchLyricsDuration.value;
+      timeCapsuleYears.value = json['timeCapsuleYears'] ?? timeCapsuleYears.value;
       playlistAddTracksAtBeginning.value = json['playlistAddTracksAtBeginning'] ?? playlistAddTracksAtBeginning.value;
       playlistAddTracksAtBeginningYT.value = json['playlistAddTracksAtBeginningYT'] ?? playlistAddTracksAtBeginningYT.value;
       wakelockMode.value = WakelockMode.values.getEnum(json['wakelockMode']) ?? wakelockMode.value;
@@ -892,6 +894,7 @@ class _SettingsController with SettingsFileWriter {
     'tagFieldsToEdit': tagFieldsToEdit.value.map((element) => element.name).toFixedList(),
     'customEQPackage': ?customEQPackage.value,
     'stretchLyricsDuration': stretchLyricsDuration.value,
+    'timeCapsuleYears': timeCapsuleYears.value,
     'playlistAddTracksAtBeginning': playlistAddTracksAtBeginning.value,
     'playlistAddTracksAtBeginningYT': playlistAddTracksAtBeginningYT.value,
     'wakelockMode': wakelockMode.value.name,
@@ -1086,6 +1089,7 @@ class _SettingsController with SettingsFileWriter {
     List<TagField>? tagFieldsToEdit,
     String? customEQPackage,
     bool? stretchLyricsDuration,
+    int? timeCapsuleYears,
     bool? playlistAddTracksAtBeginning,
     bool? playlistAddTracksAtBeginningYT,
     WakelockMode? wakelockMode,
@@ -1344,6 +1348,7 @@ class _SettingsController with SettingsFileWriter {
     }
     if (customEQPackage != null) this.customEQPackage.value = customEQPackage;
     if (stretchLyricsDuration != null) this.stretchLyricsDuration.value = stretchLyricsDuration;
+    if (timeCapsuleYears != null) this.timeCapsuleYears.value = timeCapsuleYears;
     if (playlistAddTracksAtBeginning != null) this.playlistAddTracksAtBeginning.value = playlistAddTracksAtBeginning;
     if (playlistAddTracksAtBeginningYT != null) this.playlistAddTracksAtBeginningYT.value = playlistAddTracksAtBeginningYT;
     if (wakelockMode != null) this.wakelockMode.value = wakelockMode;

@@ -1,10 +1,17 @@
 import 'package:jiffy/jiffy.dart';
 
+import 'package:namida/controller/settings_controller.dart';
 import 'package:namida/core/extensions.dart';
 
 class TimeAgoController {
-  static final instance = TimeAgoController._();
-  TimeAgoController._();
+  const TimeAgoController._();
+
+  static Jiffy _getCurrentDateTime() {
+    final years = settings.timeCapsuleYears.value;
+    if (years == null || years == 0) return Jiffy.now();
+    // -- years can be +ve or -ve so always add
+    return Jiffy.now().add(years: years);
+  }
 
   static Future<void> setLocale(String code) async {
     await _trySetLocale(code) ||
@@ -22,10 +29,10 @@ class TimeAgoController {
   }
 
   static String dateFromNow(DateTime date, {bool long = true}) {
-    return Jiffy.parseFromDateTime(date).fromNow(withPrefixAndSuffix: long);
+    return Jiffy.parseFromDateTime(date).from(_getCurrentDateTime(), withPrefixAndSuffix: long);
   }
 
   static String dateMSSEFromNow(int millisecondsSinceEpoch, {bool long = true}) {
-    return Jiffy.parseFromMillisecondsSinceEpoch(millisecondsSinceEpoch).fromNow(withPrefixAndSuffix: long);
+    return Jiffy.parseFromMillisecondsSinceEpoch(millisecondsSinceEpoch).from(_getCurrentDateTime(), withPrefixAndSuffix: long);
   }
 }

@@ -1270,7 +1270,32 @@ class _ExtrasFlagsOptionsState extends State<_ExtrasFlagsOptions> {
                     },
                   ),
                 ),
+              ObxO(
+                rx: settings.timeCapsuleYears,
+                builder: (context, timeCapsuleYears) {
+                  timeCapsuleYears ??= 0;
+                  final now = DateTime.now();
+                  const preferredYear = 2018;
 
+                  const int maxYears = 100 * 5;
+                  const int offset = maxYears ~/ 2;
+                  return CustomListTile(
+                    icon: Broken.calendar,
+                    title: 'time_capsule_years'.toUpperCase(),
+                    subtitle:
+                        "you think it's ${now.year}? $preferredYear was ${now.year - preferredYear} years ago? except that it's not. this capsule can send u back in time or far into the future, use carefully.",
+                    trailing: NamidaWheelSlider(
+                      initValue: timeCapsuleYears + offset,
+                      max: maxYears,
+                      onValueChanged: (val) {
+                        final actualYears = val - offset;
+                        settings.save(timeCapsuleYears: actualYears);
+                      },
+                      text: timeCapsuleYears > 0 ? '+$timeCapsuleYears' : '$timeCapsuleYears',
+                    ),
+                  );
+                },
+              ),
               NamidaPopupWrapper(
                 childrenDefault: _getSearchTypeChildren,
                 child: CustomListTile(
