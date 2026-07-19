@@ -33,9 +33,9 @@ class _VideoInfoController {
 
   String? getJSPlayerVersion() => YoutiPie.cipher.jsPlayerVersion;
 
-  Future<LikeStatus?> fetchLikeStatusForVideoCard(String videoId, {ExecuteDetails? details}) async {
+  Future<LikeStatus?> fetchLikeStatusForVideoCardInstant(String videoId, {ExecuteDetails? details}) async {
     if (settings.youtube.showLikeStatusOnCards.valueF) {
-      final page = await this.fetchVideoPage(videoId);
+      final page = await this.fetchVideoPage(videoId, details: details);
       return page?.videoInfo?.engagement?.likeStatus ?? LikeStatus.unknown;
     }
     return null;

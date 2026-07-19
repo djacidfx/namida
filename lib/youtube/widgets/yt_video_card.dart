@@ -7,7 +7,6 @@ import 'package:youtipie/class/result_wrapper/playlist_result.dart';
 import 'package:youtipie/class/result_wrapper/playlist_result_base.dart';
 import 'package:youtipie/class/stream_info_item/stream_info_item.dart';
 import 'package:youtipie/class/stream_info_item/stream_info_item_short.dart';
-import 'package:youtipie/core/enum.dart';
 import 'package:youtipie/youtipie.dart';
 
 import 'package:namida/controller/player_controller.dart';
@@ -20,6 +19,7 @@ import 'package:namida/core/icon_fonts/broken_icons.dart';
 import 'package:namida/core/utils.dart';
 import 'package:namida/ui/widgets/custom_widgets.dart';
 import 'package:namida/youtube/class/youtube_id.dart';
+import 'package:namida/youtube/class/yt_card_like_status_mixin.dart';
 import 'package:namida/youtube/controller/youtube_info_controller.dart';
 import 'package:namida/youtube/functions/yt_playlist_utils.dart';
 import 'package:namida/youtube/widgets/yt_card.dart';
@@ -63,19 +63,16 @@ class YoutubeVideoCard extends StatefulWidget {
   State<YoutubeVideoCard> createState() => _YoutubeVideoCardState();
 }
 
-class _YoutubeVideoCardState extends State<YoutubeVideoCard> {
-  final _likeStatusRx = Rxn<LikeStatus>(LikeStatus.unknown);
+class _YoutubeVideoCardState extends State<YoutubeVideoCard> with YTCardLikeStatusMixin {
+  @override
+  bool get canFetchLikeStatus => true;
+  @override
+  String get cardVideoId => widget.video.id;
 
   @override
   void initState() {
-    _tryFetchLikeStatus();
+    tryFetchLikeStatus();
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    _likeStatusRx.close();
-    super.dispose();
   }
 
   FutureOr<List<NamidaPopupItem>> getMenuItems() {
@@ -92,10 +89,6 @@ class _YoutubeVideoCardState extends State<YoutubeVideoCard> {
       idsNamesLookup: {videoId: widget.video.title},
       playlistName: widget.playlist?.basicInfo.title ?? '',
     );
-  }
-
-  Future<void> _tryFetchLikeStatus() async {
-    _likeStatusRx.value = await YoutubeInfoController.video.fetchLikeStatusForVideoCard(widget.video.id);
   }
 
   @override
@@ -160,7 +153,7 @@ class _YoutubeVideoCardState extends State<YoutubeVideoCard> {
         bottomRightWidgets: YTUtils.getVideoCacheStatusIcons(
           videoId: videoId,
           context: context,
-          likeStatusRx: _likeStatusRx,
+          likeStatusRx: canFetchLikeStatus ? likeStatusRx : null,
         ),
         menuChildrenDefault: getMenuItems,
         extractColor: false,

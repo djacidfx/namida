@@ -94,7 +94,7 @@ class YTUtils {
     List<int> overrideListens = const [],
     bool displayCacheIcons = true,
     double? fontMultiplier,
-    required Rxn<LikeStatus>? likeStatusRx,
+    required RxBaseCore<LikeStatus?>? likeStatusRx,
   }) {
     iconsColor ??= context.theme.iconTheme.color;
     final listens = overrideListens.isNotEmpty ? overrideListens : YoutubeHistoryController.inst.topTracksMapListens.value[videoId] ?? [];
