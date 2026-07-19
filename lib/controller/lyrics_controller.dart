@@ -495,7 +495,7 @@ class LrcText {
 
   factory LrcText.fromText(String text) {
     final textSample = text.substring(0, 100.withMaximum(text.length));
-    final isRTL = LrcParser.isLrcRTLRaw([textSample]);
+    final isRTL = LrcParser.isLrcLineRTL(textSample);
     return LrcText(
       text: text,
       isRTL: isRTL,

@@ -638,15 +638,13 @@ extension LRCParsingUtils on String {
               person: null,
               parts: null,
               type: LrcTypes.simple,
+              isRTL: LrcParser.isLrcLineRTL(e.mainText ?? ''),
             ),
           );
         }
 
-        final isRTL = LrcParser.isLrcRTL(lines);
-
         return Lrc(
           lyrics: lines,
-          isRTL: isRTL,
         );
       }
     } catch (_) {}

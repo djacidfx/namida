@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
@@ -787,212 +788,212 @@ class LyricsLRCParsedViewState extends State<LyricsLRCParsedView> {
                       final miniplayerColor = CurrentColor.inst.miniplayerColor;
                       final personCount = currentLRC?.personCount ?? 1;
 
-                      final textDirection = currentLRC?.isRTL == true ? TextDirection.rtl : TextDirection.ltr;
-                      return Directionality(
-                        textDirection: textDirection,
-                        child: ObxO(
-                          rx: _latestUpdatedLineInfo,
-                          builder: (context, selectedInfo) {
-                            final selectedIndex = selectedInfo?.$2;
-                            final selectedLineTimestamp = selectedInfo?.$1;
-                            return CustomAnimatedSwitcher(
-                              duration: const Duration(milliseconds: 600),
-                              switchInCurve: Curves.easeInOutQuart,
-                              switchOutCurve: Curves.easeInOutQuart,
-                              child: lyrics.isEmpty
-                                  ? const SizedBox(
-                                      key: ValueKey('empty_lrc'),
-                                    )
-                                  : SuperSmoothListView.builder(
-                                      key: ValueKey('valid_lrc'),
-                                      padding: EdgeInsets.symmetric(vertical: _paddingVertical),
-                                      controller: _scrollController,
-                                      listController: _listController,
-                                      itemCount: lyrics.length,
-                                      itemBuilder: (context, index) {
-                                        // -- usually not needed, but helps cuz sometimes gets called on stale index
-                                        if (index >= lyrics.length) return const SizedBox.shrink();
+                      return ObxO(
+                        rx: _latestUpdatedLineInfo,
+                        builder: (context, selectedInfo) {
+                          final selectedIndex = selectedInfo?.$2;
+                          final selectedLineTimestamp = selectedInfo?.$1;
+                          return CustomAnimatedSwitcher(
+                            duration: const Duration(milliseconds: 600),
+                            switchInCurve: Curves.easeInOutQuart,
+                            switchOutCurve: Curves.easeInOutQuart,
+                            child: lyrics.isEmpty
+                                ? const SizedBox(
+                                    key: ValueKey('empty_lrc'),
+                                  )
+                                : SuperSmoothListView.builder(
+                                    key: ValueKey('valid_lrc'),
+                                    padding: EdgeInsets.symmetric(vertical: _paddingVertical),
+                                    controller: _scrollController,
+                                    listController: _listController,
+                                    itemCount: lyrics.length,
+                                    itemBuilder: (context, index) {
+                                      // -- usually not needed, but helps cuz sometimes gets called on stale index
+                                      if (index >= lyrics.length) return const SizedBox.shrink();
 
-                                        final distanceDiffFromSelected = selectedIndex == null ? null : index - selectedIndex; // -- does not account for empty lines
-                                        final distanceDiffFromSelectedAbs = distanceDiffFromSelected?.abs();
-                                        final lrc = lyrics[index];
-                                        String text = lrc.readableText;
-                                        final parts = lrc.parts;
-                                        final person = lrc.person;
-                                        final isBGLyrics = lrc.isBGLyrics;
-                                        final indicesForTimestamp = highlightTimestampsMap[lrc.timestamp];
+                                      final distanceDiffFromSelected = selectedIndex == null ? null : index - selectedIndex; // -- does not account for empty lines
+                                      final distanceDiffFromSelectedAbs = distanceDiffFromSelected?.abs();
+                                      final lrc = lyrics[index];
+                                      String text = lrc.readableText;
+                                      final parts = lrc.parts;
+                                      final person = lrc.person;
+                                      final isBGLyrics = lrc.isBGLyrics;
+                                      final indicesForTimestamp = highlightTimestampsMap[lrc.timestamp];
+                                      final textDirection = lrc.isRTL == true ? TextDirection.rtl : TextDirection.ltr;
 
-                                        final selected = distanceDiffFromSelected == 0 || isBGLyrics || selectedLineTimestamp == lrc.timestamp;
-                                        final selectedAndEmpty = selected && _checkIfTextEmpty(text);
-                                        var bgColor = selected && !isBGLyrics
-                                            ? Color.alphaBlend(miniplayerColor.withAlpha(140), theme.scaffoldBackgroundColor).withOpacityExt(
-                                                selectedAndEmpty
-                                                    ? 0.1
-                                                    : fullscreen
-                                                    ? 0.4
-                                                    : 0.5,
-                                              )
-                                            : null;
+                                      final selected = distanceDiffFromSelected == 0 || isBGLyrics || selectedLineTimestamp == lrc.timestamp;
+                                      final selectedAndEmpty = selected && _checkIfTextEmpty(text);
+                                      var bgColor = selected && !isBGLyrics
+                                          ? Color.alphaBlend(miniplayerColor.withAlpha(140), theme.scaffoldBackgroundColor).withOpacityExt(
+                                              selectedAndEmpty
+                                                  ? 0.1
+                                                  : fullscreen
+                                                  ? 0.4
+                                                  : 0.5,
+                                            )
+                                          : null;
 
-                                        EdgeInsetsGeometry lineMargin = EdgeInsets.symmetric(
-                                          vertical: /* (selected ? 2.0 : 0.0) + */ (fullscreen ? 8.0 : 2.0),
-                                          horizontal: fullscreen ? 10.0 : 8.0,
-                                        );
+                                      EdgeInsetsGeometry lineMargin = EdgeInsets.symmetric(
+                                        vertical: /* (selected ? 2.0 : 0.0) + */ (fullscreen ? 8.0 : 2.0),
+                                        horizontal: fullscreen ? 10.0 : 8.0,
+                                      );
 
-                                        EdgeInsetsGeometry padding = selectedAndEmpty
-                                            ? const EdgeInsets.symmetric(
-                                                vertical: 3.0,
-                                                horizontal: 24.0,
-                                              )
-                                            : fullscreen
-                                            ? const EdgeInsets.symmetric(
-                                                vertical: 8.0,
-                                                horizontal: 8.0,
-                                              )
-                                            : const EdgeInsets.symmetric(
-                                                vertical: 8.0,
-                                                horizontal: 8.0,
-                                              );
-
-                                        BorderRadius borderRadius = selectedAndEmpty ? BorderRadius.circular(5.0.multipliedRadius) : BorderRadius.circular(8.0.multipliedRadius);
-
-                                        TextAlign textAlign = alignAtStart ? TextAlign.start : TextAlign.center;
-                                        AlignmentDirectional alignment = alignAtStart ? AlignmentDirectional.centerStart : AlignmentDirectional.center;
-                                        double normalLineColorOpacity = 0.5;
-                                        (double, FontWeight)? fontModifier;
-                                        TextStyle textStyle;
-
-                                        if (person != null && personCount > 0) {
-                                          if (personCount == 1) {
-                                            // -- keep defaults
-                                          } else if (person == 0) {
-                                            // -- bg
-                                            textAlign = TextAlign.center;
-                                            alignment = AlignmentDirectional.center;
-                                            fontModifier = (0.75, FontWeight.w400);
-                                          } else if (person == 1) {
-                                            // -- v1
-                                            textAlign = TextAlign.start;
-                                            alignment = AlignmentDirectional.centerStart;
-                                            padding = padding.add(EdgeInsetsDirectional.only(start: 12.0, end: 64.0));
-                                          } else if (person == 2) {
-                                            // -- v2
-                                            textAlign = TextAlign.end;
-                                            alignment = AlignmentDirectional.centerEnd;
-                                            padding = padding.add(EdgeInsetsDirectional.only(start: 64.0, end: 12.0));
-                                          } else if (person >= 3) {
-                                            // -- v3
-                                            textAlign = TextAlign.center;
-                                            alignment = AlignmentDirectional.center;
-                                          }
-                                          if (selected) {
-                                            textStyle = normalTextStyle.copyWith(
-                                              color: Colors.white.withOpacityExt(0.75),
+                                      EdgeInsetsGeometry padding = selectedAndEmpty
+                                          ? const EdgeInsets.symmetric(
+                                              vertical: 3.0,
+                                              horizontal: 24.0,
+                                            )
+                                          : fullscreen
+                                          ? const EdgeInsets.symmetric(
+                                              vertical: 8.0,
+                                              horizontal: 8.0,
+                                            )
+                                          : const EdgeInsets.symmetric(
+                                              vertical: 8.0,
+                                              horizontal: 8.0,
                                             );
-                                          } else if (distanceDiffFromSelected != null && distanceDiffFromSelected <= 0) {
-                                            // -- lines before current in word synced lyrics
-                                            textStyle = normalTextStyle.copyWith(
-                                              color: normalTextStyle.color?.withOpacityExt(normalLineColorOpacity) ?? Colors.transparent,
-                                            );
-                                          } else {
-                                            // -- lines after current in word synced lyrics
-                                            normalLineColorOpacity = 0.2;
-                                            textStyle = normalTextStyle.copyWith(
-                                              color: normalTextStyle.color?.withOpacityExt(normalLineColorOpacity) ?? Colors.transparent,
-                                            );
-                                          }
+
+                                      BorderRadius borderRadius = selectedAndEmpty ? BorderRadius.circular(5.0.multipliedRadius) : BorderRadius.circular(8.0.multipliedRadius);
+
+                                      TextAlign textAlign = alignAtStart ? TextAlign.start : TextAlign.center;
+                                      AlignmentDirectional alignment = alignAtStart ? AlignmentDirectional.centerStart : AlignmentDirectional.center;
+                                      double normalLineColorOpacity = 0.5;
+                                      (double, FontWeight)? fontModifier;
+                                      TextStyle textStyle;
+
+                                      if (person != null && personCount > 0) {
+                                        if (personCount == 1) {
+                                          // -- keep defaults
+                                        } else if (person == 0) {
+                                          // -- bg
+                                          textAlign = TextAlign.center;
+                                          alignment = AlignmentDirectional.center;
+                                          fontModifier = (0.75, FontWeight.w400);
+                                        } else if (person == 1) {
+                                          // -- v1
+                                          textAlign = TextAlign.start;
+                                          alignment = AlignmentDirectional.centerStart;
+                                          padding = padding.add(EdgeInsetsDirectional.only(start: 12.0, end: 64.0));
+                                        } else if (person == 2) {
+                                          // -- v2
+                                          textAlign = TextAlign.end;
+                                          alignment = AlignmentDirectional.centerEnd;
+                                          padding = padding.add(EdgeInsetsDirectional.only(start: 64.0, end: 12.0));
+                                        } else if (person >= 3) {
+                                          // -- v3
+                                          textAlign = TextAlign.center;
+                                          alignment = AlignmentDirectional.center;
+                                        }
+                                        if (selected) {
+                                          textStyle = normalTextStyle.copyWith(
+                                            color: Colors.white.withOpacityExt(0.75),
+                                          );
+                                        } else if (distanceDiffFromSelected != null && distanceDiffFromSelected <= 0) {
+                                          // -- lines before current in word synced lyrics
+                                          textStyle = normalTextStyle.copyWith(
+                                            color: normalTextStyle.color?.withOpacityExt(normalLineColorOpacity) ?? Colors.transparent,
+                                          );
                                         } else {
-                                          // -- lines in normal synced lyrics
-                                          if (distanceDiffFromSelected != null) {
-                                            normalLineColorOpacity = distanceDiffFromSelectedAbs == 1
-                                                ? 0.5
-                                                : distanceDiffFromSelectedAbs == 2
-                                                ? 0.4
-                                                : 0.25;
-                                          }
+                                          // -- lines after current in word synced lyrics
+                                          normalLineColorOpacity = 0.2;
+                                          textStyle = normalTextStyle.copyWith(
+                                            color: normalTextStyle.color?.withOpacityExt(normalLineColorOpacity) ?? Colors.transparent,
+                                          );
+                                        }
+                                      } else {
+                                        // -- lines in normal synced lyrics
+                                        if (distanceDiffFromSelected != null) {
+                                          normalLineColorOpacity = distanceDiffFromSelectedAbs == 1
+                                              ? 0.5
+                                              : distanceDiffFromSelectedAbs == 2
+                                              ? 0.4
+                                              : 0.25;
+                                        }
 
-                                          if (selected) {
-                                            textStyle = normalTextStyle;
-                                          } else {
-                                            textStyle = normalTextStyle.copyWith(
-                                              color: normalTextStyle.color?.withOpacityExt(normalLineColorOpacity) ?? Colors.transparent,
-                                            );
+                                        if (selected) {
+                                          textStyle = normalTextStyle;
+                                        } else {
+                                          textStyle = normalTextStyle.copyWith(
+                                            color: normalTextStyle.color?.withOpacityExt(normalLineColorOpacity) ?? Colors.transparent,
+                                          );
+                                        }
+                                      }
+                                      if (fontModifier != null) {
+                                        final size = fontModifier.$1;
+                                        final weigth = fontModifier.$2;
+                                        textStyle = textStyle.copyWith(
+                                          fontSize: size == 1.0 ? null : textStyle.fontSize! * size,
+                                          fontWeight: weigth,
+                                        );
+                                      }
+
+                                      if (indicesForTimestamp != null && indicesForTimestamp.length > 1) {
+                                        final isFirst = index == indicesForTimestamp.first;
+                                        final isLast = index == indicesForTimestamp.last;
+                                        final isSecondaryLanguageLine = !isFirst;
+
+                                        if (isSecondaryLanguageLine) {
+                                          final multiplier = fullscreen ? 0.75 : 0.85;
+                                          textStyle = textStyle.copyWith(
+                                            fontSize: textStyle.fontSize! * multiplier,
+                                          );
+                                          if (bgColor != null) {
+                                            bgColor = bgColor.withOpacityExt(bgColor.a * 0.75);
                                           }
                                         }
-                                        if (fontModifier != null) {
-                                          final size = fontModifier.$1;
-                                          final weigth = fontModifier.$2;
-                                          textStyle = textStyle.copyWith(
-                                            fontSize: size == 1.0 ? null : textStyle.fontSize! * size,
-                                            fontWeight: weigth,
+
+                                        if (!isFirst) {
+                                          lineMargin = lineMargin.subtract(
+                                            EdgeInsetsDirectional.only(
+                                              top: lineMargin.resolve(textDirection).top,
+                                            ),
+                                          );
+                                          padding = padding.subtract(
+                                            EdgeInsetsDirectional.only(
+                                              top: padding.resolve(textDirection).top * 0.4,
+                                            ),
+                                          );
+                                          borderRadius = borderRadius.copyWith(
+                                            topRight: Radius.zero,
+                                            topLeft: Radius.zero,
                                           );
                                         }
 
-                                        if (indicesForTimestamp != null && indicesForTimestamp.length > 1) {
-                                          final isFirst = index == indicesForTimestamp.first;
-                                          final isLast = index == indicesForTimestamp.last;
-                                          final isSecondaryLanguageLine = !isFirst;
-
-                                          if (isSecondaryLanguageLine) {
-                                            final multiplier = fullscreen ? 0.75 : 0.85;
-                                            textStyle = textStyle.copyWith(
-                                              fontSize: textStyle.fontSize! * multiplier,
-                                            );
-                                            if (bgColor != null) {
-                                              bgColor = bgColor.withOpacityExt(bgColor.a * 0.75);
-                                            }
-                                          }
-
-                                          if (!isFirst) {
-                                            lineMargin = lineMargin.subtract(
-                                              EdgeInsetsDirectional.only(
-                                                top: lineMargin.resolve(textDirection).top,
-                                              ),
-                                            );
-                                            padding = padding.subtract(
-                                              EdgeInsetsDirectional.only(
-                                                top: padding.resolve(textDirection).top * 0.4,
-                                              ),
-                                            );
-                                            borderRadius = borderRadius.copyWith(
-                                              topRight: Radius.zero,
-                                              topLeft: Radius.zero,
-                                            );
-                                          }
-
-                                          if (!isLast) {
-                                            lineMargin = lineMargin.subtract(
-                                              EdgeInsetsDirectional.only(
-                                                bottom: lineMargin.resolve(textDirection).bottom,
-                                              ),
-                                            );
-                                            padding = padding.subtract(
-                                              EdgeInsetsDirectional.only(
-                                                bottom: padding.resolve(textDirection).bottom * 0.4,
-                                              ),
-                                            );
-                                            borderRadius = borderRadius.copyWith(
-                                              bottomRight: Radius.zero,
-                                              bottomLeft: Radius.zero,
-                                            );
-                                          }
+                                        if (!isLast) {
+                                          lineMargin = lineMargin.subtract(
+                                            EdgeInsetsDirectional.only(
+                                              bottom: lineMargin.resolve(textDirection).bottom,
+                                            ),
+                                          );
+                                          padding = padding.subtract(
+                                            EdgeInsetsDirectional.only(
+                                              bottom: padding.resolve(textDirection).bottom * 0.4,
+                                            ),
+                                          );
+                                          borderRadius = borderRadius.copyWith(
+                                            bottomRight: Radius.zero,
+                                            bottomLeft: Radius.zero,
+                                          );
                                         }
+                                      }
 
-                                        final textWidget = selected && parts != null && parts.isNotEmpty
-                                            ? _TextWithFadingProgress(
-                                                parts: parts,
-                                                textStyle: textStyle,
-                                                textAlign: textAlign,
-                                                textDirection: textDirection,
-                                              )
-                                            : Text(
-                                                text,
-                                                style: textStyle,
-                                                textAlign: textAlign,
-                                                // softWrap: false, // keep the text steady while animating mp
-                                              );
+                                      final textWidget = selected && parts != null && parts.isNotEmpty
+                                          ? _TextWithFadingProgress(
+                                              parts: parts,
+                                              textStyle: textStyle,
+                                              textAlign: textAlign,
+                                              textDirection: textDirection,
+                                            )
+                                          : Text(
+                                              text,
+                                              style: textStyle,
+                                              textAlign: textAlign,
+                                              // softWrap: false, // keep the text steady while animating mp
+                                            );
 
-                                        return Align(
+                                      return Directionality(
+                                        textDirection: textDirection,
+                                        child: Align(
                                           alignment: alignment, // needed for constraints
                                           child: ConstrainedBox(
                                             constraints: BoxConstraints(
@@ -1040,12 +1041,12 @@ class LyricsLRCParsedViewState extends State<LyricsLRCParsedView> {
                                               ],
                                             ),
                                           ),
-                                        );
-                                      },
-                                    ),
-                            );
-                          },
-                        ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                          );
+                        },
                       );
                     },
                   );
@@ -1111,7 +1112,7 @@ class LyricsLRCParsedViewState extends State<LyricsLRCParsedView> {
                           _updateHighlightedLine(Player.inst.nowPlayingPosition.value, forceAnimate: true, force: true);
                           _canAnimateScroll.value = true;
                         },
-                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
                         bgColor: context.theme.colorScheme.secondary.withOpacityExt(0.3),
                         child: Row(
                           mainAxisSize: .min,
@@ -1177,7 +1178,122 @@ class LyricsLRCParsedViewState extends State<LyricsLRCParsedView> {
   }
 }
 
-class _TextWithFadingProgress extends StatelessWidget {
+// class _TextWithFadingProgressOld extends StatelessWidget {
+//   final List<LrcLinePart> parts;
+//   final TextStyle textStyle;
+//   final TextAlign textAlign;
+//   final TextDirection textDirection;
+
+//   const _TextWithFadingProgressOld({
+//     required this.parts,
+//     required this.textStyle,
+//     required this.textAlign,
+//     required this.textDirection,
+//   });
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return ObxO(
+//       rx: Player.inst.playWhenReady,
+//       builder: (context, playWhenReady) => ObxO(
+//         rx: Player.inst.nowPlayingPosition,
+//         builder: (context, currentPosition) => Text.rich(
+//           TextSpan(
+//             children: parts.mapIndexed(
+//               (_, indexPre) {
+//                 final indexEffective = switch (textDirection) {
+//                   TextDirection.ltr => indexPre,
+//                   TextDirection.rtl => parts.length - indexPre - 1,
+//                 };
+//                 final e = parts[indexEffective];
+//                 final textPart = e.lyrics;
+//                 final normalColor = textStyle.color!;
+//                 final dimmedColor = normalColor.withValues(
+//                   alpha: 0.25,
+//                 );
+//                 final didReachTimeStampForPart = Duration(milliseconds: currentPosition) > e.startTimestamp;
+
+//                 final child = RichText(
+//                   text: TextSpan(
+//                     text: textPart,
+//                     style: textStyle, // dont dim here
+//                   ),
+//                   // textDirection: textDirection,
+//                   textAlign: TextAlign.start, // -- otherwise multi-part word will appear split
+//                   // -- fixes artifacts with shader
+//                   textHeightBehavior: const TextHeightBehavior(
+//                     applyHeightToFirstAscent: false,
+//                     applyHeightToLastDescent: false,
+//                   ),
+//                   // softWrap: false, // keep the text steady while animating mp
+//                 );
+
+//                 // -- more accurate but position updates are slower, so it feels jittery
+//                 // final eStart = e.startTimestamp.inMilliseconds;
+//                 // final nextStart = e.endTimestamp.inMilliseconds;
+//                 // final total = nextStart - eStart;
+//                 // double progress = (currentPosition - eStart) / total;
+//                 // progress = progress.clampDouble(0.0, 1.0);
+
+//                 var animationDuration = !playWhenReady ? Duration.zero : e.endTimestamp - e.startTimestamp;
+//                 if (animationDuration <= Duration.zero) animationDuration = const Duration(milliseconds: 10);
+//                 return WidgetSpan(
+//                   child: TweenAnimationBuilder(
+//                     duration: animationDuration,
+//                     tween: DoubleTween(begin: 0.0, end: didReachTimeStampForPart ? 1.0 : 0.0),
+//                     builder: (context, value, _) {
+//                       final progress = value ?? 1.0;
+//                       // if (progress >= 1.0) return child; // color be mismatching
+//                       return ShaderMask(
+//                         shaderCallback: (bounds) => LinearGradient(
+//                           begin: AlignmentDirectional.centerStart,
+//                           end: AlignmentDirectional.centerEnd,
+//                           colors: [
+//                             normalColor,
+//                             normalColor,
+//                             dimmedColor,
+//                           ],
+//                           stops: [
+//                             0,
+//                             progress,
+//                             progress == 0 ? 0.0 : progress + 0.1,
+//                           ],
+//                         ).createShader(bounds, textDirection: textDirection),
+//                         blendMode: BlendMode.dstIn,
+//                         child: ClipRect(
+//                           // -- clip is important to avoid artifacts caused by font exisitng outside shader mask area
+//                           child: child,
+//                         ),
+//                       );
+//                     },
+//                   ),
+//                 );
+//               },
+//             ).toFixedList(),
+//           ),
+//           textDirection: textDirection,
+//           textAlign: textAlign,
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+/// Generated by claude.ai
+/// Reason: no enough experience with deep rendering stuff
+///
+/// the old version [_TextWithFadingProgressOld] laid out each part with its own shader mask,
+/// causing text to jump due to different layout ways (Text vs TextSpan.children)
+///
+/// Karaoke-style word-synced line.
+///
+/// Instead of wrapping each timed part in its own [WidgetSpan] (which turns every
+/// word into an atomic inline box -> spaces no longer collapse at line breaks and
+/// words no longer pack tightly, so the text wraps differently than a plain [Text]),
+/// this lays out the whole line as ONE real paragraph via a [TextPainter] and reveals
+/// the "sung" region on top of a dimmed base. Because it's a single paragraph, wrapping
+/// is identical to [Text] and the reveal flows correctly across any number of lines.
+class _TextWithFadingProgress extends StatefulWidget {
   final List<LrcLinePart> parts;
   final TextStyle textStyle;
   final TextAlign textAlign;
@@ -1191,83 +1307,327 @@ class _TextWithFadingProgress extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return ObxO(
-      rx: Player.inst.playWhenReady,
-      builder: (context, playWhenReady) => ObxO(
-        rx: Player.inst.nowPlayingPosition,
-        builder: (context, currentPosition) => Text.rich(
-          TextSpan(
-            children: parts.mapIndexed(
-              (e, i) {
-                final textPart = e.lyrics;
-                final normalColor = textStyle.color!;
-                final dimmedColor = normalColor.withValues(
-                  alpha: 0.25,
-                );
-                final didReachTimeStampForPart = Duration(milliseconds: currentPosition) > e.startTimestamp;
+  State<_TextWithFadingProgress> createState() => _TextWithFadingProgressState();
+}
 
-                final child = RichText(
-                  text: TextSpan(
-                    text: textPart,
-                    style: textStyle, // dont dim here
-                  ),
-                  textAlign: TextAlign.start, // -- otherwise multi-part word will appear split
-                  // -- fixes artifacts with shader
-                  textHeightBehavior: const TextHeightBehavior(
-                    applyHeightToFirstAscent: false,
-                    applyHeightToLastDescent: false,
-                  ),
-                  // softWrap: false, // keep the text steady while animating mp
-                );
+class _TextWithFadingProgressState extends State<_TextWithFadingProgress> with SingleTickerProviderStateMixin {
+  /// unbounded; its value is the number of "sung" characters (fractional) of [_fullText].
+  late final AnimationController _fillController;
 
-                // -- more accurate but position updates are slower, so it feels jittery
-                // final eStart = e.startTimestamp.inMilliseconds;
-                // final nextStart = e.endTimestamp.inMilliseconds;
-                // final total = nextStart - eStart;
-                // double progress = (currentPosition - eStart) / total;
-                // progress = progress.clampDouble(0.0, 1.0);
+  late String _fullText;
+  late List<int> _partCharStarts;
+  late List<int> _partCharEnds;
+  int _totalChars = 0;
 
-                var animationDuration = !playWhenReady ? Duration.zero : e.endTimestamp - e.startTimestamp;
-                if (animationDuration <= Duration.zero) animationDuration = const Duration(milliseconds: 10);
-                return WidgetSpan(
-                  child: TweenAnimationBuilder(
-                    duration: animationDuration,
-                    tween: DoubleTween(begin: 0.0, end: didReachTimeStampForPart ? 1.0 : 0.0),
-                    builder: (context, value, _) {
-                      final progress = value ?? 1.0;
-                      // if (progress >= 1.0) return child; // color be mismatching
-                      return ShaderMask(
-                        shaderCallback: (bounds) => LinearGradient(
-                          begin: AlignmentDirectional.centerStart,
-                          end: AlignmentDirectional.centerEnd,
-                          colors: [
-                            normalColor,
-                            normalColor,
-                            dimmedColor,
-                          ],
-                          stops: [
-                            0,
-                            progress,
-                            progress == 0 ? 0.0 : progress + 0.1,
-                          ],
-                        ).createShader(bounds, textDirection: textDirection),
-                        blendMode: BlendMode.dstIn,
-                        child: ClipRect(
-                          // -- clip is important to avoid artifacts caused by font exisitng outside shader mask area
-                          child: child,
-                        ),
-                      );
-                    },
-                  ),
-                );
-              },
-            ).toFixedList(),
-          ),
-          textDirection: textDirection,
-          textAlign: textAlign,
-        ),
+  // -- laid-out painters cached so that per-frame paint() never re-runs layout.
+  // -- relaid only when text / style / width / textScaler actually change.
+  TextPainter? _tpDim;
+  TextPainter? _tpFull;
+  double _laidOutMaxWidth = -1;
+  TextScaler _laidOutScaler = TextScaler.noScaling;
+  TextStyle? _laidOutStyle;
+  String? _laidOutText;
+
+  @override
+  void initState() {
+    super.initState();
+    _fillController = AnimationController.unbounded(vsync: this);
+    _computeParts();
+    _syncFill();
+    Player.inst.nowPlayingPosition.addListener(_syncFill);
+    Player.inst.playWhenReady.addListener(_syncFill);
+  }
+
+  void _computeParts() {
+    final parts = widget.parts;
+    _partCharStarts = List.filled(parts.length, 0);
+    _partCharEnds = List.filled(parts.length, 0);
+    final sb = StringBuffer();
+    int offset = 0;
+    for (int i = 0; i < parts.length; i++) {
+      final txt = parts[i].lyrics;
+      _partCharStarts[i] = offset;
+      offset += txt.length;
+      _partCharEnds[i] = offset;
+      sb.write(txt);
+    }
+    _fullText = sb.toString();
+    _totalChars = offset;
+  }
+
+  @override
+  void didUpdateWidget(covariant _TextWithFadingProgress oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.parts, widget.parts)) {
+      _computeParts();
+      _syncFill();
+    }
+  }
+
+  /// Re-targets [_fillController] towards the end of the currently-sung part over the
+  /// time remaining for that part, so the fill sweeps smoothly even though position
+  /// updates are coarse. Called on every position/playWhenReady change.
+  void _syncFill() {
+    final parts = widget.parts;
+    if (parts.isEmpty || _totalChars == 0) return;
+
+    final posMicros = Player.inst.nowPlayingPosition.value * 1000;
+    final playing = Player.inst.playWhenReady.value;
+
+    // -- last part whose start has already been reached
+    int active = -1;
+    for (int i = 0; i < parts.length; i++) {
+      if (parts[i].startTimestamp.inMicroseconds <= posMicros) {
+        active = i;
+      } else {
+        break;
+      }
+    }
+
+    double exactChars;
+    double targetChars;
+    int remainingMicros = 0;
+
+    if (active < 0) {
+      exactChars = 0.0;
+      targetChars = 0.0;
+    } else {
+      final startMicros = parts[active].startTimestamp.inMicroseconds;
+      var endMicros = parts[active].endTimestamp.inMicroseconds;
+      if (endMicros <= startMicros) endMicros = startMicros + 10000; // -- 10ms min
+      final startChar = _partCharStarts[active];
+      final endChar = _partCharEnds[active];
+      if (posMicros >= endMicros) {
+        exactChars = endChar.toDouble();
+        targetChars = endChar.toDouble();
+      } else {
+        final frac = ((posMicros - startMicros) / (endMicros - startMicros)).clampDouble(0.0, 1.0);
+        exactChars = startChar + frac * (endChar - startChar);
+        targetChars = endChar.toDouble();
+        remainingMicros = endMicros - posMicros;
+      }
+    }
+
+    // -- re-sync only on discontinuity (seek); otherwise let the ongoing animation flow
+    if ((exactChars - _fillController.value).abs() > 1.5) {
+      _fillController.value = exactChars;
+    }
+
+    if (playing && remainingMicros > 0 && targetChars > _fillController.value) {
+      _fillController.animateTo(
+        targetChars,
+        duration: Duration(microseconds: remainingMicros),
+        curve: Curves.linear,
+      );
+    } else {
+      _fillController.stop();
+      _fillController.value = exactChars;
+    }
+  }
+
+  /// (Re)lays out the cached painters only when an input that affects layout changed.
+  /// Keeps [paint] layout-free (layout is the costly part; painting a laid-out painter is cheap).
+  void _ensurePainters(double maxWidth, TextScaler textScaler) {
+    final style = widget.textStyle;
+    final upToDate = _tpFull != null && _laidOutMaxWidth == maxWidth && _laidOutScaler == textScaler && _laidOutStyle == style && _laidOutText == _fullText;
+    if (upToDate) return;
+
+    _tpDim?.dispose();
+    _tpFull?.dispose();
+    final normalColor = style.color ?? const Color(0xFFFFFFFF);
+    final dimmedColor = normalColor.withValues(alpha: 0.25);
+    _tpDim = _layoutPainter(dimmedColor, style, maxWidth, textScaler);
+    _tpFull = _layoutPainter(normalColor, style, maxWidth, textScaler);
+    _laidOutMaxWidth = maxWidth;
+    _laidOutScaler = textScaler;
+    _laidOutStyle = style;
+    _laidOutText = _fullText;
+  }
+
+  TextPainter _layoutPainter(Color color, TextStyle style, double maxWidth, TextScaler textScaler) {
+    return TextPainter(
+      text: TextSpan(
+        text: _fullText,
+        style: style.copyWith(color: color),
       ),
+      textAlign: widget.textAlign,
+      textDirection: widget.textDirection,
+      textScaler: textScaler,
+      textWidthBasis: TextWidthBasis.parent,
+      textHeightBehavior: TextHeightBehavior(
+        applyHeightToFirstAscent: false,
+        applyHeightToLastDescent: false,
+      ),
+    )..layout(maxWidth: maxWidth);
+  }
+
+  @override
+  void dispose() {
+    Player.inst.nowPlayingPosition.removeListener(_syncFill);
+    Player.inst.playWhenReady.removeListener(_syncFill);
+    _tpDim?.dispose();
+    _tpFull?.dispose();
+    _fillController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final textScaler = MediaQuery.textScalerOf(context);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxWidth = constraints.maxWidth.isFinite ? constraints.maxWidth : double.infinity;
+        _ensurePainters(maxWidth, textScaler);
+        final full = _tpFull!;
+        return RepaintBoundary(
+          child: CustomPaint(
+            size: full.size,
+            painter: _KaraokeTextPainter(
+              dim: _tpDim!,
+              full: full,
+              total: _totalChars,
+              textDirection: widget.textDirection,
+              fill: _fillController,
+            ),
+          ),
+        );
+      },
     );
+  }
+}
+
+/// Generated by claude.ai
+/// Reason: no enough experience with deep rendering stuff
+class _KaraokeTextPainter extends CustomPainter {
+  final TextPainter dim;
+  final TextPainter full;
+  final int total;
+  final TextDirection textDirection;
+  final Animation<double> fill;
+
+  static const double _featherPx = 20.0;
+
+  const _KaraokeTextPainter({
+    required this.dim,
+    required this.full,
+    required this.total,
+    required this.textDirection,
+    required this.fill,
+  }) : super(repaint: fill);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // -- base dimmed layer (whole line)
+    dim.paint(canvas, Offset.zero);
+
+    if (total == 0) return;
+    var fillChars = fill.value;
+    if (fillChars.isNaN) fillChars = 0.0;
+    fillChars = fillChars.clampDouble(0.0, total.toDouble());
+    if (fillChars <= 0) return;
+
+    if (fillChars >= total) {
+      full.paint(canvas, Offset.zero); // -- whole line sung
+      return;
+    }
+
+    final n = fillChars.floor();
+    final frac = fillChars - n;
+
+    // -- the active char's box gives us the boundary line's vertical band + the sweep x position
+    final cboxes = full.getBoxesForSelection(
+      TextSelection(baseOffset: n, extentOffset: n + 1),
+      boxHeightStyle: ui.BoxHeightStyle.max,
+    );
+    if (cboxes.isEmpty) {
+      _paintHardSung(canvas, n); // -- fallback (e.g. active char is a zero-width glyph)
+      return;
+    }
+    final cb = cboxes.first;
+    final cRect = cb.toRect();
+    final ltr = cb.direction == TextDirection.ltr;
+    final lineTop = cRect.top;
+    final lineBottom = cRect.bottom + 12.0; // -- ensure it clips more for higher glyphs, shouldn't affect anything else even with very high number
+    final boundaryX = ltr ? cRect.left + frac * cRect.width : cRect.right - frac * cRect.width;
+
+    // -- one small saveLayer: paint the full-color line, then carve it down to the sung region
+    // -- with a dstIn mask. Lines above the sweep stay opaque, the sweep line feathers, lines below clear.
+    canvas.saveLayer(Offset.zero & size, Paint());
+    full.paint(canvas, Offset.zero);
+
+    if (lineTop > 0) {
+      canvas.drawRect(
+        Rect.fromLTRB(0, 0, size.width, lineTop),
+        Paint()
+          ..blendMode = BlendMode.dstIn
+          ..color = const Color(0xFFFFFFFF), // -- keep everything above
+      );
+    }
+    canvas.drawRect(
+      Rect.fromLTRB(0, lineTop, size.width, lineBottom),
+      Paint()
+        ..blendMode = BlendMode.dstIn
+        ..shader = _featherShader(size.width, boundaryX, ltr), // -- feather the sweep line
+    );
+    if (lineBottom < size.height) {
+      canvas.drawRect(
+        Rect.fromLTRB(0, lineBottom, size.width, size.height),
+        Paint()
+          ..blendMode = BlendMode.dstIn
+          ..color = const Color(0x00000000), // -- clear everything below
+      );
+    }
+    canvas.restore();
+  }
+
+  Shader _featherShader(double width, double boundaryX, bool ltr) {
+    final w = width <= 0 ? 1.0 : width;
+    const white = Color(0xFFFFFFFF);
+    const clear = Color(0x00FFFFFF);
+    final rect = Rect.fromLTWH(0, 0, w, 1);
+    if (ltr) {
+      final s1 = (boundaryX / w).clampDouble(0.0, 1.0);
+      var s2 = ((boundaryX + _featherPx) / w).clampDouble(0.0, 1.0);
+      if (s2 <= s1) s2 = (s1 + 0.001).clampDouble(0.0, 1.0);
+      return LinearGradient(
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+        colors: const [white, white, clear],
+        stops: [0.0, s1, s2],
+      ).createShader(rect);
+    } else {
+      final s2 = (boundaryX / w).clampDouble(0.0, 1.0);
+      var s1 = ((boundaryX - _featherPx) / w).clampDouble(0.0, 1.0);
+      if (s1 >= s2) s1 = (s2 - 0.001).clampDouble(0.0, 1.0);
+      return LinearGradient(
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+        colors: const [clear, white, white],
+        stops: [s1, s2, 1.0],
+      ).createShader(rect);
+    }
+  }
+
+  void _paintHardSung(Canvas canvas, int n) {
+    if (n <= 0) return;
+    final boxes = full.getBoxesForSelection(
+      TextSelection(baseOffset: 0, extentOffset: n),
+      boxHeightStyle: ui.BoxHeightStyle.max,
+    );
+    if (boxes.isEmpty) return;
+    canvas.save();
+    final path = Path();
+    for (final b in boxes) {
+      path.addRect(b.toRect());
+    }
+    canvas.clipPath(path);
+    full.paint(canvas, Offset.zero);
+
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant _KaraokeTextPainter old) {
+    return old.dim != dim || old.full != full || old.total != total || old.textDirection != textDirection;
   }
 }
